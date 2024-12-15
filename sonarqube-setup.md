@@ -303,4 +303,90 @@ Once the scan completes:
 
 ---
 
-Let me know if you encounter any issues during setup!
+The issue lies in your script at this line:
+
+```bash
+JAVA_17_HOME="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home/bin/java"
+```
+
+The `JAVA_HOME` variable should point to the base directory of the JDK, not to the `java` binary itself. Update your script as follows:
+
+---
+
+### **Corrected Script**
+
+```bash
+#!/bin/bash
+
+# Paths to Java installations
+JAVA_17_HOME="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home"
+JAVA_22_HOME="/Library/Java/JavaVirtualMachines/jdk-22.jdk/Contents/Home"
+
+# Path to SonarQube
+SONARQUBE_HOME="/usr/local/sonarqube"
+
+# Check if Java 17 is installed
+if [ ! -d "$JAVA_17_HOME" ]; then
+  echo "Java 17 is not installed at $JAVA_17_HOME. Please install Java 17 first."
+  exit 1
+fi
+
+# Check if SonarQube directory exists
+if [ ! -d "$SONARQUBE_HOME" ]; then
+  echo "SonarQube directory not found at $SONARQUBE_HOME. Please provide the correct path."
+  exit 1
+fi
+
+# Backup the current JAVA_HOME
+CURRENT_JAVA_HOME=$JAVA_HOME
+
+echo "Switching to Java 17 for SonarQube..."
+export JAVA_HOME="$JAVA_17_HOME"
+
+# Confirm the switch
+echo "Using Java version:"
+$JAVA_HOME/bin/java -version
+
+# Start SonarQube
+echo "Starting SonarQube..."
+$SONARQUBE_HOME/bin/macosx-universal-64/sonar.sh start
+
+# Wait for user input to stop SonarQube
+read -p "Press [Enter] to stop SonarQube and switch back to Java 22..."
+
+# Stop SonarQube
+echo "Stopping SonarQube..."
+$SONARQUBE_HOME/bin/macosx-universal-64/sonar.sh stop
+
+# Revert to original JAVA_HOME
+echo "Switching back to Java 22..."
+export JAVA_HOME="$JAVA_22_HOME"
+
+# Confirm the revert
+echo "Using Java version:"
+$JAVA_HOME/bin/java -version
+
+echo "Done. System is back to Java 22."
+```
+
+---
+
+### **Key Fixes**
+1. Changed `JAVA_17_HOME` to point to the JDK base directory:
+   ```bash
+   JAVA_17_HOME="/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home"
+   ```
+2. Used `$JAVA_HOME/bin/java` to invoke the Java binary in the `java -version` commands.
+3. The script now correctly checks for the existence of the `JAVA_17_HOME` directory.
+
+---
+
+### **Verify**
+1. Save the corrected script.
+2. Make sure the `JAVA_17_HOME` path is correct (it should match your installed Java 17 directory).
+3. Run the script again:
+   ```bash
+   ./run-sonarqube.sh
+   ```
+
+This should resolve the issue! Let me know if you face further problems.
