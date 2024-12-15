@@ -180,3 +180,127 @@ cd /usr/local/sonarqube/bin/macosx-universal-64
    ```
 
 ---
+
+
+To set up a **local Spring Boot project** with **SonarQube** analysis, follow these steps:
+
+---
+
+### **1. Install SonarQube Locally**
+Make sure SonarQube is running locally. If not already set up, follow these steps:
+- Download and extract the [SonarQube Community Edition](https://www.sonarqube.org/downloads/).
+- Start SonarQube:
+  ```bash
+  cd <sonarqube-folder>/bin/<os-folder>
+  ./sonar.sh start
+  ```
+- Access the dashboard at: [http://localhost:9000](http://localhost:9000).
+
+---
+
+### **2. Add SonarQube Plugin to Your Spring Boot Project**
+#### a. **Using Maven**
+Add the **SonarQube plugin** in your `pom.xml`:
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <version>3.9.1.2184</version>
+        </plugin>
+    </plugins>
+</build>
+```
+
+#### b. **Using Gradle**
+If you're using Gradle, add the SonarQube plugin to your `build.gradle`:
+```groovy
+plugins {
+    id "org.sonarqube" version "4.3.0.3225"
+}
+```
+
+---
+
+### **3. Configure SonarQube in Your Project**
+#### a. **In `pom.xml` (for Maven projects)**
+Add SonarQube properties:
+```xml
+<properties>
+    <sonar.host.url>http://localhost:9000</sonar.host.url>
+    <sonar.projectKey>your_project_key</sonar.projectKey>
+    <sonar.login>your_sonar_token</sonar.login>
+</properties>
+```
+
+#### b. **In `build.gradle` (for Gradle projects)**
+Configure SonarQube settings:
+```groovy
+sonarqube {
+    properties {
+        property "sonar.projectKey", "your_project_key"
+        property "sonar.host.url", "http://localhost:9000"
+        property "sonar.login", "your_sonar_token"
+    }
+}
+```
+
+#### c. **Alternative: Use `sonar-project.properties` File**
+Create a `sonar-project.properties` file in the project root:
+```properties
+sonar.projectKey=your_project_key
+sonar.projectName=Your Spring Boot Project
+sonar.projectVersion=1.0
+sonar.sources=src/main/java
+sonar.java.binaries=target/classes
+sonar.host.url=http://localhost:9000
+sonar.login=your_sonar_token
+```
+
+---
+
+### **4. Generate SonarQube Token**
+Follow the steps mentioned earlier to generate a token:
+1. Go to **My Account** > **Security** in SonarQube.
+2. Generate a new token.
+3. Use the token in your `pom.xml`, `build.gradle`, or `sonar-project.properties`.
+
+---
+
+### **5. Run SonarQube Analysis**
+#### a. **For Maven Projects**
+Run the following Maven command to analyze your project:
+```bash
+mvn clean install sonar:sonar
+```
+
+#### b. **For Gradle Projects**
+Run the following Gradle command:
+```bash
+gradle sonarqube
+```
+
+#### c. **For CLI Scanner**
+Alternatively, use the SonarScanner CLI:
+1. Install the [SonarScanner CLI](https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/).
+2. Run the scanner from your project directory:
+```bash
+sonar-scanner \
+  -Dsonar.projectKey=your_project_key \
+  -Dsonar.sources=src/main/java \
+  -Dsonar.host.url=http://localhost:9000 \
+  -Dsonar.login=your_sonar_token
+```
+
+---
+
+### **6. View Results**
+Once the scan completes:
+1. Open your SonarQube dashboard: [http://localhost:9000](http://localhost:9000).
+2. Find your project under the "Projects" tab.
+3. Review code quality metrics, bugs, vulnerabilities, and more.
+
+---
+
+Let me know if you encounter any issues during setup!
