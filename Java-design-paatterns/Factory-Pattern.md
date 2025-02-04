@@ -127,3 +127,137 @@ Preparing Pepperoni Pizza 🍕
 ✔ Implement a **LoggerFactory** to return **ConsoleLogger** or **FileLogger** dynamically.  
 
 ---
+### **🚀 Extending Factory Pattern with Reflection – A More Scalable Approach**
+
+Instead of using multiple `if-else` conditions in the factory method, we can use **Reflection** to create objects dynamically. This approach makes the factory **more flexible, maintainable, and scalable**.
+
+---
+
+## **📌 1. Why Use Reflection in Factory Pattern?**
+### **Problems with Traditional Factory**
+- Every time a new class (e.g., `VeganPizza`) is added, we must **modify the Factory** (`if-else` block).
+- Violates the **Open/Closed Principle** (code should be open for extension but closed for modification).
+
+### **Solution: Reflection-Based Factory**
+- Uses **fully qualified class names**.
+- Removes **hardcoded logic** (`if-else` conditions).
+- Makes the factory **truly dynamic**.
+
+---
+
+## **📌 2. Implementing Reflection-Based Factory**
+We’ll modify the **PizzaFactory** to use **Reflection**.
+
+---
+
+### **Step 1: Define the Interface (Product)**
+```java
+public interface Pizza {
+    void prepare();
+}
+```
+
+---
+
+### **Step 2: Implement Different Concrete Products**
+```java
+public class MargheritaPizza implements Pizza {
+    @Override
+    public void prepare() {
+        System.out.println("Preparing Margherita Pizza 🍕");
+    }
+}
+
+public class PepperoniPizza implements Pizza {
+    @Override
+    public void prepare() {
+        System.out.println("Preparing Pepperoni Pizza 🍕");
+    }
+}
+
+public class VeganPizza implements Pizza {
+    @Override
+    public void prepare() {
+        System.out.println("Preparing Vegan Pizza 🌱");
+    }
+}
+```
+
+---
+
+### **Step 3: Create a Reflection-Based Factory**
+```java
+public class PizzaFactory {
+    public static Pizza getPizza(String className) {
+        try {
+            // Load the class dynamically using Reflection
+            Class<?> clazz = Class.forName(className);
+
+            // Ensure the class implements Pizza interface
+            if (!Pizza.class.isAssignableFrom(clazz)) {
+                throw new IllegalArgumentException(className + " does not implement Pizza interface");
+            }
+
+            // Create a new instance of the class
+            return (Pizza) clazz.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create pizza: " + e.getMessage(), e);
+        }
+    }
+}
+```
+
+✔ **Dynamically creates objects without `if-else`**  
+✔ **No need to modify the Factory when adding new Pizza types**  
+
+---
+
+### **Step 4: Using the Reflection Factory**
+```java
+public class Main {
+    public static void main(String[] args) {
+        // Get Pizza instances dynamically
+        Pizza pizza1 = PizzaFactory.getPizza("MargheritaPizza");
+        pizza1.prepare();
+
+        Pizza pizza2 = PizzaFactory.getPizza("PepperoniPizza");
+        pizza2.prepare();
+
+        Pizza pizza3 = PizzaFactory.getPizza("VeganPizza");
+        pizza3.prepare();
+    }
+}
+```
+
+---
+
+## **📌 3. Explanation**
+1. **Reflection (`Class.forName()`)** loads the class dynamically.
+2. **Ensures the class implements the `Pizza` interface** (`isAssignableFrom` check).
+3. **Creates an instance using `newInstance()`** without hardcoded conditions.
+4. **If a new class (e.g., `BBQPizza`) is added**, **no modifications** are needed in the `PizzaFactory`.
+
+---
+
+## **📌 4. Advantages of Reflection-Based Factory**
+| **Feature**              | **Traditional Factory** | **Reflection Factory** |
+|--------------------------|------------------------|------------------------|
+| **New Class Addition**   | Modify Factory (`if-else`) | No modification needed |
+| **Code Maintenance**     | High (every new class requires update) | Low (truly dynamic) |
+| **Open/Closed Principle** | ❌ Violates (modifies factory often) | ✅ Follows (extend without changes) |
+| **Performance**          | ✅ Fast | ❌ Slight overhead due to Reflection |
+
+---
+
+## **📌 5. Common Mistakes & How to Avoid Them**
+❌ **Passing an invalid class name** – Handle with exception handling.  
+❌ **Performance overhead of Reflection** – Use caching for frequently created objects.  
+❌ **Forgetting to implement the interface** – Use `isAssignableFrom()` to check.  
+
+---
+
+## **🔥 Hands-On Challenge**
+✔ Modify the factory to use **a configuration file (`pizza-config.properties`)** to store available pizza types.  
+✔ Extend the factory to support **different pizza sizes dynamically**.  
+
+---
