@@ -165,3 +165,159 @@ Total Character Objects Created: 2
 | **Example** | **Text editor characters with shared symbols**. |
 
 ---
+
+### **🚀 Flyweight Pattern: Car Model Factory Implementation**
+  
+We will build a **Car Model Factory** where:  
+✅ **Car Models** (`Tesla Model S`, `Toyota Corolla`) are **shared** objects.  
+✅ **Registration Numbers** are **unique for each car instance**.  
+✅ The **Flyweight Pattern** will ensure we don’t create duplicate `CarModel` objects.  
+
+---
+
+## **📌 Step 1: Create the Flyweight Interface**
+This interface represents the **common behavior** for shared car models.
+
+```java
+// Flyweight Interface (Defines shared Car Model properties)
+public interface CarModel {
+    void displayCar(String registrationNumber);
+}
+```
+
+---
+
+## **📌 Step 2: Implement the Concrete Flyweight Class**
+This class **stores shared car model data**.
+
+```java
+// Concrete Flyweight (Shared Car Model)
+public class ConcreteCarModel implements CarModel {
+    private final String brand;
+    private final String model;
+    private final String engineType;
+    private final String color;
+
+    public ConcreteCarModel(String brand, String model, String engineType, String color) {
+        this.brand = brand;
+        this.model = model;
+        this.engineType = engineType;
+        this.color = color;
+    }
+
+    @Override
+    public void displayCar(String registrationNumber) {
+        System.out.println("Car: " + brand + " " + model +
+                " | Engine: " + engineType +
+                " | Color: " + color +
+                " | Registration: " + registrationNumber);
+    }
+}
+```
+✔ Stores **brand, model, engine type, and color** (**intrinsic state**).  
+✔ **Registration number is passed dynamically** (**extrinsic state**).  
+
+---
+
+## **📌 Step 3: Create the Flyweight Factory**
+The **Factory ensures** that car models are **reused** instead of creating new instances.
+
+```java
+import java.util.HashMap;
+import java.util.Map;
+
+// Flyweight Factory (Manages shared CarModel objects)
+public class CarModelFactory {
+    private static final Map<String, CarModel> carModelPool = new HashMap<>();
+
+    public static CarModel getCarModel(String brand, String model, String engineType, String color) {
+        String key = brand + "-" + model + "-" + engineType + "-" + color;
+
+        carModelPool.putIfAbsent(key, new ConcreteCarModel(brand, model, engineType, color));
+        return carModelPool.get(key);
+    }
+
+    public static int getTotalCarModelsCreated() {
+        return carModelPool.size();
+    }
+}
+```
+✔ Uses a **HashMap** to track shared car models.  
+✔ Ensures **only one instance per unique model** is created.  
+
+---
+
+## **📌 Step 4: Using the Flyweight Pattern**
+```java
+public class Main {
+    public static void main(String[] args) {
+        // Shared Car Models
+        CarModel model1 = CarModelFactory.getCarModel("Tesla", "Model S", "Electric", "Red");
+        CarModel model2 = CarModelFactory.getCarModel("Toyota", "Corolla", "Petrol", "White");
+
+        // Unique Cars with Different Registration Numbers
+        model1.displayCar("TS-1234");
+        model1.displayCar("TS-5678");
+
+        model2.displayCar("TO-9876");
+        model2.displayCar("TO-4321");
+
+        // Checking Memory Optimization
+        System.out.println("Total Unique Car Models Created: " + CarModelFactory.getTotalCarModelsCreated());
+    }
+}
+```
+
+---
+
+## **📌 Expected Output**
+```
+Car: Tesla Model S | Engine: Electric | Color: Red | Registration: TS-1234
+Car: Tesla Model S | Engine: Electric | Color: Red | Registration: TS-5678
+Car: Toyota Corolla | Engine: Petrol | Color: White | Registration: TO-9876
+Car: Toyota Corolla | Engine: Petrol | Color: White | Registration: TO-4321
+Total Unique Car Models Created: 2
+```
+✔ **Only two unique car models were created** (`Tesla Model S` & `Toyota Corolla`).  
+✔ **Registration numbers remain unique for each car instance**.  
+✔ **Memory optimization achieved by reusing car models**.  
+
+---
+
+## **📌 Flyweight Pattern Breakdown**
+| **Type** | **Stored in Flyweight?** | **Example** |
+|---------|------------------|------------|
+| **Intrinsic (Shared State)** | ✅ Yes | Car Brand, Model, Engine Type, Color |
+| **Extrinsic (Unique State)** | ❌ No | Registration Number |
+
+---
+
+## **📌 Advantages of Using Flyweight in Car Factory**
+✅ **Memory-efficient** – Only **one object per car model is stored**.  
+✅ **Fast object creation** – Instead of creating new objects, we **reuse existing ones**.  
+✅ **Supports high scalability** – Ideal for **large-scale car rental, manufacturing, or inventory systems**.  
+
+---
+
+## **📌 Common Mistakes & How to Avoid Them**
+❌ **Storing unique data inside Flyweights** – Always pass unique state externally.  
+❌ **Not using a Factory** – Use a **centralized factory to manage flyweight objects**.  
+❌ **Applying Flyweight in small-scale systems** – Use only when **many similar objects exist**.  
+
+---
+
+## **🔥 Hands-On Challenge**
+✔ Modify the **Car Factory** to support **different car dealerships** while still reusing car models.  
+✔ Implement a **Tree Rendering System** where similar **tree types** share model data but have unique coordinates.  
+
+---
+
+## **🚀 Summary**
+| **Concept** | **Explanation** |
+|------------|----------------|
+| **Flyweight Pattern** | Shares objects to **reduce memory usage**. |
+| **Flyweight Object** | Stores **shared intrinsic state** (Car Model Data). |
+| **Extrinsic State** | Stored outside Flyweight (Registration Number). |
+| **Example** | **Car Factory where models are shared, but registration is unique**. |
+
+---
