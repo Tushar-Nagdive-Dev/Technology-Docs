@@ -1,8 +1,3 @@
-Hey Tushar! Welcome back! 😊🚀  
-Let's continue with **Lesson 13: Calling External APIs from Spring Boot (RESTTemplate & WebClient).**  
-
----
-
 # 🚀 **Phase 2 - Lesson 13: Calling External APIs from Spring Boot (RESTTemplate & WebClient)**  
 
 ## **📌 Lesson Objective**  
