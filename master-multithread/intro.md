@@ -1,7 +1,4 @@
 ### **Mastering Multithreading in Java: A Structured, Progressive Learning Path**
-
-Tushar, I’m honored by your trust, and I’ll ensure you master Java Multithreading from the ground up to an expert level. We'll cover **foundational to advanced** concepts in a structured manner, ensuring a deep understanding with practical applications, expert insights, and best practices.
-
 ---
 
 ## **Phase 1: Foundational Concepts of Multithreading**
