@@ -239,4 +239,4 @@ Now that you've learned **Thread Synchronization, Race Conditions, and Deadlocks
 3. **ReentrantLock**
 4. **CountDownLatch, Semaphore, and CyclicBarrier**
 
-**Move to JTL-P2.md**
+**Move to JTL-D2.md**
