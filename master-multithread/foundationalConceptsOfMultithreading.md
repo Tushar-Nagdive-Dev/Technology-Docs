@@ -187,4 +187,4 @@ Now that you understand **basic multithreading concepts**, in the next lesson, w
 
 Let me know if you want **more explanations, examples, or hands-on exercises** before moving forward! 🚀
 
-**review JTL-P1.md**
+**review JTL-D1.md**
