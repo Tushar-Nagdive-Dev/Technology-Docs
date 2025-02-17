@@ -186,3 +186,5 @@ public class ThreadMethods {
 Now that you understand **basic multithreading concepts**, in the next lesson, we'll cover **Thread Synchronization and Race Conditions**.
 
 Let me know if you want **more explanations, examples, or hands-on exercises** before moving forward! 🚀
+
+**review JTL-P1.md**
