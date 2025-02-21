@@ -357,3 +357,193 @@ public static boolean hasDuplicates(int[] arr) {
 4. Given a sorted array, implement a two-pointer approach to find two numbers that sum up to a given target.  
 
 ---
+Here's a Java program implementing all requested functionalities with analysis:
+
+```java
+public class ArrayOperationsAdvanced {
+    // 1. Find maximum difference where larger element comes after smaller
+    public static int maxDifference(int[] arr) {
+        if (arr == null || arr.length < 2) {
+            return -1;
+        }
+        
+        int maxDiff = -1;
+        int minElement = arr[0];
+        
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] > minElement) {
+                maxDiff = Math.max(maxDiff, arr[i] - minElement);
+            }
+            minElement = Math.min(minElement, arr[i]);
+        }
+        return maxDiff;
+    }
+    // Time Complexity: O(n)
+    // Space Complexity: O(1)
+
+    // 2. Reverse array in place
+    public static void reverseArray(int[] arr) {
+        if (arr == null || arr.length <= 1) {
+            return;
+        }
+        
+        int left = 0;
+        int right = arr.length - 1;
+        
+        while (left < right) {
+            // Swap elements
+            int temp = arr[left];
+            arr[left] = arr[right];
+            arr[right] = temp;
+            
+            left++;
+            right--;
+        }
+    }
+    // Time Complexity: O(n/2) = O(n)
+    // Space Complexity: O(1) - only uses a constant amount of extra space
+
+    // 3. Rotate array by k positions to the right
+    public static void rotateArray(int[] arr, int k) {
+        if (arr == null || arr.length <= 1 || k <= 0) {
+            return;
+        }
+        
+        k = k % arr.length; // Handle cases where k > array length
+        
+        // Reverse entire array
+        reverseArray(arr);
+        // Reverse first k elements
+        reverseArraySection(arr, 0, k - 1);
+        // Reverse remaining elements
+        reverseArraySection(arr, k, arr.length - 1);
+    }
+    
+    private static void reverseArraySection(int[] arr, int start, int end) {
+        while (start < end) {
+            int temp = arr[start];
+            arr[start] = arr[end];
+            arr[end] = temp;
+            start++;
+            end--;
+        }
+    }
+    // Time Complexity: O(n)
+    // Space Complexity: O(1)
+
+    // 4. Find two numbers that sum to target in sorted array
+    public static int[] findPairSum(int[] arr, int target) {
+        if (arr == null || arr.length < 2) {
+            return new int[]{-1, -1};
+        }
+        
+        int left = 0;
+        int right = arr.length - 1;
+        
+        while (left < right) {
+            int currentSum = arr[left] + arr[right];
+            if (currentSum == target) {
+                return new int[]{arr[left], arr[right]};
+            } else if (currentSum < target) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        return new int[]{-1, -1}; // No pair found
+    }
+    // Time Complexity: O(n)
+    // Space Complexity: O(1)
+
+    public static void main(String[] args) {
+        // Test cases
+        int[] arr1 = {7, 2, 3, 10, 2, 4, 8, 1};
+        System.out.println("Max difference: " + maxDifference(arr1));
+
+        int[] arr2 = {1, 2, 3, 4, 5};
+        System.out.print("Original array: ");
+        printArray(arr2);
+        reverseArray(arr2);
+        System.out.print("Reversed array: ");
+        printArray(arr2);
+
+        int[] arr3 = {1, 2, 3, 4, 5};
+        System.out.print("Original array: ");
+        printArray(arr3);
+        rotateArray(arr3, 2);
+        System.out.print("Rotated by 2: ");
+        printArray(arr3);
+
+        int[] sortedArr = {2, 4, 6, 8, 10, 12};
+        int target = 14;
+        int[] result = findPairSum(sortedArr, target);
+        System.out.println("\nPair summing to " + target + ": " + 
+            result[0] + ", " + result[1]);
+    }
+
+    private static void printArray(int[] arr) {
+        for (int num : arr) {
+            System.out.print(num + " ");
+        }
+        System.out.println();
+    }
+}
+```
+
+Analysis:
+
+1. **Maximum Difference**
+   - Time Complexity: O(n)
+     - Single pass through array
+     - Each element examined once
+   - Space Complexity: O(1)
+     - Only uses two variables regardless of input size
+   - Logic: Keeps track of minimum element seen so far and updates max difference
+
+2. **Reverse Array In Place**
+   - Time Complexity: O(n)
+     - Processes half the array (n/2 swaps)
+     - Linear time operation
+   - Space Complexity: O(1)
+     - Only uses temporary variable for swapping
+     - Modification done in place
+   - Logic: Uses two pointers moving towards center
+
+3. **Rotate Array**
+   - Time Complexity: O(n)
+     - Three reverse operations:
+       - Reverse full array: O(n)
+       - Reverse first k: O(k)
+       - Reverse remaining: O(n-k)
+     - Total: O(n)
+   - Space Complexity: O(1)
+     - All operations in place
+     - Uses reversal algorithm
+   - Logic: Uses reverse technique for efficient rotation
+
+4. **Find Pair Sum (Two Pointer)**
+   - Time Complexity: O(n)
+     - Single pass with two pointers
+     - Each element examined at most once
+   - Space Complexity: O(1)
+     - Only stores two pointers and result array
+   - Prerequisite: Array must be sorted
+   - Logic: Uses two pointers converging based on sum comparison
+
+Sample Output:
+```
+Max difference: 8
+Original array: 1 2 3 4 5 
+Reversed array: 5 4 3 2 1 
+Original array: 1 2 3 4 5 
+Rotated by 2: 4 5 1 2 3 
+Pair summing to 14: 2, 12
+```
+
+Additional Notes:
+- All methods include error handling for null/empty arrays
+- Rotate array handles k > array length using modulo
+- Two-pointer approach requires sorted input
+- All implementations are space-efficient, modifying arrays in place where possible
+- Time complexities are optimal for the given constraints
+- The reverse technique for array rotation is more efficient than shifting elements one by one (which would be O(n*k))
