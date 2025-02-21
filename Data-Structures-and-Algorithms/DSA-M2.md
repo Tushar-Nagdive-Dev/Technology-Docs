@@ -386,3 +386,141 @@ The program demonstrates:
 - Method creation and usage
 
 Each method is self-contained and can be used independently. The main method provides example usage of all implemented functionalities.
+---
+
+## Enhancements 
+Great job! Your implementation covers all the exercises effectively and demonstrates a solid understanding of the basics. Here's a quick review and some insights to enhance your learning:
+
+---
+
+## **🔍 Code Review and Insights**  
+
+### 🔥 **1. Finding Maximum of Three Numbers**  
+```java
+public static int findMax(int a, int b, int c) {
+    if (a >= b && a >= c) {
+        return a;
+    } else if (b >= a && b >= c) {
+        return b;
+    } else {
+        return c;
+    }
+}
+```
+- Excellent use of `if-else` for comparisons.  
+- **Insight:** In real-world scenarios, this approach is readable but can be optimized using the `Math.max()` function for simplicity:
+    ```java
+    return Math.max(a, Math.max(b, c));
+    ```
+
+---
+
+### 🔥 **2. Basic Calculator using switch-case**  
+```java
+public static double calculator(double num1, double num2, char operator) {
+    switch (operator) {
+        case '+':
+            return num1 + num2;
+        case '-':
+            return num1 - num2;
+        case '*':
+            return num1 * num2;
+        case '/':
+            if (num2 != 0) {
+                return num1 / num2;
+            } else {
+                System.out.println("Error: Division by zero!");
+                return 0;
+            }
+        default:
+            System.out.println("Error: Invalid operator!");
+            return 0;
+    }
+}
+```
+- Excellent handling of division by zero.  
+- **Insight:** For robustness, consider using `double.NaN` for invalid cases:
+    ```java
+    return Double.NaN;
+    ```
+  This better indicates an undefined result rather than `0`.
+
+---
+
+### 🔥 **3. Array Operations**  
+```java
+int[] numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int sum = 0;
+for (int num : numbers) {
+    sum += num;
+}
+double average = (double) sum / numbers.length;
+```
+- Good use of enhanced for-loop for iteration.  
+- **Insight:** In competitive programming, you can also use the `Arrays.stream()` method:
+    ```java
+    int sum = Arrays.stream(numbers).sum();
+    double average = Arrays.stream(numbers).average().orElse(0);
+    ```
+
+---
+
+### 🔥 **4. Factorial Calculation**  
+```java
+public static long factorial(int n) {
+    if (n < 0) {
+        System.out.println("Error: Factorial not defined for negative numbers!");
+        return -1;
+    }
+    long result = 1;
+    for (int i = 1; i <= n; i++) {
+        result *= i;
+    }
+    return result;
+}
+```
+- Excellent handling of negative inputs.  
+- **Insight:** You can also implement this using **Recursion**:
+    ```java
+    public static long recursiveFactorial(int n) {
+        if (n <= 1) return 1;
+        return n * recursiveFactorial(n - 1);
+    }
+    ```
+  This approach showcases the power of recursion, which is fundamental in DSA.
+
+---
+
+### 🔥 **5. Prime Number Check**  
+```java
+public static boolean isPrime(int n) {
+    if (n <= 1) return false;
+    for (int i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+- Efficient optimization using `Math.sqrt(n)`, reducing the loop iterations.  
+- **Insight:** You can further optimize it by checking for divisibility by `2` and `3` first:
+    ```java
+    if (n <= 1) return false;
+    if (n <= 3) return true;
+    if (n % 2 == 0 || n % 3 == 0) return false;
+    for (int i = 5; i * i <= n; i += 6) {
+        if (n % i == 0 || n % (i + 2) == 0) return false;
+    }
+    return true;
+    ```
+  This reduces the number of iterations even further.
+
+---
+
+## **📌 Common Mistakes to Avoid**  
+- **Using `==` for String Comparison:** Use `.equals()` for comparing strings in Java.  
+- **Division by Zero:** Always handle it to avoid runtime errors.  
+- **Array Index Out of Bounds:** Check the index limit while iterating over arrays.  
+
+---
