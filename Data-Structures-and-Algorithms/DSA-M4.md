@@ -171,3 +171,186 @@ Fibonacci of 6 is: 8
 5. Write a recursive function to count the number of ways to climb `n` stairs, taking either 1 or 2 steps at a time.  
 
 ---
+### 🚀 **1.6 Mastering Recursion - Let's Continue!**  
+
+We’ve covered the basics of recursion, but to truly master it, we need to see more examples and get comfortable with how the call stack works. Let's continue with more practical examples and solve some real problems!
+
+---
+
+## **🔥 Example 3: Sum of Digits of a Number**  
+Let's find the sum of digits of a number using recursion.  
+
+### 📘 **Problem Statement:**  
+- Given a number, find the sum of its digits.  
+- **Example:**  
+    - `Input: 1234`  
+    - `Output: 1 + 2 + 3 + 4 = 10`
+
+---
+
+### 📘 **Mathematical Breakdown:**  
+- Last digit of a number = `n % 10`  
+- Remaining digits = `n / 10`  
+- **Recursive Definition:**  
+    ```
+    sumOfDigits(n) = lastDigit + sumOfDigits(remainingDigits)
+                   = (n % 10) + sumOfDigits(n / 10)
+    Base Case: if n == 0 → return 0
+    ```
+
+---
+
+### 📘 **Example Code: Sum of Digits using Recursion**  
+```java
+public class RecursionExample {
+    // Recursive method to calculate sum of digits
+    public static int sumOfDigits(int n) {
+        // Base Case
+        if (n == 0) {
+            return 0;
+        }
+        // Recursive Case
+        return (n % 10) + sumOfDigits(n / 10);
+    }
+
+    public static void main(String[] args) {
+        int num = 1234;
+        System.out.println("Sum of digits of " + num + " is: " + sumOfDigits(num));
+    }
+}
+```
+
+---
+
+### 📊 **Output:**  
+```
+Sum of digits of 1234 is: 10
+```
+
+---
+
+### 🔥 **What's Happening Behind the Scenes?**  
+Let's see how the function calls are made for `sumOfDigits(1234)`:
+```
+sumOfDigits(1234) = 4 + sumOfDigits(123)
+sumOfDigits(123)  = 3 + sumOfDigits(12)
+sumOfDigits(12)   = 2 + sumOfDigits(1)
+sumOfDigits(1)    = 1 + sumOfDigits(0)
+sumOfDigits(0)    = 0 (Base Case)
+```
+
+Then it resolves backwards:
+```
+sumOfDigits(1) = 1 + 0 = 1
+sumOfDigits(2) = 2 + 1 = 3
+sumOfDigits(3) = 3 + 3 = 6
+sumOfDigits(4) = 4 + 6 = 10
+```
+
+### 🔥 **Key Points to Remember:**  
+- The last digit is calculated first (`n % 10`).  
+- The problem size is reduced (`n / 10`) in each step.  
+- The base case stops the recursion when `n` becomes `0`.  
+
+---
+
+## **🔥 Example 4: Reverse a String using Recursion**  
+Let's reverse a string using recursion.  
+
+### 📘 **Problem Statement:**  
+- Given a string, reverse it using recursion.  
+- **Example:**  
+    - `Input: "Maya"`  
+    - `Output: "ayaM"`
+
+---
+
+### 📘 **Recursive Definition:**  
+- Last character of the string = `str.charAt(str.length() - 1)`  
+- Remaining substring = `str.substring(0, str.length() - 1)`  
+- **Recursive Formula:**  
+    ```
+    reverse(str) = lastChar + reverse(remainingString)
+    Base Case: if str is empty → return ""
+    ```
+
+---
+
+### 📘 **Example Code: Reverse a String using Recursion**  
+```java
+public class RecursionExample {
+    // Recursive method to reverse a string
+    public static String reverseString(String str) {
+        // Base Case
+        if (str.isEmpty()) {
+            return str;
+        }
+        // Recursive Case
+        return reverseString(str.substring(1)) + str.charAt(0);
+    }
+
+    public static void main(String[] args) {
+        String input = "Maya";
+        System.out.println("Reversed string: " + reverseString(input));
+    }
+}
+```
+
+---
+
+### 📊 **Output:**  
+```
+Reversed string: ayaM
+```
+
+---
+
+### 🔥 **What's Happening Behind the Scenes?**  
+Let's see how the function calls are made for `reverseString("Maya")`:
+```
+reverseString("Maya") = reverseString("aya") + 'M'
+reverseString("aya")  = reverseString("ya") + 'a'
+reverseString("ya")   = reverseString("a") + 'y'
+reverseString("a")    = reverseString("") + 'a'
+reverseString("")     = "" (Base Case)
+```
+
+Then it resolves backwards:
+```
+reverseString("a")  = "" + 'a' = "a"
+reverseString("ya") = "a" + 'y' = "ay"
+reverseString("aya") = "ay" + 'a' = "aya"
+reverseString("Maya") = "aya" + 'M' = "ayaM"
+```
+
+---
+
+### 🔥 **Key Points to Remember:**  
+- The last character is added first.  
+- The problem size is reduced by slicing the string (`str.substring(1)`).  
+- The base case stops the recursion when the string becomes empty.  
+
+---
+
+## **🔥 Common Mistakes to Avoid**  
+- **Missing Base Case:** Leads to infinite recursion and `StackOverflowError`.  
+- **Misunderstanding Flow:** Remember, recursion goes deeper first, then resolves backwards.  
+- **Confusing Return Statement:** `return` sends the result back to the previous call.  
+
+---
+
+## **📝 Exercise Set:**  
+1. Write a recursive function to calculate the product of digits of a number.  
+2. Implement a recursive function to check if a string is a palindrome.  
+3. Write a recursive function to find the maximum element in an array.  
+4. Implement a recursive solution for the Tower of Hanoi problem.  
+5. Write a recursive function to calculate the power of a number (i.e., `x^n`).  
+
+---
+
+## 🔥 **Ready for Module 2?**  
+Next, we will dive into **Arrays and Strings** — the building blocks of data structures.  
+
+- Do you feel more comfortable with Recursion now?  
+- Would you like more examples or simpler explanations?  
+- Were you able to run the example programs successfully?
