@@ -12,4 +12,11 @@
 2. Implement a method to count the occurrence of each character in a string.  
 3. Write a function to reverse each word in a given sentence.  
 4. Implement a function to find the longest palindrome substring in a string.  
-5. Write a function to check if two strings are anagrams.  
+5. Write a function to check if two strings are anagrams.
+
+## **📝 Exercise Set:**  
+1. Write a function to find the longest substring without repeating characters.  
+2. Implement a method to find the most frequent character in a string.  
+3. Write a function to find all permutations of a string.  
+4. Implement a pattern matching algorithm without using regex.  
+5. Write a function to count the number of words in a sentence.
