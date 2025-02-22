@@ -189,3 +189,192 @@ Pairs summing to 7:
 Rotated array: [4, 5, 1, 2, 3]
 Merged array: [1, 2, 3, 4, 5, 6]
 ```
+
+Below is a Java program implementing five string-related functions with simple and clear explanations for each. We'll create a single class `StringOperations` containing all methods and include a `main` method to test them.
+
+```java
+import java.util.*;
+
+public class StringOperations {
+    // 1. Check if a string is a palindrome
+    public static boolean isPalindrome(String str) {
+        // Remove spaces and convert to lowercase for fair comparison
+        str = str.replaceAll("\\s", "").toLowerCase();
+        
+        int left = 0;
+        int right = str.length() - 1;
+        
+        // Compare characters from both ends moving inward
+        while (left < right) {
+            if (str.charAt(left) != str.charAt(right)) {
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
+    
+    // 2. Count occurrence of each character in a string
+    public static Map<Character, Integer> countCharacters(String str) {
+        Map<Character, Integer> charCount = new HashMap<>();
+        
+        // Iterate through each character and count
+        for (char c : str.toCharArray()) {
+            charCount.put(c, charCount.getOrDefault(c, 0) + 1);
+        }
+        return charCount;
+    }
+    
+    // 3. Reverse each word in a sentence
+    public static String reverseWords(String sentence) {
+        // Split sentence into words
+        String[] words = sentence.split("\\s+");
+        StringBuilder result = new StringBuilder();
+        
+        // Reverse each word and build result
+        for (String word : words) {
+            StringBuilder reversedWord = new StringBuilder(word).reverse();
+            result.append(reversedWord).append(" ");
+        }
+        
+        // Remove extra space at the end and return
+        return result.toString().trim();
+    }
+    
+    // 4. Find longest palindromic substring
+    public static String longestPalindrome(String str) {
+        if (str == null || str.length() < 1) return "";
+        
+        int start = 0, maxLength = 1;  // Start index and length of longest palindrome
+        
+        // Check each position as potential center of palindrome
+        for (int i = 0; i < str.length(); i++) {
+            // Check for odd length palindromes (center at i)
+            int len1 = expandAroundCenter(str, i, i);
+            // Check for even length palindromes (center between i and i+1)
+            int len2 = expandAroundCenter(str, i, i + 1);
+            
+            int len = Math.max(len1, len2);
+            if (len > maxLength) {
+                start = i - (len - 1) / 2;  // Calculate start of palindrome
+                maxLength = len;
+            }
+        }
+        
+        return str.substring(start, start + maxLength);
+    }
+    
+    private static int expandAroundCenter(String str, int left, int right) {
+        // Expand around center while characters match and within bounds
+        while (left >= 0 && right < str.length() && str.charAt(left) == str.charAt(right)) {
+            left--;
+            right++;
+        }
+        return right - left - 1;  // Length of palindrome
+    }
+    
+    // 5. Check if two strings are anagrams
+    public static boolean areAnagrams(String str1, String str2) {
+        // Remove spaces and convert to lowercase
+        str1 = str1.replaceAll("\\s", "").toLowerCase();
+        str2 = str2.replaceAll("\\s", "").toLowerCase();
+        
+        // If lengths differ after cleanup, not anagrams
+        if (str1.length() != str2.length()) return false;
+        
+        // Count characters in first string
+        int[] charCount = new int[26];  // For a-z
+        for (char c : str1.toCharArray()) {
+            charCount[c - 'a']++;
+        }
+        
+        // Decrease count for second string
+        for (char c : str2.toCharArray()) {
+            charCount[c - 'a']--;
+        }
+        
+        // Check if all counts are zero
+        for (int count : charCount) {
+            if (count != 0) return false;
+        }
+        return true;
+    }
+
+    // Main method to test all functions
+    public static void main(String[] args) {
+        // Test 1: Palindrome
+        String str1 = "Racecar";
+        System.out.println("Is '" + str1 + "' a palindrome? " + isPalindrome(str1));  // true
+        
+        // Test 2: Character count
+        String str2 = "hello";
+        Map<Character, Integer> counts = countCharacters(str2);
+        System.out.println("Character counts in '" + str2 + "': " + counts);  // {h=1, e=1, l=2, o=1}
+        
+        // Test 3: Reverse words
+        String sentence = "Hello World Java";
+        String reversed = reverseWords(sentence);
+        System.out.println("Reversed words: '" + reversed + "'");  // "olleH dlroW avaJ"
+        
+        // Test 4: Longest palindrome
+        String str3 = "babad";
+        String longestPal = longestPalindrome(str3);
+        System.out.println("Longest palindrome in '" + str3 + "': '" + longestPal + "'");  // "bab" or "aba"
+        
+        // Test 5: Anagrams
+        String str4 = "Listen";
+        String str5 = "Silent";
+        System.out.println("'" + str4 + "' and '" + str5 + "' are anagrams? " + areAnagrams(str4, str5));  // true
+    }
+}
+```
+
+### Simple Explanation of Each Method:
+
+1. **Check if String is a Palindrome:**
+   - **What it does:** Checks if a string reads the same forwards and backwards (e.g., "racecar").
+   - **How:** Remove spaces, make lowercase, then compare characters from both ends moving inward.
+   - **Example:** "Racecar" → "racecar" → check 'r' vs 'r', 'a' vs 'a', etc. → true.
+   - **Key Point:** Ignores spaces and case (e.g., "A man a plan" → true).
+
+2. **Count Characters:**
+   - **What it does:** Counts how many times each character appears in the string.
+   - **How:** Uses a HashMap to store each character and its count, incrementing as we go.
+   - **Example:** "hello" → h:1, e:1, l:2, o:1.
+   - **Key Point:** Simple and shows frequency of all characters, including spaces if present.
+
+3. **Reverse Each Word:**
+   - **What it does:** Takes a sentence and reverses each word individually (e.g., "Hello World" → "olleH dlroW").
+   - **How:** Split into words, reverse each word using StringBuilder, then join back with spaces.
+   - **Example:** "Hello World" → ["Hello", "World"] → ["olleH", "dlroW"] → "olleH dlroW".
+   - **Key Point:** Keeps word order, only reverses letters within each word.
+
+4. **Find Longest Palindromic Substring:**
+   - **What it does:** Finds the longest substring that’s a palindrome (e.g., "babad" → "bab").
+   - **How:** Checks each character as a possible center of a palindrome, expands outward to find longest match.
+   - **Example:** "babad" → check around 'b', 'a', etc. → "bab" or "aba" (length 3).
+   - **Key Point:** Handles both odd-length ("aba") and even-length ("aa") palindromes.
+
+5. **Check if Two Strings are Anagrams:**
+   - **What it does:** Checks if two strings have the same characters with the same frequencies (e.g., "listen" and "silent").
+   - **How:** Clean up strings, use an array to count character frequencies in first string, decrease for second, check if all zero.
+   - **Example:** "Listen" → "listen", "Silent" → "silent" → same letters, same counts → true.
+   - **Key Point:** Ignores case and spaces, focuses on character composition.
+
+### Output from main():
+```
+Is 'Racecar' a palindrome? true
+Character counts in 'hello': {e=1, h=1, l=2, o=1}
+Reversed words: 'olleH dlroW avaJ'
+Longest palindrome in 'babad': 'bab'
+'Listen' and 'Silent' are anagrams? true
+```
+
+### Why It’s Easy to Understand:
+- **Comments:** Each step is explained in the code.
+- **Simple Logic:** Uses basic loops, conditionals, and common Java tools (HashMap, StringBuilder).
+- **Examples:** Main method shows how each function works with clear outputs.
+- **Edge Cases:** Handles empty strings, spaces, and case sensitivity where appropriate.
+
+Feel free to run this code and tweak the inputs in `main()` to see how it behaves with different strings!
