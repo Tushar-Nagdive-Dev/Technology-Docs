@@ -115,3 +115,85 @@ public class AnagramCheck {
     }
 }
 ```
+
+## How do you find the first non-repeating character in a string?
+
+Let’s tackle finding the first non-repeating character in a string in Java, aiming for efficiency! The goal is to identify the first character that appears exactly once, like 'l' in "leetcode" or 'w' in "world". A fast and clean way to do this is to use a frequency counter—specifically, an array or map to track how often each character appears—then scan the string again to find the first one with a count of 1. This gives us O(n) time and O(1) space if we assume a fixed character set (like ASCII).
+
+Here’s an efficient solution using an array:
+
+```java
+public class FirstNonRepeatingChar {
+    public static char findFirstNonRepeating(String s) {
+        // Handle null or empty string
+        if (s == null || s.isEmpty()) {
+            return '\0';  // Null char as a convention for "not found"
+        }
+
+        // Array for ASCII character counts (128 covers basic ASCII)
+        int[] charCount = new int[128];
+
+        // Count frequency of each character
+        for (int i = 0; i < s.length(); i++) {
+            charCount[s.charAt(i)]++;
+        }
+
+        // Find first character with count of 1
+        for (int i = 0; i < s.length(); i++) {
+            if (charCount[s.charAt(i)] == 1) {
+                return s.charAt(i);
+            }
+        }
+
+        return '\0';  // No non-repeating character found
+    }
+
+    public static void main(String[] args) {
+        String s1 = "leetcode";
+        String s2 = "loveleetcode";
+        String s3 = "aabb";
+        System.out.println(findFirstNonRepeating(s1));  // Output: 'l'
+        System.out.println(findFirstNonRepeating(s2));  // Output: 'v'
+        System.out.println(findFirstNonRepeating(s3));  // Output: '\0' (none)
+    }
+}
+```
+
+### Why’s this efficient?
+- **Time Complexity**: O(n) — One pass to count frequencies, one pass to find the first non-repeater. Total is 2n, which is still O(n).
+- **Space Complexity**: O(1) — The `charCount` array is fixed at 128 (or 256 for extended ASCII), not growing with input size.
+- **No Extra Data Structures**: Unlike a map or set, the array keeps it lightweight and fast for a limited character set.
+
+### How it works
+1. Build a frequency table: Loop through the string, incrementing the count for each character.
+2. Check in order: Loop again, returning the first character whose count is 1.
+3. If nothing’s found, return a sentinel like `\0`.
+
+### Tweaks and Alternatives
+- **Unicode Support**: If the string might have more than ASCII (e.g., "héllo"), use a `HashMap` instead. Here’s that version:
+
+```java
+import java.util.HashMap;
+
+public static char findFirstNonRepeating(String s) {
+    if (s == null || s.isEmpty()) return '\0';
+
+    HashMap<Character, Integer> charCount = new HashMap<>();
+    // Count frequencies
+    for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        charCount.merge(c, 1, Integer::sum);
+    }
+    // Find first non-repeater
+    for (int i = 0; i < s.length(); i++) {
+        if (charCount.get(s.charAt(i)) == 1) {
+            return s.charAt(i);
+        }
+    }
+    return '\0';
+}
+```
+
+This is still O(n) time but O(k) space, where k is the number of unique characters. It’s more flexible but less space-efficient than the array.
+
+- **Single Pass with LinkedHashMap**: You could track order and counts in one go with a `LinkedHashMap`, but it’s overkill—still O(n) time and O(n) space, and slower due to hash operations.
