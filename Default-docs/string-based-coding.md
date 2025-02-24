@@ -340,3 +340,106 @@ This is still O(n) and O(1), just a bit leaner if you’re sure your input is AS
 
 - **Regex**: You could use `s.matches("\\d+")`, but it’s overkill—O(n) time with worse constants and extra object creation. Not as efficient.
 - **Empty String Handling**: I return `false` for empty strings or null, but if you want `true` (e.g., "empty is valid"), just tweak the initial check.
+
+## How do you find the longest substring without repeating characters?
+
+Let’s crack the problem of finding the longest substring without repeating characters in Java, aiming for efficiency! We want to take a string like "abcabcbb" and find "abc" (length 3) or "pwwkew" and get "wke" (length 3). The key is to track characters and their positions while sliding through the string. The most efficient approach uses a sliding window with a map or array to mark seen characters, achieving O(n) time and O(min(m, n)) space, where n is the string length and m is the character set size.
+
+Here’s an optimized solution using a `HashMap`:
+
+```java
+import java.util.HashMap;
+
+public class LongestSubstring {
+    public static String longestSubstringWithoutRepeating(String s) {
+        if (s == null || s.isEmpty()) {
+            return "";
+        }
+
+        // Map to store character -> last seen index
+        HashMap<Character, Integer> seen = new HashMap<>();
+        int start = 0;  // Start of current window
+        int maxLength = 0;  // Length of longest substring
+        int maxStart = 0;  // Start index of longest substring
+
+        // Slide through the string
+        for (int end = 0; end < s.length(); end++) {
+            char current = s.charAt(end);
+            
+            // If character is seen and within current window, shrink window
+            if (seen.containsKey(current) && seen.get(current) >= start) {
+                start = seen.get(current) + 1;
+            } else {
+                // Update max if current window is longer
+                if (end - start + 1 > maxLength) {
+                    maxLength = end - start + 1;
+                    maxStart = start;
+                }
+            }
+            seen.put(current, end);  // Update last seen index
+        }
+
+        // Extract the substring
+        return s.substring(maxStart, maxStart + maxLength);
+    }
+
+    public static void main(String[] args) {
+        String s1 = "abcabcbb";
+        String s2 = "bbbbb";
+        String s3 = "pwwkew";
+        System.out.println(longestSubstringWithoutRepeating(s1));  // Output: "abc"
+        System.out.println(longestSubstringWithoutRepeating(s2));  // Output: "b"
+        System.out.println(longestSubstringWithoutRepeating(s3));  // Output: "wke"
+    }
+}
+```
+
+### Why’s this efficient?
+- **Time Complexity**: O(n) — Each character is processed once, and `HashMap` operations (get/put) are O(1) on average.
+- **Space Complexity**: O(min(m, n)) — The map stores at most `min(m, n)` entries, where m is the character set size (e.g., 128 for ASCII) and n is the string length.
+- **Sliding Window**: We expand the window until we hit a repeat, then slide the start pointer just past the last occurrence—minimal backtracking.
+
+### How it works
+1. Use `start` and `end` pointers to define the current window.
+2. Track each character’s last index in the `HashMap`.
+3. When a repeat is found within the window, move `start` to skip the earlier occurrence.
+4. Update the max length and starting point whenever the current window grows longer.
+5. Finally, extract the substring using the stored indices.
+
+### Alternative: Array for ASCII
+If you’re sure the string is ASCII-only, use an array instead of a map for even better performance (O(1) space, no hash overhead):
+
+```java
+public static String longestSubstringWithoutRepeating(String s) {
+    if (s == null || s.isEmpty()) return "";
+
+    int[] lastIndex = new int[128];  // ASCII size
+    for (int i = 0; i < 128; i++) {
+        lastIndex[i] = -1;  // Initialize as not seen
+    }
+
+    int start = 0;
+    int maxLength = 0;
+    int maxStart = 0;
+
+    for (int end = 0; end < s.length(); end++) {
+        char current = s.charAt(end);
+        if (lastIndex[current] >= start) {
+            start = lastIndex[current] + 1;
+        } else if (end - start + 1 > maxLength) {
+            maxLength = end - start + 1;
+            maxStart = start;
+        }
+        lastIndex[current] = end;
+    }
+
+    return s.substring(maxStart, maxStart + maxLength);
+}
+```
+
+This drops space to O(1) for fixed-size character sets and skips hash overhead, making it slightly faster for simple strings.
+
+### Why not brute force?
+Checking every substring would be O(n²) or worse—way too slow. The sliding window cuts that down by only adjusting the window boundaries as needed.
+
+The `HashMap` version handles any character set (Unicode included), while the array version is leaner for ASCII. Which suits your string? Want just the length instead of the substring? I can tweak it!
