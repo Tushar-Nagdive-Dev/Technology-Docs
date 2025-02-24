@@ -197,3 +197,81 @@ public static char findFirstNonRepeating(String s) {
 This is still O(n) time but O(k) space, where k is the number of unique characters. It’s more flexible but less space-efficient than the array.
 
 - **Single Pass with LinkedHashMap**: You could track order and counts in one go with a `LinkedHashMap`, but it’s overkill—still O(n) time and O(n) space, and slower due to hash operations.
+
+## How can you remove duplicate characters from a string?
+Let’s dive into removing duplicate characters from a string in Java efficiently! The goal is to take a string like "hello" and turn it into "helo", keeping only the first occurrence of each character. Since Java strings are immutable, we’ll need to build a new result, and the trick is to balance speed and space. One of the most efficient ways is to use a boolean array (or set) to track seen characters while preserving order, giving us O(n) time and O(1) space for a fixed character set like ASCII.
+
+Here’s a solid solution:
+
+```java
+public class RemoveDuplicates {
+    public static String removeDuplicates(String s) {
+        // Handle null or empty string
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+
+        // Boolean array to mark seen characters (ASCII size = 128)
+        boolean[] seen = new boolean[128];
+        StringBuilder result = new StringBuilder();
+
+        // Iterate through string, keeping first occurrence
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (!seen[c]) {  // If not seen yet
+                seen[c] = true;
+                result.append(c);
+            }
+        }
+
+        return result.toString();
+    }
+
+    public static void main(String[] args) {
+        String s1 = "hello";
+        String s2 = "aabbcc";
+        System.out.println(removeDuplicates(s1));  // Output: "helo"
+        System.out.println(removeDuplicates(s2));  // Output: "abc"
+    }
+}
+```
+
+### Why’s this efficient?
+- **Time Complexity**: O(n) — One pass through the string, with constant-time array lookups and appends (amortized for `StringBuilder`).
+- **Space Complexity**: O(1) — The `seen` array is fixed at 128 (or 256 for extended ASCII), and `StringBuilder` scales with unique characters, but that’s part of the output.
+- **Preserves Order**: We keep the first occurrence of each character naturally, no sorting needed.
+
+### How it works
+1. Use a `boolean` array to flag characters we’ve seen.
+2. Build the result with `StringBuilder` (faster than string concatenation).
+3. Only append a character the first time we see it.
+
+### Tweaks and Alternatives
+- **Unicode Support**: If your string has more than ASCII (e.g., "hééllo"), switch to a `HashSet`. Here’s that version:
+
+```java
+import java.util.HashSet;
+
+public static String removeDuplicates(String s) {
+    if (s == null || s.isEmpty()) return s;
+
+    HashSet<Character> seen = new HashSet<>();
+    StringBuilder result = new StringBuilder();
+
+    for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        if (seen.add(c)) {  // add() returns true if c wasn’t already present
+            result.append(c);
+        }
+    }
+    return result.toString();
+}
+```
+
+This is still O(n) time, but space is O(k) where k is the number of unique characters. It’s a tad slower due to hash operations but handles any character set.
+
+- **In-Place (Sort of)**: If you’re given a `char[]` instead of a `String`, you could mark duplicates in-place with a similar tracking array and shift characters, but Java’s string immutability makes `StringBuilder` the practical choice here.
+
+- **LinkedHashSet**: If order matters (it does here), a `LinkedHashSet` works too, but it’s O(n) space and slower than a plain array or `HashSet`.
+
+The boolean array version is the efficiency champ for basic strings—fast lookups, minimal memory. If your strings are wild with Unicode, the `HashSet` version’s got you covered. What’s your string like? Need a specific twist on this?
