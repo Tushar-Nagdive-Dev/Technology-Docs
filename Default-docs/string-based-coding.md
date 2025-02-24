@@ -72,3 +72,46 @@ public class PalindromeCheck {
     }
 }
 ```
+
+## How can you determine if two strings are anagrams of each other?
+```java
+public class AnagramCheck {
+    public static boolean areAnagrams(String s1, String s2) {
+        s1 = s1.toLowerCase();
+        s2 = s2.toLowerCase();
+        
+        // Quick checks: null handling and length mismatch
+        if (s1 == null || s2 == null) {
+            return s1 == s2;  // Both null = true, one null = false
+        }
+        if (s1.length() != s2.length()) {
+            return false;  // Different lengths can’t be anagrams
+        }
+
+        // Use an array to count character frequencies (ASCII size = 128)
+        int[] charCount = new int[128];  // Covers basic ASCII
+
+        // Increment counts for s1, decrement for s2
+        for (int i = 0; i < s1.length(); i++) {
+            charCount[s1.charAt(i)]++;  // Add s1’s char
+            charCount[s2.charAt(i)]--;  // Subtract s2’s char
+        }
+
+        // If they’re anagrams, all counts should be zero
+        for (int count : charCount) {
+            if (count != 0) {
+                return false;  // Mismatch in frequency
+            }
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        String s1 = "listen";
+        String s2 = "silent";
+        String s3 = "hello";
+        System.out.println(areAnagrams(s1, s2));  // Output: true
+        System.out.println(areAnagrams(s1, s3));  // Output: false
+    }
+}
+```
