@@ -275,3 +275,68 @@ This is still O(n) time, but space is O(k) where k is the number of unique chara
 - **LinkedHashSet**: If order matters (it does here), a `LinkedHashSet` works too, but it’s O(n) space and slower than a plain array or `HashSet`.
 
 The boolean array version is the efficiency champ for basic strings—fast lookups, minimal memory. If your strings are wild with Unicode, the `HashSet` version’s got you covered. What’s your string like? Need a specific twist on this?
+
+## How do you check if a string contains only digits?
+Let’s figure out an efficient way to check if a string contains only digits in Java! The goal is to verify that every character is a number (0-9), like "12345", and reject strings like "12a34" or "abc". The most efficient approach is to scan the string once, checking each character against a digit condition, which gives us O(n) time and O(1) space—no extra data structures needed.
+
+Here’s a straightforward and fast solution:
+
+```java
+public class DigitCheck {
+    public static boolean containsOnlyDigits(String s) {
+        // Handle null or empty string
+        if (s == null || s.isEmpty()) {
+            return false;  // Convention: null/empty isn’t "only digits"
+        }
+
+        // Check each character
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isDigit(s.charAt(i))) {
+                return false;  // Found a non-digit
+            }
+        }
+        return true;  // All characters are digits
+    }
+
+    public static void main(String[] args) {
+        String s1 = "12345";
+        String s2 = "12a34";
+        String s3 = "";
+        System.out.println(containsOnlyDigits(s1));  // Output: true
+        System.out.println(containsOnlyDigits(s2));  // Output: false
+        System.out.println(containsOnlyDigits(s3));  // Output: false
+    }
+}
+```
+
+### Why’s this efficient?
+- **Time Complexity**: O(n) — Single pass through the string, with `charAt()` and `isDigit()` being O(1) per character.
+- **Space Complexity**: O(1) — No extra memory beyond a loop variable.
+- **Early Exit**: If we hit a non-digit, we stop immediately—no need to check the rest.
+
+### How it works
+- `Character.isDigit()` checks if a character is a decimal digit (0-9 in Unicode). It’s built into Java and super fast.
+- Loop through each character; if any fail the digit test, return `false`.
+- If we make it through, it’s all digits—return `true`.
+
+### Tweaks and Alternatives
+- **Manual Check**: Instead of `isDigit()`, you could check `c >= '0' && c <= '9'`. It’s slightly faster (avoids method call overhead) and works for ASCII digits:
+
+```java
+public static boolean containsOnlyDigits(String s) {
+    if (s == null || s.isEmpty()) return false;
+
+    for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        if (c < '0' || c > '9') {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+This is still O(n) and O(1), just a bit leaner if you’re sure your input is ASCII.
+
+- **Regex**: You could use `s.matches("\\d+")`, but it’s overkill—O(n) time with worse constants and extra object creation. Not as efficient.
+- **Empty String Handling**: I return `false` for empty strings or null, but if you want `true` (e.g., "empty is valid"), just tweak the initial check.
