@@ -591,3 +591,116 @@ public static char mostFrequentChar(String s) {
 - **Case Insensitivity**: Add `c = Character.toLowerCase(c)` if 'A' and 'a' should count together.
 
 The array version is the efficiency king for ASCII strings—super fast and light. The `HashMap` version scales to any character set. What’s your string like? Need a specific twist?
+
+## Reverse Words in a Sentence Reverse the order of words in a given sentence. Example: Input: "Hello World" → Output: "World Hello"
+
+Here's a Java program to reverse the order of words in a string while keeping the words themselves intact:
+
+```java
+public class ReverseWords {
+    public static String reverseWords(String str) {
+        // Split the string into words
+        String[] words = str.trim().split("\\s+");
+        
+        // Create StringBuilder for efficient string manipulation
+        StringBuilder reversed = new StringBuilder();
+        
+        // Iterate through words array in reverse order
+        for (int i = words.length - 1; i >= 0; i--) {
+            reversed.append(words[i]);
+            // Add space between words (except after last word)
+            if (i > 0) {
+                reversed.append(" ");
+            }
+        }
+        
+        return reversed.toString();
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        String str1 = "Hello World";
+        String str2 = "Java is fun";
+        String str3 = "I love to code";
+        
+        System.out.println("Original: " + str1);
+        System.out.println("Reversed: " + reverseWords(str1));
+        System.out.println();
+        
+        System.out.println("Original: " + str2);
+        System.out.println("Reversed: " + reverseWords(str2));
+        System.out.println();
+        
+        System.out.println("Original: " + str3);
+        System.out.println("Reversed: " + reverseWords(str3));
+    }
+}
+```
+
+This program:
+
+1. Defines a `reverseWords` method that takes a string as input
+2. Uses `trim()` to remove leading/trailing spaces
+3. Splits the string into an array of words using `split("\\s+")` (which handles multiple spaces)
+4. Creates a StringBuilder to efficiently build the reversed string
+5. Iterates through the words array backwards, appending each word
+6. Adds spaces between words (but not after the last word)
+7. Returns the final reversed string
+
+When you run this program, it will output:
+```
+Original: Hello World
+Reversed: World Hello
+
+Original: Java is fun
+Reversed: fun is Java
+
+Original: I love to code
+Reversed: code to love I
+```
+
+Alternative approach using a character array (more manual method):
+
+```java
+public class ReverseWordsManual {
+    public static String reverseWords(String str) {
+        char[] chars = str.toCharArray();
+        int length = chars.length;
+        
+        // Reverse entire string first
+        reverse(chars, 0, length - 1);
+        
+        // Reverse each word
+        int start = 0;
+        for (int i = 0; i < length; i++) {
+            if (chars[i] == ' ') {
+                reverse(chars, start, i - 1);
+                start = i + 1;
+            }
+        }
+        // Reverse the last word
+        reverse(chars, start, length - 1);
+        
+        return new String(chars);
+    }
+    
+    private static void reverse(char[] chars, int start, int end) {
+        while (start < end) {
+            char temp = chars[start];
+            chars[start] = chars[end];
+            chars[end] = temp;
+            start++;
+            end--;
+        }
+    }
+
+    public static void main(String[] args) {
+        String str = "Hello World";
+        System.out.println("Original: " + str);
+        System.out.println("Reversed: " + reverseWords(str));
+    }
+}
+```
+
+Both methods will give you the same result. The first approach is simpler and more readable, while the second approach might be more efficient for very large strings as it works in-place with character arrays. Choose the one that best fits your needs!
+
