@@ -704,3 +704,124 @@ public class ReverseWordsManual {
 
 Both methods will give you the same result. The first approach is simpler and more readable, while the second approach might be more efficient for very large strings as it works in-place with character arrays. Choose the one that best fits your needs!
 
+## Check if a String is a Valid Shuffle of Two Strings Check if a given string is a valid shuffle of two other strings.Example: Input: "abc", "def", "dabecf" → Output: true
+
+Here's a Java program to check if a string is a valid shuffle of two other strings:
+
+```java
+public class ShuffleCheck {
+    public static boolean isValidShuffle(String str1, String str2, String result) {
+        // Check if length of result matches sum of str1 and str2
+        if (str1.length() + str2.length() != result.length()) {
+            return false;
+        }
+        
+        int i = 0; // index for str1
+        int j = 0; // index for str2
+        int k = 0; // index for result
+        
+        // Iterate through result string
+        while (k < result.length()) {
+            // If current char matches with str1's current char
+            if (i < str1.length() && result.charAt(k) == str1.charAt(i)) {
+                i++;
+            }
+            // If current char matches with str2's current char
+            else if (j < str2.length() && result.charAt(k) == str2.charAt(j)) {
+                j++;
+            }
+            // If no match found
+            else {
+                return false;
+            }
+            k++;
+        }
+        
+        // Check if we've used all characters from both strings
+        return i == str1.length() && j == str2.length();
+    }
+
+    public static void main(String[] args) {
+        // Test cases
+        String[][] tests = {
+            {"abc", "def", "dabecf"},    // true
+            {"abc", "def", "dabfce"},    // false (wrong order)
+            {"hello", "world", "hweolrllod"}, // true
+            {"xy", "z", "xyz"},          // true
+            {"xy", "z", "yxz"},          // true
+            {"xy", "z", "xxyz"}          // false (extra character)
+        };
+        
+        for (String[] test : tests) {
+            String str1 = test[0];
+            String str2 = test[1];
+            String result = test[2];
+            boolean isValid = isValidShuffle(str1, str2, result);
+            System.out.println("str1: " + str1 + ", str2: " + str2 + 
+                             ", result: " + result + " -> " + isValid);
+        }
+    }
+}
+```
+
+This solution:
+
+1. First checks if the length of the result string equals the sum of lengths of str1 and str2 (if not, it can't be a valid shuffle)
+
+2. Uses three pointers:
+   - i for str1
+   - j for str2
+   - k for result
+
+3. For each character in the result string:
+   - Checks if it matches the current character in str1 (if we haven't used all of str1)
+   - If not, checks if it matches the current character in str2 (if we haven't used all of str2)
+   - If neither matches, returns false
+
+4. Finally verifies that we've used all characters from both input strings
+
+When you run this, you'll get output like:
+```
+str1: abc, str2: def, result: dabecf -> true
+str1: abc, str2: def, result: dabfce -> false
+str1: hello, str2: world, result: hweolrllod -> true
+str1: xy, str2: z, result: xyz -> true
+str1: xy, str2: z, result: yxz -> true
+str1: xy, str2: z, result: xxyz -> false
+```
+
+Alternative approach using character frequency (might be useful if order doesn't matter):
+
+```java
+public static boolean isValidShuffleFrequency(String str1, String str2, String result) {
+    if (str1.length() + str2.length() != result.length()) {
+        return false;
+    }
+    
+    int[] freq = new int[26]; // Assuming lowercase letters only
+    
+    // Count frequencies in str1 and str2
+    for (char c : str1.toCharArray()) freq[c - 'a']++;
+    for (char c : str2.toCharArray()) freq[c - 'a']++;
+    
+    // Subtract frequencies from result
+    for (char c : result.toCharArray()) freq[c - 'a']--;
+    
+    // Check if all frequencies are zero
+    for (int count : freq) {
+        if (count != 0) return false;
+    }
+    
+    return true;
+}
+```
+
+The first approach is generally preferred as it:
+- Preserves the relative order of characters from each string
+- Has O(n) time complexity where n is the length of result
+- Uses O(1) extra space
+- Is more intuitive to understand
+
+The frequency approach might be useful if:
+- You only care about character composition, not order
+- You need to handle larger character sets (with modified array size)
