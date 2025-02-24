@@ -42,7 +42,7 @@ public static String reverseString(String s) {
 This is concise and still O(n), but under the hood, it’s doing similar work—possibly with a bit more overhead from the `StringBuilder` object. For raw efficiency, the `char` array approach wins because it’s more direct.
 
 ## How do you check if a string is a palindrome?
-```
+```java
 public class PalindromeCheck {
     public static boolean isPalindrome(String s) {
         // Handle null or empty string
