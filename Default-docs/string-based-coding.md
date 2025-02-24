@@ -40,3 +40,35 @@ public static String reverseString(String s) {
 ```
 
 This is concise and still O(n), but under the hood, it’s doing similar work—possibly with a bit more overhead from the `StringBuilder` object. For raw efficiency, the `char` array approach wins because it’s more direct.
+
+## How do you check if a string is a palindrome?
+```
+public class PalindromeCheck {
+    public static boolean isPalindrome(String s) {
+        // Handle null or empty string
+        if (s == null || s.isEmpty()) {
+            return true;  // Often considered palindromes by convention
+        }
+
+        int left = 0;
+        int right = s.length() - 1;
+
+        // Compare characters from both ends moving inward
+        while (left < right) {
+            if (s.charAt(left) != s.charAt(right)) {
+                return false;  // Mismatch found, not a palindrome
+            }
+            left++;
+            right--;
+        }
+        return true;  // All characters matched
+    }
+
+    public static void main(String[] args) {
+        String s1 = "racecar";
+        String s2 = "hello";
+        System.out.println(isPalindrome(s1));  // Output: true
+        System.out.println(isPalindrome(s2));  // Output: false
+    }
+}
+```
