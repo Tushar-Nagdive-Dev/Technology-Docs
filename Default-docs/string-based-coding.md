@@ -443,3 +443,151 @@ This drops space to O(1) for fixed-size character sets and skips hash overhead, 
 Checking every substring would be O(n²) or worse—way too slow. The sliding window cuts that down by only adjusting the window boundaries as needed.
 
 The `HashMap` version handles any character set (Unicode included), while the array version is leaner for ASCII. Which suits your string? Want just the length instead of the substring? I can tweak it!
+
+## How can you check if two strings are rotations of each other?
+Let’s figure out how to efficiently check if two strings are rotations of each other in Java! Two strings are rotations if one can be shifted circularly to match the other—like "abcde" and "cdeab". The trick is to avoid manually checking every rotation, which would be slow. Instead, a clever and efficient solution leverages the fact that if `s2` is a rotation of `s1`, then `s2` must be a substring of `s1 + s1`. This runs in O(n) time and O(n) space, where n is the string length.
+
+Here’s the solution:
+
+```java
+public class StringRotation {
+    public static boolean areRotations(String s1, String s2) {
+        // Check nulls and length mismatch
+        if (s1 == null || s2 == null) {
+            return s1 == s2;  // Both null = true, one null = false
+        }
+        if (s1.length() != s2.length()) {
+            return false;  // Different lengths can’t be rotations
+        }
+
+        // Concatenate s1 with itself
+        String doubleS1 = s1 + s1;
+        
+        // Check if s2 is a substring of doubleS1
+        return doubleS1.contains(s2);
+    }
+
+    public static void main(String[] args) {
+        String s1 = "abcde";
+        String s2 = "cdeab";
+        String s3 = "abcd";
+        System.out.println(areRotations(s1, s2));  // Output: true
+        System.out.println(areRotations(s1, s3));  // Output: false
+    }
+}
+```
+
+### Why’s this efficient?
+- **Time Complexity**: O(n) — String concatenation is O(n), and `contains()` uses an efficient substring search (like KMP or Boyer-Moore under the hood in Java, typically O(n+m), but here it’s O(n) since the pattern is the same length).
+- **Space Complexity**: O(n) — We create a new string `doubleS1` of length 2n.
+- **Simple Logic**: No need to manually rotate and compare every possibility, which would be O(n²).
+
+### How it works
+- If `s1 = "abcde"`, then `s1 + s1 = "abcdeabcde"`.
+- Any rotation of `s1` (e.g., "cdeab") will appear as a contiguous chunk in `doubleS1`.
+- `contains()` checks this in one shot.
+- Early checks for null or length mismatch avoid wasted effort.
+
+### Why does it work?
+Imagine rotating "abcde":
+- Shift 0: "abcde"
+- Shift 1: "bcdea"
+- Shift 2: "cdeab"
+- All these are substrings of "abcdeabcde". The duplication ensures every possible rotation is covered.
+
+### Alternative: Manual Rotation Check
+You could rotate `s1` and compare it to `s2` at each position, but that’s O(n²)—way less efficient. Another option is to find the rotation point using character matching, but it’s trickier and rarely faster than the concatenation trick.
+
+### Tweaks
+- **Case Sensitivity**: Add `s1 = s1.toLowerCase(); s2 = s2.toLowerCase();` if "ABCde" and "cdeAB" should match.
+- **Space Tradeoff**: If you’re desperate to avoid the extra string, you could use modular indexing to simulate rotation, but it’s more complex and still O(n²) unless paired with a smart search.
+
+This method’s the sweet spot—fast, readable, and reliable. Does it fit your needs? Want to tweak it for something specific?
+
+## How do you find the most frequent character in a string?
+Let’s find the most frequent character in a string efficiently in Java! The goal is to identify which character appears the most, like 'l' in "hello" (appears 2 times). The most efficient approach is to use a frequency counter—either an array or a map—to tally occurrences in one pass, then find the max. For a fixed character set like ASCII, this gives us O(n) time and O(1) space, where n is the string length.
+
+Here’s a lean solution using an array:
+
+```java
+public class MostFrequentChar {
+    public static char mostFrequentChar(String s) {
+        // Handle null or empty string
+        if (s == null || s.isEmpty()) {
+            return '\0';  // Sentinel for "not found"
+        }
+
+        // Array for ASCII character counts (128 for basic ASCII)
+        int[] charCount = new int[128];
+        int maxCount = 0;
+        char maxChar = '\0';
+
+        // Count frequencies
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            charCount[c]++;
+            // Update max if this char’s count beats the current max
+            if (charCount[c] > maxCount) {
+                maxCount = charCount[c];
+                maxChar = c;
+            }
+        }
+
+        return maxChar;
+    }
+
+    public static void main(String[] args) {
+        String s1 = "hello";
+        String s2 = "aabbcc";
+        System.out.println(mostFrequentChar(s1));  // Output: 'l' (2 times)
+        System.out.println(mostFrequentChar(s2));  // Output: 'a' (2 times, first max)
+    }
+}
+```
+
+### Why’s this efficient?
+- **Time Complexity**: O(n) — One pass through the string, with constant-time array updates and comparisons.
+- **Space Complexity**: O(1) — The `charCount` array is fixed at 128 (or 256 for extended ASCII), regardless of input size.
+- **Single Pass**: We track the max while counting, avoiding a separate scan.
+
+### How it works
+1. Use an array to count each character’s occurrences.
+2. During the count, update the max count and corresponding character on the fly.
+3. Return the character with the highest frequency (first one if tied).
+
+### Alternative: HashMap for Unicode
+If your string might have non-ASCII characters (e.g., "héllo"), use a `HashMap`:
+
+```java
+import java.util.HashMap;
+
+public static char mostFrequentChar(String s) {
+    if (s == null || s.isEmpty()) return '\0';
+
+    HashMap<Character, Integer> charCount = new HashMap<>();
+    int maxCount = 0;
+    char maxChar = '\0';
+
+    for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        int count = charCount.merge(c, 1, Integer::sum);  // Increment count
+        if (count > maxCount) {
+            maxCount = count;
+            maxChar = c;
+        }
+    }
+
+    return maxChar;
+}
+```
+
+- **Time**: Still O(n) — Hash operations are O(1) on average.
+- **Space**: O(k) — Where k is the number of unique characters.
+- **Flexibility**: Handles any character set, like emojis or accents.
+
+### Tweaks
+- **Ties**: This returns the first max encountered. Want the last? Move the max check to a second loop.
+- **Count Too**: Return both char and frequency? Use a custom class or array.
+- **Case Insensitivity**: Add `c = Character.toLowerCase(c)` if 'A' and 'a' should count together.
+
+The array version is the efficiency king for ASCII strings—super fast and light. The `HashMap` version scales to any character set. What’s your string like? Need a specific twist?
