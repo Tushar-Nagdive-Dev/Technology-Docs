@@ -276,3 +276,180 @@ This solution:
    - Rejecting negative reduction quantities
 
 The fields are properly encapsulated (can't be accessed directly), and the stock management logic prevents negative values through both direct setting and reduction operations. The `reduceStock` method is a practical addition for inventory systems, returning a boolean to indicate success or failure.
+
+---
+
+## **What You Did Well:**
+1. **Encapsulation:**
+   - Made all attributes (`name`, `stock`, `price`) private, ensuring data hiding.
+   - Provided public getters and setters for controlled access.
+
+2. **Validation Logic:**
+   - `setStock(int stock)` ensures stock is non-negative.
+   - `reduceStock(int quantity)` checks:
+     - Quantity isn't negative.
+     - Enough stock is available for reduction.
+   - Used `Math.max(0, initialStock)` in the constructor to prevent negative initial stock.
+
+3. **Object-Oriented Design:**
+   - Created a cohesive class with relevant attributes and behaviors.
+   - The `reduceStock(int quantity)` method encapsulates a common business rule.
+
+4. **Error Handling:**
+   - Clear error messages for invalid operations, enhancing code maintainability and usability.
+
+---
+
+## **Expert Insights:**
+1. **Immutability and Final Keyword:**
+   - Consider using `final` for fields that shouldn't change after initialization (e.g., `name`).
+   - Example: 
+     ```java
+     private final String name;
+     ```
+
+2. **Constructor Improvement:**
+   - Validate `price` in the constructor to ensure it’s non-negative.
+     ```java
+     this.price = Math.max(0, price);
+     ```
+
+3. **Method Enhancement:**
+   - Adding a `restock(int quantity)` method would complement `reduceStock()`.
+
+---
+
+## **Refactored Code with Improvements:**
+Here's an enhanced version implementing the suggestions:
+
+```java
+public class Product {
+    // Attributes (Encapsulated State)
+    private final String name; // Made final to ensure immutability
+    private int stock;
+    private double price;
+
+    // Constructor
+    public Product(String name, int initialStock, double price) {
+        this.name = name;
+        this.stock = Math.max(0, initialStock); // Ensures stock is non-negative
+        this.price = Math.max(0, price); // Ensures price is non-negative
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    // Setters
+    public void setStock(int stock) {
+        if (stock >= 0) {
+            this.stock = stock;
+        } else {
+            System.out.println("Stock cannot be set to a negative value.");
+        }
+    }
+
+    public void setPrice(double price) {
+        if (price >= 0) {
+            this.price = price;
+        } else {
+            System.out.println("Price cannot be negative.");
+        }
+    }
+
+    // Behavior Methods
+    public boolean reduceStock(int quantity) {
+        if (quantity < 0) {
+            System.out.println("Quantity to reduce cannot be negative.");
+            return false;
+        }
+        if (this.stock >= quantity) {
+            this.stock -= quantity;
+            System.out.println("Reduced stock by " + quantity + ". Remaining stock: " + this.stock);
+            return true;
+        } else {
+            System.out.println("Insufficient stock to reduce by " + quantity);
+            return false;
+        }
+    }
+
+    public void restock(int quantity) {
+        if (quantity > 0) {
+            this.stock += quantity;
+            System.out.println("Restocked " + quantity + ". New stock: " + this.stock);
+        } else {
+            System.out.println("Quantity to restock should be positive.");
+        }
+    }
+
+    // Display Details
+    public void displayDetails() {
+        System.out.println("Product: " + name + ", Price: " + price + ", Stock: " + stock);
+    }
+}
+
+// Example usage
+class Main {
+    public static void main(String[] args) {
+        Product product = new Product("Widget", 10, 5.99);
+
+        product.displayDetails(); // Displaying initial details
+
+        product.setStock(-5); // Invalid stock, error message
+        product.reduceStock(7); // Valid reduction
+        product.reduceStock(5); // Insufficient stock message
+
+        product.restock(10); // Adding stock
+        product.displayDetails(); // Displaying updated details
+
+        product.setPrice(-10); // Invalid price, error message
+        product.setPrice(7.49); // Valid price update
+        product.displayDetails(); // Displaying final details
+    }
+}
+```
+
+---
+
+## **What's New and Improved?**
+1. **Immutability:** Made `name` final to ensure it can't be changed once initialized.
+2. **Enhanced Validation:**
+   - Added `Math.max(0, price)` in the constructor.
+   - Improved `setPrice(double price)` to validate non-negative prices.
+3. **New Method:** 
+   - Added `restock(int quantity)` to complement `reduceStock()`.
+4. **Enhanced Usability:**
+   - `displayDetails()` method to view product details in a formatted way.
+
+---
+
+## **Next Steps:**
+1. **Test the Enhanced Class:** Run the new code and observe the behavior.
+2. **Reflect on Learnings:** Note the impact of encapsulation, immutability, and validation.
+3. **Get Ready for the Next Concept:** We will now dive deeper into **Classes and Objects**:
+   - How objects are created and managed in memory.
+   - Understanding constructors and method overloading.
+   - Using the `this` keyword for better readability.
+
+---
+
+## **Your Exercise:**
+1. Implement a `Customer` class with:
+   - Attributes: `name`, `email`, `balance`.
+   - Methods:
+     - `deposit(double amount)` — Add to balance.
+     - `withdraw(double amount)` — Subtract from balance with validation.
+     - `displayDetails()` — Display customer details.
+2. Use encapsulation with private fields and public methods.
+3. Implement proper validation and error messages.
+
+---
