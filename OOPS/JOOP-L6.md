@@ -287,3 +287,123 @@ Dog is barking.
    - Test your implementation by creating objects of `Circle` and `Rectangle`.
 
 ---
+
+Here's a Java implementation of the Shape hierarchy with the specified requirements:
+
+```java
+// Abstract Class: Shape
+abstract class Shape {
+    private String color;
+
+    // Constructor
+    public Shape(String color) {
+        this.color = color;
+    }
+
+    // Abstract method to be overridden by subclasses
+    public abstract double calculateArea();
+
+    // Concrete method to display color
+    public void displayColor() {
+        System.out.println("Color: " + this.color);
+    }
+
+    // Getter for color (if needed)
+    public String getColor() {
+        return this.color;
+    }
+}
+
+// Concrete Class: Circle
+class Circle extends Shape {
+    private double radius;
+
+    // Constructor
+    public Circle(String color, double radius) {
+        super(color); // Call parent constructor to set color
+        this.radius = radius;
+    }
+
+    // Override calculateArea for circle (π * radius^2)
+    @Override
+    public double calculateArea() {
+        return Math.PI * radius * radius;
+    }
+}
+
+// Concrete Class: Rectangle
+class Rectangle extends Shape {
+    private double length;
+    private double width;
+
+    // Constructor
+    public Rectangle(String color, double length, double width) {
+        super(color); // Call parent constructor to set color
+        this.length = length;
+        this.width = width;
+    }
+
+    // Override calculateArea for rectangle (length * width)
+    @Override
+    public double calculateArea() {
+        return length * width;
+    }
+}
+
+// Test Class
+class Main {
+    public static void main(String[] args) {
+        // Create a Circle object
+        Circle circle = new Circle("Red", 5.0);
+        System.out.println("Circle Details:");
+        circle.displayColor(); // Uses parent's concrete method
+        System.out.printf("Area: %.2f square units%n", circle.calculateArea());
+        System.out.println();
+
+        // Create a Rectangle object
+        Rectangle rectangle = new Rectangle("Blue", 4.0, 6.0);
+        System.out.println("Rectangle Details:");
+        rectangle.displayColor(); // Uses parent's concrete method
+        System.out.printf("Area: %.2f square units%n", rectangle.calculateArea());
+    }
+}
+```
+
+### Explanation:
+
+1. **Abstract Class: `Shape`**:
+   - **Attribute**: `color` (private String) with a getter for access.
+   - **Constructor**: Initializes `color`.
+   - **Abstract Method**: `calculateArea()` is declared without implementation, forcing subclasses to override it.
+   - **Concrete Method**: `displayColor()` displays the shape's color using the `color` attribute.
+
+2. **Concrete Class: `Circle`**:
+   - **Attribute**: `radius` (private double).
+   - **Constructor**: Uses `super(color)` to pass the color to the `Shape` constructor.
+   - **Method Override**: `calculateArea()` computes the area using the formula π * radius².
+
+3. **Concrete Class: `Rectangle`**:
+   - **Attributes**: `length` and `width` (private doubles).
+   - **Constructor**: Uses `super(color)` to initialize the parent’s `color`.
+   - **Method Override**: `calculateArea()` computes the area using length * width.
+
+4. **Testing**:
+   - The `Main` class creates objects of `Circle` and `Rectangle`, calls `displayColor()` (inherited from `Shape`), and `calculateArea()` (overridden in each subclass).
+   - Output is formatted to two decimal places for readability.
+
+### Sample Output:
+```
+Circle Details:
+Color: Red
+Area: 78.54 square units
+
+Rectangle Details:
+Color: Blue
+Area: 24.00 square units
+```
+
+### Key Points:
+- **Method Overriding**: `calculateArea()` is overridden in `Circle` and `Rectangle` with shape-specific formulas.
+- **Use of `super`**: Used in constructors to access the parent class’s constructor and set the `color`.
+- **Encapsulation**: All attributes are private, with access controlled via constructors and getters (where provided).
+- **Testing**: Demonstrates polymorphism by treating `Circle` and `Rectangle` as `Shape` subtypes implicitly.
