@@ -292,3 +292,183 @@ Engine stopped.
   - `WashingMachine` and `Refrigerator` using `Appliance` and `ElectronicDevice`.
 
 ---
+
+Here's a Java implementation that includes an abstract `Appliance` class, an `ElectronicDevice` interface, and two concrete classes (`WashingMachine` and `Refrigerator`) implementing both:
+
+```java
+// Abstract Class: Appliance
+abstract class Appliance {
+    private String brand;
+    private int power; // in watts
+
+    // Constructor
+    public Appliance(String brand, int power) {
+        this.brand = brand;
+        this.power = power;
+    }
+
+    // Abstract method
+    public abstract void turnOn();
+
+    // Concrete method
+    public void turnOff() {
+        System.out.println(brand + " appliance is turned off.");
+    }
+
+    // Getters (for accessing private fields if needed)
+    public String getBrand() {
+        return brand;
+    }
+
+    public int getPower() {
+        return power;
+    }
+}
+
+// Interface: ElectronicDevice
+interface ElectronicDevice {
+    void connectToPower();
+
+    default void disconnectFromPower() {
+        System.out.println("Disconnected from power.");
+    }
+}
+
+// Concrete Class: WashingMachine
+class WashingMachine extends Appliance implements ElectronicDevice {
+    private boolean isRunning;
+
+    public WashingMachine(String brand, int power) {
+        super(brand, power);
+        this.isRunning = false;
+    }
+
+    @Override
+    public void turnOn() {
+        if (!isRunning) {
+            System.out.println(getBrand() + " washing machine is turned on. Power consumption: " + getPower() + "W");
+            isRunning = true;
+        } else {
+            System.out.println(getBrand() + " washing machine is already running.");
+        }
+    }
+
+    @Override
+    public void connectToPower() {
+        System.out.println(getBrand() + " washing machine is connected to power.");
+    }
+
+    // Override turnOff for additional behavior
+    @Override
+    public void turnOff() {
+        if (isRunning) {
+            super.turnOff();
+            isRunning = false;
+        } else {
+            System.out.println(getBrand() + " washing machine is already off.");
+        }
+    }
+}
+
+// Concrete Class: Refrigerator
+class Refrigerator extends Appliance implements ElectronicDevice {
+    private boolean isCooling;
+
+    public Refrigerator(String brand, int power) {
+        super(brand, power);
+        this.isCooling = false;
+    }
+
+    @Override
+    public void turnOn() {
+        if (!isCooling) {
+            System.out.println(getBrand() + " refrigerator is turned on. Power consumption: " + getPower() + "W");
+            isCooling = true;
+        } else {
+            System.out.println(getBrand() + " refrigerator is already running.");
+        }
+    }
+
+    @Override
+    public void connectToPower() {
+        System.out.println(getBrand() + " refrigerator is connected to power.");
+    }
+
+    // Override turnOff for additional behavior
+    @Override
+    public void turnOff() {
+        if (isCooling) {
+            super.turnOff();
+            isCooling = false;
+        } else {
+            System.out.println(getBrand() + " refrigerator is already off.");
+        }
+    }
+}
+
+// Example usage
+class Main {
+    public static void main(String[] args) {
+        // Create a WashingMachine
+        WashingMachine washer = new WashingMachine("LG", 500);
+        System.out.println("Washing Machine Demo:");
+        washer.connectToPower();
+        washer.turnOn();
+        washer.turnOn(); // Already on
+        washer.turnOff();
+        washer.disconnectFromPower();
+        System.out.println();
+
+        // Create a Refrigerator
+        Refrigerator fridge = new Refrigerator("Samsung", 150);
+        System.out.println("Refrigerator Demo:");
+        fridge.connectToPower();
+        fridge.turnOn();
+        fridge.turnOff();
+        fridge.turnOff(); // Already off
+        fridge.disconnectFromPower();
+    }
+}
+```
+
+### Explanation:
+
+1. **Abstract Class: `Appliance`**:
+   - **Attributes**: `brand` (String) and `power` (int) are private, with public getters for access.
+   - **Abstract Method**: `turnOn()` must be implemented by subclasses.
+   - **Concrete Method**: `turnOff()` provides a default behavior that prints a shutdown message.
+
+2. **Interface: `ElectronicDevice`**:
+   - **Abstract Method**: `connectToPower()` must be implemented by classes that implement this interface.
+   - **Default Method**: `disconnectFromPower()` provides a default implementation that prints "Disconnected from power."
+
+3. **Concrete Class: `WashingMachine`**:
+   - Extends `Appliance` and implements `ElectronicDevice`.
+   - Adds `isRunning` to track state.
+   - Implements `turnOn()` to start the machine if not already running.
+   - Overrides `turnOff()` to update state and call the parent’s method.
+   - Implements `connectToPower()` with a custom message.
+
+4. **Concrete Class: `Refrigerator`**:
+   - Similarly extends `Appliance` and implements `ElectronicDevice`.
+   - Uses `isCooling` to track state.
+   - Implements `turnOn()`, overrides `turnOff()`, and implements `connectToPower()` with refrigerator-specific behavior.
+
+### Sample Output:
+```
+Washing Machine Demo:
+LG washing machine is connected to power.
+LG washing machine is turned on. Power consumption: 500W
+LG washing machine is already running.
+LG appliance is turned off.
+Disconnected from power.
+
+Refrigerator Demo:
+Samsung refrigerator is connected to power.
+Samsung refrigerator is turned on. Power consumption: 150W
+Samsung appliance is turned off.
+Samsung refrigerator is already off.
+Disconnected from power.
+```
+
+This implementation adheres to object-oriented principles, including abstraction, inheritance, and interface implementation. The use of state variables (`isRunning`, `isCooling`) enhances the realism of the appliance behavior. 
