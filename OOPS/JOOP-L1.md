@@ -184,3 +184,95 @@ Once you've completed the exercise:
 - Learning about constructors, `this` keyword, and method overloading.
 
 ---
+### **Challenge:Solutions**
+
+I assume you're asking for a programming example, likely in Java since that's a common context for this type of challenge involving encapsulation, getters, setters, and stock management. Here's a solution that meets your requirements:
+
+```java
+public class Product {
+    private String name;
+    private int stock;
+    private double price;
+
+    // Constructor
+    public Product(String name, int initialStock, double price) {
+        this.name = name;
+        this.stock = Math.max(0, initialStock); // Ensures stock doesn't start negative
+        this.price = price;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    // Setters
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setStock(int stock) {
+        if (stock >= 0) {
+            this.stock = stock;
+        } else {
+            System.out.println("Stock cannot be set to a negative value.");
+        }
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    // Additional method to reduce stock (common in inventory systems)
+    public boolean reduceStock(int quantity) {
+        if (quantity < 0) {
+            System.out.println("Quantity to reduce cannot be negative.");
+            return false;
+        }
+        if (this.stock >= quantity) {
+            this.stock -= quantity;
+            return true;
+        } else {
+            System.out.println("Insufficient stock to reduce by " + quantity);
+            return false;
+        }
+    }
+}
+
+// Example usage
+class Main {
+    public static void main(String[] args) {
+        Product product = new Product("Widget", 10, 5.99);
+        
+        System.out.println("Initial stock: " + product.getStock()); // 10
+        
+        product.setStock(-5); // Will print error message
+        System.out.println("Stock after trying negative: " + product.getStock()); // Still 10
+        
+        product.reduceStock(7);
+        System.out.println("Stock after reducing by 7: " + product.getStock()); // 3
+        
+        product.reduceStock(5); // Will print insufficient stock message
+        System.out.println("Stock after trying to reduce by 5: " + product.getStock()); // Still 3
+    }
+}
+```
+
+This solution:
+1. Uses private fields (`name`, `stock`, `price`) for encapsulation
+2. Provides public getters (`getName`, `getStock`, `getPrice`) and setters (`setName`, `setStock`, `setPrice`)
+3. Ensures stock cannot go negative by:
+   - Validating in the constructor using `Math.max(0, initialStock)`
+   - Checking for negative values in `setStock`
+   - Including a `reduceStock` method that prevents stock from dropping below 0
+   - Rejecting negative reduction quantities
+
+The fields are properly encapsulated (can't be accessed directly), and the stock management logic prevents negative values through both direct setting and reduction operations. The `reduceStock` method is a practical addition for inventory systems, returning a boolean to indicate success or failure.
