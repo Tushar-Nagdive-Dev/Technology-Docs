@@ -107,3 +107,16 @@ Let me know if you want to try this on your own or want me to show you the compl
 ---
 
 ### ✅ Coming Up Next
+
+```java
+import org.apache.camel.builder.RouteBuilder;
+
+public class CatFactRoute extends RouteBuilder {
+    @Override
+    public void configure() throws Exception {
+        from("timer:catFact?period=2000")
+            .to("https://catfact.ninja/fact")
+            .log("Cat Fact: ${body}");
+    }
+}
+```
