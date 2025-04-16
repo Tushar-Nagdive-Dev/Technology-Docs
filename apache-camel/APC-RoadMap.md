@@ -1,7 +1,3 @@
-You're in for an amazing journey, Tushar! Apache Camel is one of the most powerful integration frameworks out there—used by enterprise-grade applications, especially where complex routing and integration are needed across systems and protocols.
-
-I'll be your mentor from scratch to mastery. We'll break this into structured stages. Here's how we'll proceed:
-
 ---
 
 ### 🧭 **Apache Camel Mastery Roadmap**
