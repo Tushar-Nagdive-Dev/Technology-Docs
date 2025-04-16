@@ -99,7 +99,7 @@ Want to try it yourself? I can review your solution. Or I can provide the full c
 
 ---
 
-```
+```java
 import org.apache.camel.builder.RouteBuilder;
 
 public class CamelHeartbeatRoute extends RouteBuilder {
