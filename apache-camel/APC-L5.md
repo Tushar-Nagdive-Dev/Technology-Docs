@@ -121,3 +121,20 @@ Try this:
 Let me know if you want the solution next or if you want to try it first.
 
 ---
+
+```java
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.processor.aggregate.GroupedExchangeAggregationStrategy;
+
+public class NameSplitterRoute extends RouteBuilder {
+    @Override
+    public void configure() throws Exception {
+        from("direct:start")
+            .split().tokenize(",")
+                .log("Individual name: ${body}")
+                .aggregate(constant(true), new GroupedExchangeAggregationStrategy())
+                    .completionSize(2)
+                    .log("Aggregated names: ${body}");
+    }
+}
+```
