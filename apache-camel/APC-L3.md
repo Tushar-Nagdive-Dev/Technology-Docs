@@ -98,3 +98,18 @@ Create a route using `RouteBuilder` that:
 Want to try it yourself? I can review your solution. Or I can provide the full code and move on.
 
 ---
+
+```
+import org.apache.camel.builder.RouteBuilder;
+
+public class CamelHeartbeatRoute extends RouteBuilder {
+    @Override
+    public void configure() throws Exception {
+        from("timer:heartbeat?period=3000")
+            .setBody(simple("Heartbeat at ${date:now}"))
+            .to("log:heartbeat?showAll=true")
+            .to("controlbus:route?routeId=heartbeatRoute&action=stop")
+            .delay(10000);
+    }
+}
+```
