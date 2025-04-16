@@ -1,5 +1,3 @@
----
-
 ## ✅ **Exercise Solution: Append “ - Processed” to message and log before/after**
 
 ```java
@@ -51,7 +49,6 @@ Apache Camel supports **two primary ways** to define routes:
 1. **Java DSL** (fluent style in Java classes)
 2. **XML DSL** (used in Spring or XML configs)
 
----
 
 ### 1. 🧪 **Java DSL (Most Popular)**
 > You’ve already been using this!
