@@ -113,7 +113,3 @@ Create a route that:
 2. Logs the original message.
 3. Appends " - Processed" to the message body.
 4. Logs the updated message.
-
-Let me know if you’d like to try it yourself, or I can show the solution.
-
-Shall we proceed to **Lesson 3: Writing Routes using Java DSL and XML DSL**, or want to attempt the above exercise first?
