@@ -1,4 +1,4 @@
----
+
 
 ### 1. **Route**
 A **Route** defines the flow of messages from a **source (from)** to one or more **destinations (to)** with optional **processing** in between.
@@ -14,7 +14,6 @@ from("file:data/inbox?noop=true")
 - Input: `data/inbox`
 - Output: `data/outbox`
 
----
 
 ### 2. **Endpoint**
 An **Endpoint** is the starting or ending point of a route. It’s represented by a URI (like `file:`, `http:`, `timer:`).
