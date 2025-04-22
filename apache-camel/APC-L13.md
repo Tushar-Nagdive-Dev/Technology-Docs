@@ -1,6 +1,3 @@
-Let’s get into the **engineering core** of Apache Camel now, Tushar — where you build **your own components** and manipulate message formats like a pro! 🛠️🔥
-
----
 
 ## 🧰 **Stage 3 – Lesson 14: Custom Components & Data Formats in Camel**
 
