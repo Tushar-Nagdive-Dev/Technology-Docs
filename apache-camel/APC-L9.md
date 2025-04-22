@@ -1,6 +1,3 @@
-Excellent, Tushar! Now that you’ve built Camel routes in Spring Boot, it’s time to level up with **real-time messaging** using **Kafka**—a staple in modern event-driven systems.
-
----
 
 ## 📡 **Stage 2 – Lesson 10: Apache Camel Kafka Integration (with Spring Boot)**
 
