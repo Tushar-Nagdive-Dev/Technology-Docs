@@ -1,7 +1,3 @@
-Fantastic, Tushar! You're now entering the **core mechanics** of Camel's processing pipeline. Let's dive into:
-
----
-
 ## ⚙️ **Stage 1 – Lesson 7: Processors, Beans, and Type Conversions in Camel**
 
 Apache Camel gives you a lot of **control** over messages during routing, especially through **Processors**, **Beans**, and **automatic type conversion**.
@@ -121,3 +117,29 @@ Then create a route that:
 2. Converts input to `Integer`
 3. Calls the bean method
 4. Logs the result
+---
+```java
+import org.apache.camel.builder.RouteBuilder;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CamelRouteConfiguration extends RouteBuilder {
+    @Override
+    public void configure() throws Exception {
+        from("direct:start")
+            .convertBodyTo(Integer.class)
+            .bean(MultiplierBean.class, "multiplyByFive")
+            .log("Result: ${body}");
+    }
+}
+```
+```java
+import org.springframework.stereotype.Component;
+
+@Component
+public class MultiplierBean {
+    public int multiplyByFive(int input) {
+        return input * 5;
+    }
+}
+```
