@@ -1,6 +1,3 @@
-Perfect, Tushar! Testing is what separates great developers from production fire-fighters 😄
-
----
 
 ## ✅ **Stage 2 – Lesson 11: Testing Apache Camel Routes (Unit & Integration)**
 
