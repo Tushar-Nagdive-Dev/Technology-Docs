@@ -1,5 +1,4 @@
----
- 
+--- 
 ### 🧭 **Apache Camel Mastery Roadmap**
 
 #### **🔰 Stage 1: Foundational Concepts (Beginner)**
