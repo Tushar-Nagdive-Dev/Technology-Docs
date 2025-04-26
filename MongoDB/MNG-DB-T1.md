@@ -241,3 +241,290 @@ If you're ready after exercises, in **Phase 2** we will go to:
 - **Flexible schema** = add fields anytime, no alter tables.
 
 ---
+
+### Solution
+
+Below is a step-by-step guide to accomplish the tasks you outlined, including installing MongoDB, creating a database and collection, performing CRUD operations, and using MongoDB Compass or Mongo Shell. I'll assume you're using a local installation, but I'll also provide Docker instructions for flexibility. The instructions are tailored for a beginner-friendly experience on a typical system (Windows, macOS, or Linux) as of April 26, 2025.
+
+---
+
+### Step 1: Install MongoDB Locally (or via Docker)
+
+#### Option 1: Install MongoDB Locally
+1. **Download MongoDB Community Server**:
+   - Visit the [MongoDB Download Center](https://www.mongodb.com/try/download/community).
+   - Select the latest stable version (e.g., 7.0.x) for your operating system (Windows, macOS, or Linux).
+   - Download the installer or archive.
+
+2. **Install MongoDB**:
+   - **Windows**:
+     - Run the `.msi` installer.
+     - Follow the wizard, selecting "Complete" setup and installing MongoDB Compass (optional but recommended for GUI).
+     - Ensure the MongoDB service is enabled to run automatically.
+   - **macOS**:
+     - Use Homebrew: `brew tap mongodb/brew && brew install mongodb-community`.
+     - Or, extract the downloaded `.tgz` file and add the `bin/` directory to your PATH.
+   - **Linux (Ubuntu example)**:
+     - Follow the official guide: Import the MongoDB public GPG key, add the repository, and install with `sudo apt-get install -y mongodb-org`.
+     - Start the service: `sudo systemctl start mongod`.
+
+3. **Start MongoDB**:
+   - **Windows**: MongoDB runs as a service by default, or start manually via `net start MongoDB`.
+   - **macOS/Linux**: Run `mongod` in a terminal or start the service with `sudo systemctl start mongod` (Linux) or `brew services start mongodb-community` (macOS).
+   - Verify MongoDB is running by checking `http://localhost:27017` in a browser (should display a message like "It looks like you are trying to access MongoDB over HTTP on the native driver port.").
+
+4. **Install MongoDB Tools** (optional, for Mongo Shell):
+   - Download the MongoDB Database Tools from the [MongoDB Download Center](https://www.mongodb.com/try/download/database-tools).
+   - Install and add to your PATH for access to `mongo` shell.
+
+#### Option 2: Install MongoDB via Docker
+1. **Install Docker**:
+   - Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Windows/macOS or Docker for Linux.
+   - Verify installation: `docker --version`.
+
+2. **Pull MongoDB Docker Image**:
+   - Run: `docker pull mongo:latest` to get the latest MongoDB image.
+
+3. **Run MongoDB Container**:
+   - Start a MongoDB container: `docker run -d -p 27017:27017 --name mongodb mongo:latest`.
+   - `-d`: Run in detached mode.
+   - `-p 27017:27017`: Map port 27017 (MongoDB default) to the host.
+   - Verify the container is running: `docker ps`.
+
+4. **Access MongoDB**:
+   - Use `docker exec -it mongodb mongosh` to enter the MongoDB shell.
+   - Or connect via MongoDB Compass using `localhost:27017`.
+
+---
+
+### Step 2: Open MongoDB Compass or Mongo Shell
+
+- **MongoDB Compass**:
+  - If installed during MongoDB setup, launch MongoDB Compass from your applications menu.
+  - Connect to the default URI: `mongodb://localhost:27017`.
+  - You’ll see a GUI interface to manage databases and collections.
+
+- **Mongo Shell**:
+  - Open a terminal and run `mongosh` (MongoDB Shell, included with recent versions).
+  - If using Docker, run `docker exec -it mongodb mongosh`.
+  - You should see a prompt like `test>`, indicating you’re connected to the MongoDB server.
+
+For this guide, I’ll provide commands for Mongo Shell, but you can perform equivalent actions in Compass via its GUI.
+
+---
+
+### Step 3: Create a Database `company`
+
+In MongoDB, databases are created implicitly when you use them.
+
+- **Mongo Shell**:
+  ```javascript
+  use company
+  ```
+  - This switches to the `company` database. If it doesn’t exist, MongoDB creates it when you insert data.
+
+- **MongoDB Compass**:
+  - Click “Create Database” in the Compass interface.
+  - Enter `company` as the database name and proceed (you can specify a collection name later).
+
+---
+
+### Step 4: Create a Collection `employees`
+
+Collections are also created implicitly when data is inserted, but you can explicitly create one.
+
+- **Mongo Shell**:
+  ```javascript
+  db.createCollection("employees")
+  ```
+  - This creates the `employees` collection in the `company` database.
+
+- **MongoDB Compass**:
+  - In the `company` database, click “Create Collection”.
+  - Name it `employees` and confirm.
+
+---
+
+### Step 5: Insert at Least 5 Employees
+
+Insert documents with fields: `name`, `age`, `position`, and `department`.
+
+- **Mongo Shell**:
+  ```javascript
+  db.employees.insertMany([
+    { name: "Alice Smith", age: 28, position: "Software Engineer", department: "Engineering" },
+    { name: "Bob Johnson", age: 35, position: "Project Manager", department: "Management" },
+    { name: "Carol Lee", age: 42, position: "Data Scientist", department: "Analytics" },
+    { name: "David Brown", age: 23, position: "Intern", department: "Engineering" },
+    { name: "Emma Davis", age: 31, position: "UX Designer", department: "Design" }
+  ])
+  ```
+  - This inserts five employee documents. You’ll see an acknowledgment with inserted IDs.
+
+- **MongoDB Compass**:
+  - Navigate to the `employees` collection.
+  - Click “Add Data” > “Insert Document”.
+  - Enter each document in JSON format (e.g., `{ "name": "Alice Smith", "age": 28, "position": "Software Engineer", "department": "Engineering" }`).
+  - Repeat for all five employees.
+
+---
+
+### Step 6: Find All Employees
+
+Retrieve all documents in the `employees` collection.
+
+- **Mongo Shell**:
+  ```javascript
+  db.employees.find().pretty()
+  ```
+  - `find()` retrieves all documents, and `pretty()` formats the output for readability.
+  - Expected output:
+    ```json
+    {
+      "_id": ObjectId("..."),
+      "name": "Alice Smith",
+      "age": 28,
+      "position": "Software Engineer",
+      "department": "Engineering"
+    }
+    {
+      "_id": ObjectId("..."),
+      "name": "Bob Johnson",
+      "age": 35,
+      "position": "Project Manager",
+      "department": "Management"
+    }
+    ...
+    ```
+
+- **MongoDB Compass**:
+  - In the `employees` collection, the documents are displayed by default.
+  - Use the filter field to enter `{}` (empty query) and click “Find” to view all employees.
+
+---
+
+### Step 7: Find Employees Older Than 30
+
+Query for employees with `age` greater than 30.
+
+- **Mongo Shell**:
+  ```javascript
+  db.employees.find({ age: { $gt: 30 } }).pretty()
+  ```
+  - `$gt` is the greater-than operator.
+  - Expected output:
+    ```json
+    {
+      "_id": ObjectId("..."),
+      "name": "Bob Johnson",
+      "age": 35,
+      "position": "Project Manager",
+      "department": "Management"
+    }
+    {
+      "_id": ObjectId("..."),
+      "name": "Carol Lee",
+      "age": 42,
+      "position": "Data Scientist",
+      "department": "Analytics"
+    }
+    {
+      "_id": ObjectId("..."),
+      "name": "Emma Davis",
+      "age": 31,
+      "position": "UX Designer",
+      "department": "Design"
+    }
+    ```
+
+- **MongoDB Compass**:
+  - In the `employees` collection, enter the filter `{ "age": { "$gt": 30 } }`.
+  - Click “Find” to display matching employees.
+
+---
+
+### Step 8: Update an Employee’s Department
+
+Update the department of one employee (e.g., change Alice Smith’s department to “Research”).
+
+- **Mongo Shell**:
+  ```javascript
+  db.employees.updateOne(
+    { name: "Alice Smith" },
+    { $set: { department: "Research" } }
+  )
+  ```
+  - `updateOne` updates the first matching document.
+  - `$set` modifies the specified field.
+  - Verify the update:
+    ```javascript
+    db.employees.find({ name: "Alice Smith" }).pretty()
+    ```
+    - Expected output:
+      ```json
+      {
+        "_id": ObjectId("..."),
+        "name": "Alice Smith",
+        "age": 28,
+        "position": "Software Engineer",
+        "department": "Research"
+      }
+      ```
+
+- **MongoDB Compass**:
+  - Navigate to the `employees` collection.
+  - Find Alice Smith’s document and click the edit icon.
+  - Change `"department": "Engineering"` to `"department": "Research"`.
+  - Click “Update” to save.
+
+---
+
+### Step 9: Delete an Employee Younger Than 25
+
+Delete one employee with `age` less than 25 (e.g., David Brown, age 23).
+
+- **Mongo Shell**:
+  ```javascript
+  db.employees.deleteOne({ age: { $lt: 25 } })
+  ```
+  - `$lt` is the less-than operator.
+  - Verify the deletion:
+    ```javascript
+    db.employees.find().pretty()
+    ```
+    - David Brown’s document should no longer appear.
+
+- **MongoDB Compass**:
+  - In the `employees` collection, enter the filter `{ "age": { "$lt": 25 } }`.
+  - Find David Brown’s document, click the delete icon, and confirm deletion.
+
+---
+
+### Verification and Troubleshooting
+- **Verify All Steps**:
+  - After completing all tasks, run `db.employees.find().pretty()` in Mongo Shell or refresh the `employees` collection in Compass.
+  - You should see four remaining employees (after deleting David Brown), with Alice Smith’s department updated to “Research”.
+
+- **Common Issues**:
+  - **MongoDB not running**: Ensure the service is active (`sudo systemctl status mongod` on Linux, or check Docker with `docker ps`).
+  - **Connection issues**: Verify the connection string (`mongodb://localhost:27017`) and that port 27017 is open.
+  - **Syntax errors**: Double-check MongoDB commands for correct syntax, especially operators like `$gt` and `$set`.
+
+---
+
+### Summary
+You’ve successfully:
+1. Installed MongoDB locally or via Docker.
+2. Opened MongoDB Compass or Mongo Shell.
+3. Created the `company` database and `employees` collection.
+4. Inserted five employee documents.
+5. Performed queries to find all employees and those older than 30.
+6. Updated an employee’s department.
+7. Deleted an employee younger than 25.
+
+All tasks are complete, and you can continue exploring MongoDB with additional queries or operations. If you need further assistance or want to dive deeper into MongoDB features (e.g., aggregation, indexing), let me know!
+
+### Key Citations
+- [MongoDB Official Documentation](https://www.mongodb.com/docs/)
+- [MongoDB Installation Guide](https://www.mongodb.com/docs/manual/installation/)
+- [Docker MongoDB Image](https://hub.docker.com/_/mongo)
