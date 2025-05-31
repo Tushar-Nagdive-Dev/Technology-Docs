@@ -124,3 +124,31 @@ All data is stored as **0s and 1s (binary)**.
 ---
 
 ### ✅ Q3: List 3 hardware and 3 software items you use daily.
+
+---
+
+Here are my answers for the exercises:
+
+**Q1: Match the terms**  
+- RAM: c. Short-term memory  
+- CPU: b. Processes data  
+- Hard Disk: a. Long-term storage  
+
+**Q2: Convert Decimal 13 to Binary**  
+To convert 13 to binary:  
+13 ÷ 2 = 6 remainder 1  
+6 ÷ 2 = 3 remainder 0  
+3 ÷ 2 = 1 remainder 1  
+1 ÷ 2 = 0 remainder 1  
+Reading remainders bottom-up: **1101**  
+
+**Q3: List 3 hardware and 3 software items you use daily**  
+- **Hardware**:  
+  1. Laptop  
+  2. Smartphone  
+  3. Mouse  
+- **Software**:  
+  1. Web browser (e.g., Chrome)  
+  2. Operating system (e.g., Windows)  
+  3. Messaging app (e.g., WhatsApp)  
+
