@@ -1,7 +1,3 @@
-You're doing fantastic, Tushar! 🎯
-Now we move into the **real-world challenges** of programming: handling **errors gracefully** and working with **files**.
-
----
 
 ## 📘 MODULE 9: Exception Handling & File I/O in Java
 
