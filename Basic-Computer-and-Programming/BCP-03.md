@@ -1,8 +1,3 @@
-Perfect, Tushar! Let's continue.
-You’ve now got a solid understanding of how computers work.
-Now we enter the world of logic and creativity — **PROGRAMMING**! 🎯
-
----
 
 ## 📘 MODULE 2: Introduction to Programming
 
