@@ -1,8 +1,3 @@
-Fantastic, Tushar! 🎉
-You're moving swiftly and solidly. Now it's time to **code your first Java program** — a proud milestone for every programmer!
-
----
-
 ## 📘 MODULE 3: Java Setup & Your First Program
 
 ---
