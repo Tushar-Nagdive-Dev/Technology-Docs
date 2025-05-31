@@ -96,3 +96,22 @@ A **visual diagram** of your logic.
 
 ---
 
+**Q1: Write an algorithm to brush your teeth**  
+1. Pick up toothbrush  
+2. Apply toothpaste to bristles  
+3. Wet toothbrush with water  
+4. Place toothbrush in mouth  
+5. Brush teeth in circular motions for 2 minutes  
+6. Rinse mouth with water  
+7. Rinse toothbrush with water  
+8. Put toothbrush back in holder  
+
+**Q2: Describe a flowchart for this algorithm**  
+The flowchart starts with an oval labeled "Start." An arrow points to a rectangle: "Pick up toothbrush." Another arrow leads to a rectangle: "Apply toothpaste to bristles." This continues to "Wet toothbrush with water," then "Place toothbrush in mouth," followed by "Brush teeth in circular motions for 2 minutes." Next, an arrow points to "Rinse mouth with water," then to "Rinse toothbrush with water," and finally to "Put toothbrush back in holder." An arrow from this last step leads to an oval labeled "End." Each step is connected sequentially by arrows showing the flow.
+
+**Q3: Key advantages of Java**  
+1. **Platform Independence**: Java code runs on any device with a Java Virtual Machine (JVM), enabling "write once, run anywhere."  
+2. **Object-Oriented**: Supports modular, reusable code through concepts like encapsulation, inheritance, and polymorphism.  
+3. **Robustness**: Features like automatic memory management (garbage collection) and exception handling reduce errors.  
+4. **Security**: Built-in features like bytecode verification and sandboxing enhance secure execution.  
+5. **Large Community and Libraries**: Extensive APIs and a vast community provide support and resources for development.
