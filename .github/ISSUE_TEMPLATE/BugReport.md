@@ -1,35 +1,35 @@
 
-name: 🐞 Bug Report
-about: Report incorrect content or issues
+name: Bug Report
+about: Report incorrect or broken content
 title: "[BUG] "
 labels: bug
 assignees: ""
 -------------
 
-## 🐛 Description
+## 📄 Description
 
-Clearly describe the issue.
+Provide a clear and concise description of the issue.
 
 ---
 
 ## 📍 Location
 
-Provide file path (e.g., `SpringBoot/SPB-Phase-1-L1.md`)
+Specify the file path (example: `spring-boot/SPB-Phase-1-L1.md`)
 
 ---
 
-## ❗ Problem
+## ⚠️ Problem Details
 
-Explain what is wrong.
+Explain what is incorrect, unclear, or broken.
 
 ---
 
-## ✅ Expected Fix
+## ✅ Expected Outcome
 
-What should be corrected?
+Describe what the correct behavior or content should be.
 
 ---
 
 ## 📎 Additional Context
 
-Add screenshots or references if needed.
+Add any supporting details, references, or screenshots if necessary.
