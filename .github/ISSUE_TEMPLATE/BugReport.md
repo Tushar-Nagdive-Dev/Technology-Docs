@@ -1,4 +1,3 @@
----
 
 name: 🐞 Bug Report
 about: Report incorrect content or issues
