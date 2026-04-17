@@ -129,4 +129,3 @@ To build a scalable log warehouse, you typically follow a **Data Lakehouse** app
 
 When designing this system, the biggest trade-offs are **cost** and **latency**. High-frequency ingestion into Redshift is expensive, whereas batching into S3 is cheap but slower. Use the simulator below to see how log volume and your chosen architecture impact performance and estimated AWS overhead.
 
-[![Launch Simulator](https://img.shields.io/badge/Launch-Interactive_Simulator-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://htmlpreview.github.io/?https://raw.githubusercontent.com/Tushar-Nagdive/Technology-Docs/tech-docs/System-Design/visuals/aws-simulator.html)
