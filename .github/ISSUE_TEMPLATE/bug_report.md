@@ -1,22 +1,36 @@
 ---
+
 name: 🐞 Bug Report
 about: Report incorrect content or issues
 title: "[BUG] "
 labels: bug
 assignees: ""
 -------------
-## Description
+
+## 🐛 Description
+
 Clearly describe the issue.
+
 ---
-## Location
+
+## 📍 Location
+
 Provide file path (e.g., `SpringBoot/SPB-Phase-1-L1.md`)
+
 ---
-## Problem
+
+## ❗ Problem
 
 Explain what is wrong.
+
 ---
-## Expected Fix
+
+## ✅ Expected Fix
+
 What should be corrected?
+
 ---
-## Additional Context
+
+## 📎 Additional Context
+
 Add screenshots or references if needed.
