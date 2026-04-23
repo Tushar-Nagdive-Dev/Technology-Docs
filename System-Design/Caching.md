@@ -11,7 +11,7 @@
 [![Code](https://img.shields.io/badge/💻-Source-black?style=for-the-badge&logo=github)](https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/System-Design/visual-content/cachingGuide.html)
 
 <p align="center">
-  <a href="https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/System-Design/visual-content/cachingGuide.html">
+  <a href="https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/System-Design/visual-content/cachingGuide.html" target="_blank">
     <img src="https://img.shields.io/badge/🚀%20Live%20Preview-Click%20Here-success?style=for-the-badge&logo=google-chrome">
   </a>
 </p>
