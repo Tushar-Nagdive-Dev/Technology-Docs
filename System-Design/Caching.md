@@ -6,6 +6,10 @@
 
 👉 [Preview HTML](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/System-Design/visual-content/cachingGuide.html)
 
+[![Preview](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/System-Design/visual-content/cachingGuide.html)
+
+[![Code](https://img.shields.io/badge/💻-Source-black?style=for-the-badge&logo=github)](https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/System-Design/visual-content/cachingGuide.html)
+
 ---
 
 ## Core Idea
