@@ -4,6 +4,8 @@
 
 **Caching** is a technique of storing **frequently accessed data in a fast storage layer** so future requests can be served **quickly without hitting the main database**.
 
+👉 [Preview HTML](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/System-Design/visual-content/cachingGuide.html)
+
 ---
 
 ## Core Idea
