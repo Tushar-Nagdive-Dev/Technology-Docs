@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>End-to-End Caching in System Design</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #475569;
+            --bg-light: #f8fafc;
+            --box-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-light: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        section {
+            background: var(--box-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--secondary);
+        }
+
+        /* Diagrams & Visuals */
+        .diagram-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            border: 1px dashed var(--border);
+        }
+
+        .node {
+            background: white;
+            border: 2px solid var(--primary);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-width: 120px;
+        }
+
+        .node.client { border-color: var(--success); }
+        .node.cache { border-color: var(--warning); }
+        .node.db { border-color: var(--danger); }
+
+        .arrow {
+            font-weight: bold;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .arrow::after {
+            content: '→';
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .arrow.reverse::after { content: '←'; }
+        .arrow.bidirectional::after { content: '↔'; }
+
+        /* Layer Stack */
+        .layer-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .layer {
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .layer:nth-child(1) { background: #3b82f6; } /* Client */
+        .layer:nth-child(2) { background: #6366f1; } /* CDN */
+        .layer:nth-child(3) { background: #8b5cf6; } /* Load Balancer */
+        .layer:nth-child(4) { background: #d946ef; } /* Application */
+        .layer:nth-child(5) { background: #ec4899; } /* Distributed Cache */
+        .layer:nth-child(6) { background: #f43f5e; } /* Database */
+
+        /* Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .diagram-container { flex-direction: column; }
+            .arrow::after { content: '↓'; }
+            .arrow.reverse::after { content: '↑'; }
+            .arrow.bidirectional::after { content: '↕'; }
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .badge.pros { background: #d1fae5; color: #065f46; }
+        .badge.cons { background: #fee2e2; color: #991b1b; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { background: var(--bg-light); color: var(--secondary); }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Caching in System Design</h1>
+    <p>An End-to-End Visual Guide to Performance Optimization</p>
+</header>
+
+<div class="container">
+
+    <!-- Section 1: Introduction -->
+    <section>
+        <h2>1. The Fundamentals</h2>
+        <p><strong>What is Caching?</strong> A cache is a high-speed data storage layer that stores a subset of data, typically transient in nature, so that future requests for that data are served up faster than accessing the data's primary storage location.</p>
+        
+        <div class="grid-2">
+            <div class="card">
+                <h3>Why Cache?</h3>
+                <ul>
+                    <li><strong>Reduce Latency:</strong> Memory (RAM) access is orders of magnitude faster than Disk (SSD/HDD) or network access.</li>
+                    <li><strong>Reduce Load:</strong> Protects backend databases from being overwhelmed by heavy read traffic.</li>
+                    <li><strong>Cost Efficiency:</strong> Cheaper to serve repeated requests from a cache than to scale up expensive databases.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Key Metrics</h3>
+                <ul>
+                    <li><strong>Cache Hit Ratio:</strong> (Hits / Total Requests). You want this as close to 100% as possible.</li>
+                    <li><strong>Latency:</strong> Time taken to fetch data.</li>
+                    <li><strong>Throughput:</strong> Number of requests served per second.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Layers -->
+    <section>
+        <h2>2. Where Do We Cache? (Caching Layers)</h2>
+        <p>Caching is not just for the database. It happens at almost every step of the network request journey.</p>
+        
+        <div class="layer-stack">
+            <div class="layer">1. Client / Browser Cache (Local Storage, HTTP Cache-Control)</div>
+            <div class="layer">2. Edge / CDN Cache (Cloudflare, Akamai - caches static assets globally)</div>
+            <div class="layer">3. API Gateway / Load Balancer Cache (Reverse Proxies like Nginx, Varnish)</div>
+            <div class="layer">4. Application Local Cache (In-memory: Guava, Caffeine, ConcurrentHashMap)</div>
+            <div class="layer">5. Distributed Cache (Redis, Memcached - shared across app servers)</div>
+            <div class="layer">6. Database Query Cache (Internal DB mechanisms like Buffer Pool)</div>
+        </div>
+    </section>
+
+    <!-- Section 3: Read Strategies -->
+    <section>
+        <h2>3. Reading Strategies</h2>
+        
+        <h3>A. Cache-Aside (Lazy Loading)</h3>
+        <p>The application is responsible for reading and writing from storage. The cache does not interact with the database directly.</p>
+        <div class="diagram-container">
+            <div class="node client">Application</div>
+            <div class="arrow">1. Check Cache</div>
+            <div class="node cache">Cache</div>
+            <div class="arrow reverse">2. Miss</div>
+            <div class="node client">Application</div>
+            <div class="arrow">3. Fetch</div>
+            <div class="node db">Database</div>
+            <div class="arrow reverse">4. Write</div>
+            <div class="node cache">Cache</div>
+        </div>
+        <div class="grid-2">
+            <div><span class="badge pros">Pros</span> Only requested data is cached. Node failures are not fatal (app falls back to DB).</div>
+            <div><span class="badge cons">Cons</span> Three trips on a cache miss (App->Cache, App->DB, App->Cache). Data can become stale.</div>
+        </div>
+
+        <hr style="border: 1px solid var(--border); margin: 2rem 0;">
+
+        <h3>B. Read-Through</h3>
+        <p>The application strictly queries the cache. If the data is missing, the <em>cache</em> provider is responsible for fetching it from the database and updating itself.</p>
+        <div class="diagram-container">
+            <div class="node client">Application</div>
+            <div class="arrow bidirectional">1. Request</div>
+            <div class="node cache">Cache Component</div>
+            <div class="arrow bidirectional">2. Fetch on Miss</div>
+            <div class="node db">Database</div>
+        </div>
+        <div class="grid-2">
+            <div><span class="badge pros">Pros</span> Clean application code (app only talks to cache).</div>
+            <div><span class="badge cons">Cons</span> Complex to set up. Requires specific cache providers/plugins.</div>
+        </div>
+    </section>
+
+    <!-- Section 4: Write Strategies -->
+    <section>
+        <h2>4. Writing Strategies</h2>
+
+        <div class="grid-2">
+            <!-- Write Through -->
+            <div class="card">
+                <h3>A. Write-Through</h3>
+                <p>App writes to the cache, and the cache synchronously writes to the DB.</p>
+                <div class="diagram-container" style="flex-direction: column;">
+                    <div class="node client">App</div>
+                    <div class="arrow">Write</div>
+                    <div class="node cache">Cache</div>
+                    <div class="arrow">Sync Write</div>
+                    <div class="node db">DB</div>
+                </div>
+                <span class="badge pros">Pros</span> Strong consistency. <br>
+                <span class="badge cons">Cons</span> High write latency (waits for two writes).
+            </div>
+
+            <!-- Write Behind -->
+            <div class="card">
+                <h3>B. Write-Behind (Write-Back)</h3>
+                <p>App writes to cache, cache returns success immediately, and asynchronously writes to DB later.</p>
+                <div class="diagram-container" style="flex-direction: column;">
+                    <div class="node client">App</div>
+                    <div class="arrow">Write</div>
+                    <div class="node cache">Cache</div>
+                    <div class="arrow">Async Write (Batch)</div>
+                    <div class="node db">DB</div>
+                </div>
+                <span class="badge pros">Pros</span> Extremely low latency, high throughput. <br>
+                <span class="badge cons">Cons</span> Risk of data loss if cache crashes before syncing.
+            </div>
+            
+            <!-- Write Around -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <h3>C. Write-Around</h3>
+                <p>App writes directly to the DB, bypassing the cache. Cache is updated on the next read (Cache-Aside).</p>
+                <span class="badge pros">Pros</span> Good for data written once but rarely read.<br>
+                <span class="badge cons">Cons</span> Higher read latency on the first access after a write.
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Eviction & Consistency -->
+    <section>
+        <h2>5. Eviction Policies</h2>
+        <p>Cache memory is limited. When it gets full, older data must be removed to make room for new data.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Policy</th>
+                    <th>Description</th>
+                    <th>Best Use Case</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>LRU (Least Recently Used)</strong></td>
+                    <td>Discards the item that hasn't been accessed for the longest time.</td>
+                    <td>General purpose web traffic, news feeds.</td>
+                </tr>
+                <tr>
+                    <td><strong>LFU (Least Frequently Used)</strong></td>
+                    <td>Discards the item accessed the fewest number of times.</td>
+                    <td>Static configurations, dictionaries.</td>
+                </tr>
+                <tr>
+                    <td><strong>FIFO (First In, First Out)</strong></td>
+                    <td>Evicts the oldest data added to the cache, regardless of access.</td>
+                    <td>Time-series data, logs.</td>
+                </tr>
+                <tr>
+                    <td><strong>TTL (Time To Live)</strong></td>
+                    <td>Data expires automatically after a set time limit (e.g., 5 minutes).</td>
+                    <td>Session data, ephemeral tokens, dynamic pricing.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Section 6: Pitfalls -->
+    <section>
+        <h2>6. Common System Pitfalls & Mitigations</h2>
+        
+        <div class="card" style="margin-bottom: 1rem; border-left: 4px solid var(--danger);">
+            <h3>1. Cache Penetration (Cache Miss Storm)</h3>
+            <p><strong>Problem:</strong> A client requests data that doesn't exist in the cache OR the database. The request bypasses the cache, hits the DB, fails, and repeats. Malicious users can exploit this to crash the DB.</p>
+            <p><strong>Solution:</strong> <br>1. Cache null/empty values (with short TTLs). <br>2. Implement a <strong>Bloom Filter</strong> before the cache to rapidly check if a key even exists.</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 1rem; border-left: 4px solid var(--warning);">
+            <h3>2. Cache Avalanche</h3>
+            <p><strong>Problem:</strong> A large number of cache keys expire at the exact same time, sending a massive wave of read requests to the database simultaneously.</p>
+            <p><strong>Solution:</strong> Add a random jitter (randomized offset) to your TTLs. Instead of expiring everything at exactly 60 minutes, expire them between 55 and 65 minutes.</p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--primary);">
+            <h3>3. Thundering Herd (Dogpile Effect)</h3>
+            <p><strong>Problem:</strong> A highly popular key (e.g., a viral tweet) expires. Thousands of concurrent requests hit the cache simultaneously, find a miss, and ALL query the database at the same time to regenerate the cache.</p>
+            <p><strong>Solution:</strong> Use a <strong>Mutex Lock / Distributed Lock</strong>. Only the first thread that misses gets the lock to query the DB. Other threads must wait a few milliseconds and check the cache again.</p>
+        </div>
+    </section>
+
+</div>
+
+</body>
+</html>
