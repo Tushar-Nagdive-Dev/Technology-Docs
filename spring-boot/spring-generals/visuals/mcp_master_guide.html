@@ -1,240 +1,1778 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Guide: Spring Boot & MCP Integration</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --accent: #27ae60;
-            --bg-light: #f8f9fa;
-            --text-main: #333;
-            --code-bg: #1e1e1e;
-            --code-text: #d4d4d4;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e9ecef;
-            color: var(--text-main);
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            background: white;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        h1, h2, h3 { color: var(--primary); }
-        h1 { text-align: center; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; margin-bottom: 30px; }
-        
-        /* Architecture Visual Styles */
-        .architecture-flow {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 40px 0;
-            padding: 20px;
-            background: var(--bg-light);
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-        }
-        .box {
-            flex: 1;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            color: white;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .box h3 { color: white; margin-top: 0; }
-        .client-box { background: #8e44ad; }
-        .mcp-box { background: #2980b9; flex: 1.2; border: 2px dashed #fff; }
-        .server-box { background: var(--accent); }
-        
-        .arrow-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 15px;
-            color: #7f8c8d;
-            font-weight: bold;
-            font-size: 0.85em;
-            text-align: center;
-        }
-        .arrow { width: 50px; height: 3px; background: #bdc3c7; position: relative; margin: 5px 0; }
-        .arrow.right::after { content: ''; position: absolute; right: -8px; top: -5px; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid #bdc3c7; }
-        .arrow.left::before { content: ''; position: absolute; left: -8px; top: -5px; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-right: 10px solid #bdc3c7; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MCP Server — Complete Interactive Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0e0f11;
+    --bg2: #14161a;
+    --bg3: #1c1f24;
+    --bg4: #242830;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaed;
+    --muted: #8b8f9a;
+    --accent: #6C8EF5;
+    --accent2: #4ECDC4;
+    --accent3: #FF6B6B;
+    --accent4: #FFD93D;
+    --accent5: #A8E063;
+    --purple: #9B7EDB;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; }
 
-        /* Code Block Styles */
-        .code-section { margin-top: 40px; }
-        .code-block {
-            background: var(--code-bg);
-            color: var(--code-text);
-            padding: 20px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9em;
-            line-height: 1.5;
-            margin-bottom: 20px;
-            border-left: 5px solid var(--secondary);
-        }
-        .code-header {
-            background: #333;
-            color: #fff;
-            padding: 5px 15px;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            font-family: monospace;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: -5px;
-            position: relative;
-            z-index: 1;
-        }
-        .keyword { color: #569cd6; }
-        .string { color: #ce9178; }
-        .comment { color: #6a9955; font-style: italic; }
-        .annotation { color: #dcdcaa; }
-        
-        /* Flow List */
-        .flow-list {
-            background: #e8f4f8;
-            padding: 25px 40px;
-            border-radius: 8px;
-            border-left: 5px solid var(--secondary);
-            margin: 30px 0;
-        }
-        .flow-list li { margin-bottom: 12px; line-height: 1.6; }
-    </style>
+  /* ── LAYOUT ── */
+  .page { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: 260px; height: 100vh;
+    background: var(--bg2); border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 24px 0; z-index: 100;
+  }
+  .sidebar-logo {
+    padding: 0 20px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+  }
+  .sidebar-logo .logo-tag {
+    display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    background: var(--accent); color: #fff; padding: 3px 8px; border-radius: 4px;
+    letter-spacing: 0.08em; margin-bottom: 6px;
+  }
+  .sidebar-logo h1 { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .sidebar-logo p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .nav-section { padding: 0 12px; margin-bottom: 6px; }
+  .nav-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; padding: 0 8px; margin-bottom: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 8px; padding: 7px 8px;
+    border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--muted);
+    transition: all 0.15s; border: 1px solid transparent;
+  }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active { color: var(--accent); background: rgba(108,142,245,0.1); border-color: rgba(108,142,245,0.2); }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  /* ── MAIN ── */
+  .main { margin-left: 260px; padding: 48px 56px; max-width: 960px; }
+  
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 80px; display: none; }
+  .section.visible { display: block; }
+  
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 12px;
+    letter-spacing: 0.06em;
+  }
+  .badge-blue { background: rgba(108,142,245,0.15); color: var(--accent); border: 1px solid rgba(108,142,245,0.3); }
+  .badge-teal { background: rgba(78,205,196,0.12); color: var(--accent2); border: 1px solid rgba(78,205,196,0.25); }
+  .badge-red  { background: rgba(255,107,107,0.12); color: var(--accent3); border: 1px solid rgba(255,107,107,0.25); }
+  .badge-yellow { background: rgba(255,217,61,0.12); color: var(--accent4); border: 1px solid rgba(255,217,61,0.25); }
+  .badge-green  { background: rgba(168,224,99,0.12); color: var(--accent5); border: 1px solid rgba(168,224,99,0.25); }
+  .badge-purple { background: rgba(155,126,219,0.12); color: var(--purple); border: 1px solid rgba(155,126,219,0.25); }
+
+  h2 { font-size: 30px; font-weight: 700; color: var(--text); line-height: 1.25; margin-bottom: 8px; }
+  h3 { font-size: 18px; font-weight: 600; color: var(--text); margin: 28px 0 10px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; margin: 20px 0 8px; text-transform: uppercase; }
+  .lead { font-size: 17px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+  p { color: var(--muted); margin-bottom: 16px; line-height: 1.75; }
+  strong { color: var(--text); font-weight: 600; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px; margin-bottom: 16px;
+  }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+  .info-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 8px; }
+  .info-card h4 { font-size: 13px; color: var(--text); margin: 0 0 5px; text-transform: none; letter-spacing: 0; }
+  .info-card p { font-size: 13px; color: var(--muted); margin: 0; }
+
+  /* ── CODE ── */
+  .code-block {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; margin: 20px 0;
+    font-family: var(--mono);
+  }
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    background: var(--bg4);
+  }
+  .code-lang {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .code-title { font-size: 13px; color: var(--accent2); font-weight: 500; }
+  .copy-btn {
+    font-size: 11px; color: var(--muted); background: none; border: 1px solid var(--border2);
+    border-radius: 4px; padding: 3px 8px; cursor: pointer; font-family: var(--sans);
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--border2); background: var(--bg4); }
+  pre {
+    padding: 18px 20px; overflow-x: auto; font-size: 13px;
+    line-height: 1.65; tab-size: 2;
+  }
+  /* Syntax highlighting */
+  .kw { color: #C792EA; }
+  .cl { color: #FFCB6B; }
+  .fn { color: #82AAFF; }
+  .str { color: #C3E88D; }
+  .cm { color: #546e7a; font-style: italic; }
+  .an { color: #FF9CAC; }
+  .nu { color: #F78C6C; }
+  .op { color: #89DDFF; }
+  .ty { color: #FFCB6B; }
+
+  /* ── ARCHITECTURE DIAGRAM ── */
+  .arch-diagram {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px; margin: 24px 0;
+    overflow-x: auto;
+  }
+  svg text { font-family: 'DM Sans', sans-serif; }
+
+  /* ── FLOW STEPPER ── */
+  .stepper-wrap { margin: 24px 0; }
+  .step-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .step-btn {
+    padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; border: 1px solid var(--border2);
+    background: var(--bg3); color: var(--text); font-family: var(--sans);
+  }
+  .step-btn:hover { background: var(--bg4); }
+  .step-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .step-btn.primary:hover { background: #7fa0f7; }
+  .step-indicator { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .step-dots { display: flex; gap: 6px; }
+  .step-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border2); transition: all 0.2s;
+  }
+  .step-dot.active { background: var(--accent); transform: scale(1.3); }
+  .step-panel { display: none; }
+  .step-panel.active { display: block; animation: fadeUp 0.25s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── FLOW PANEL ── */
+  .flow-panel {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .flow-panel h3 { font-size: 16px; margin: 0 0 6px; }
+  .flow-step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 700;
+    background: var(--accent); color: #fff; flex-shrink: 0; font-family: var(--mono);
+  }
+  .flow-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+  .flow-row-content { flex: 1; }
+  .flow-row-content p { margin: 0; font-size: 14px; }
+  
+  /* ── COMPARISON TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: var(--bg4); }
+  th { padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; }
+  td { padding: 10px 14px; border-top: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  td:first-child { color: var(--text); font-weight: 500; }
+  tr:hover td { background: var(--bg3); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 3px solid; border-radius: 0 8px 8px 0;
+    padding: 14px 18px; margin: 20px 0;
+  }
+  .callout.info { border-color: var(--accent); background: rgba(108,142,245,0.08); }
+  .callout.tip  { border-color: var(--accent2); background: rgba(78,205,196,0.08); }
+  .callout.warn { border-color: var(--accent4); background: rgba(255,217,61,0.08); }
+  .callout p { margin: 0; font-size: 14px; }
+  .callout strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+  /* ── PILL TAGS ── */
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .pill {
+    font-size: 12px; font-weight: 600; padding: 4px 10px;
+    border-radius: 20px; font-family: var(--mono);
+    border: 1px solid; letter-spacing: 0.04em;
+  }
+
+  /* ── INTERACTIVE DEMO ── */
+  .demo-box {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 12px; overflow: hidden; margin: 24px 0;
+  }
+  .demo-header {
+    background: var(--bg4); padding: 12px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .demo-header span { font-size: 13px; color: var(--muted); flex: 1; text-align: center; }
+  .demo-body { padding: 20px; }
+  .demo-input-row { display: flex; gap: 10px; margin-bottom: 14px; }
+  .demo-input {
+    flex: 1; background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 6px; padding: 9px 12px; font-size: 13px;
+    color: var(--text); font-family: var(--sans); outline: none;
+  }
+  .demo-input:focus { border-color: var(--accent); }
+  .demo-send {
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 6px; padding: 9px 16px; font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: var(--sans);
+    transition: background 0.15s;
+  }
+  .demo-send:hover { background: #7fa0f7; }
+  .demo-log {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; min-height: 120px; max-height: 280px;
+    overflow-y: auto; font-family: var(--mono); font-size: 12px;
+    line-height: 1.7;
+  }
+  .log-entry { margin-bottom: 2px; }
+  .log-time { color: var(--muted); }
+  .log-client { color: var(--accent); }
+  .log-server { color: var(--accent2); }
+  .log-tool { color: var(--accent4); }
+  .log-result { color: var(--accent5); }
+  .log-error { color: var(--accent3); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── TRANSPORT TABS ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab {
+    padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); color: var(--muted);
+    background: var(--bg3); transition: all 0.15s; font-family: var(--sans);
+  }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 5px; top: 6px; bottom: 6px;
+    width: 2px; background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--purple));
+    border-radius: 2px;
+  }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-dot {
+    position: absolute; left: -20px; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid var(--bg2); background: var(--accent);
+  }
+  .tl-item:nth-child(2) .tl-dot { background: var(--accent2); }
+  .tl-item:nth-child(3) .tl-dot { background: var(--purple); }
+  .tl-item:nth-child(4) .tl-dot { background: var(--accent4); }
+  .tl-item:nth-child(5) .tl-dot { background: var(--accent5); }
+  .tl-item:nth-child(6) .tl-dot { background: var(--accent3); }
+  .tl-title { font-weight: 600; color: var(--text); font-size: 15px; margin-bottom: 4px; }
+  .tl-body { color: var(--muted); font-size: 14px; }
+
+  /* ── HERO ── */
+  .hero-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin: 28px 0;
+  }
+  .hero-stat {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px; text-align: center;
+  }
+  .hero-stat .big { font-size: 28px; font-weight: 700; font-family: var(--mono); }
+  .hero-stat .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+</style>
 </head>
 <body>
+<div class="page">
 
-<div class="container">
-    <h1>Master Guide: Spring Boot + MCP Integration</h1>
-    
-    <h2>1. The Big Picture Architecture</h2>
-    <div class="architecture-flow">
-        <div class="box client-box">
-            <h3>📱 Frontend UI</h3>
-            <p>User types: "Add 3 apples to my cart"</p>
-        </div>
-        <div class="arrow-container">
-            <div>HTTP POST</div>
-            <div class="arrow right"></div>
-        </div>
-        <div class="box mcp-box" style="background: #34495e;">
-            <h3>🧠 AI Host (Spring Boot)</h3>
-            <p>Talks to LLM & holds the MCP Bridge</p>
-        </div>
-        <div class="arrow-container">
-            <div>JSON-RPC</div>
-            <div class="arrow right"></div>
-            <div class="arrow left" style="margin-top:15px;"></div>
-        </div>
-        <div class="box server-box">
-            <h3>🛠️ MCP Server (Spring Boot)</h3>
-            <p>Executes actual Java code & DB logic</p>
-        </div>
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-tag">MCP</div>
+    <h1>Model Context Protocol</h1>
+    <p>Interactive deep dive</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Getting Started</div>
+    <div class="nav-item active" onclick="show('intro')">
+      <span class="nav-dot"></span> What is MCP?
+    </div>
+    <div class="nav-item" onclick="show('why')">
+      <span class="nav-dot"></span> Why MCP exists
+    </div>
+    <div class="nav-item" onclick="show('arch')">
+      <span class="nav-dot"></span> Architecture overview
+    </div>
+  </div>
+
+  <div class="nav-section" style="margin-top:12px">
+    <div class="nav-label">Core Concepts</div>
+    <div class="nav-item" onclick="show('lifecycle')">
+      <span class="nav-dot"></span> Connection lifecycle
+    </div>
+    <div class="nav-item" onclick="show('primitives')">
+      <span class="nav-dot"></span> Tools, Resources & Prompts
+    </div>
+    <div class="nav-item" onclick="show('transport')">
+      <span class="nav-dot"></span> Transport layer
+    </div>
+    <div class="nav-item" onclick="show('protocol')">
+      <span class="nav-dot"></span> JSON-RPC protocol
+    </div>
+  </div>
+
+  <div class="nav-section" style="margin-top:12px">
+    <div class="nav-label">Java Implementation</div>
+    <div class="nav-item" onclick="show('java-server')">
+      <span class="nav-dot"></span> Building a server
+    </div>
+    <div class="nav-item" onclick="show('java-client')">
+      <span class="nav-dot"></span> Building a client
+    </div>
+    <div class="nav-item" onclick="show('java-full')">
+      <span class="nav-dot"></span> Full working example
+    </div>
+  </div>
+
+  <div class="nav-section" style="margin-top:12px">
+    <div class="nav-label">Advanced</div>
+    <div class="nav-item" onclick="show('security')">
+      <span class="nav-dot"></span> Security model
+    </div>
+    <div class="nav-item" onclick="show('demo')">
+      <span class="nav-dot"></span> Interactive demo
+    </div>
+    <div class="nav-item" onclick="show('compare')">
+      <span class="nav-dot"></span> MCP vs alternatives
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+<!-- ─── INTRO ─── -->
+<section id="intro" class="section visible">
+  <div class="section-badge badge-blue">01 · Introduction</div>
+  <h2>What is MCP?</h2>
+  <p class="lead">Model Context Protocol (MCP) is an open standard by Anthropic that defines how AI models connect to external tools, data sources, and services — in a structured, secure, and reusable way.</p>
+
+  <p>Think of MCP the same way you think of <strong>USB-C</strong>: a universal connector. Before USB-C, every device had its own proprietary charger. Similarly, before MCP, every AI integration was custom-coded from scratch. MCP standardises the plug.</p>
+
+  <div class="hero-grid">
+    <div class="hero-stat">
+      <div class="big" style="color:var(--accent)">1</div>
+      <div class="label">Protocol to learn</div>
+    </div>
+    <div class="hero-stat">
+      <div class="big" style="color:var(--accent2)">∞</div>
+      <div class="label">Tools you can connect</div>
+    </div>
+    <div class="hero-stat">
+      <div class="big" style="color:var(--purple)">2-way</div>
+      <div class="label">Real-time communication</div>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-icon">🔌</div>
+      <h4>Standardised</h4>
+      <p>One protocol works across Claude, GPT, and any MCP-compatible model</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon">🔐</div>
+      <h4>Secure</h4>
+      <p>Tools declare their capabilities. Users grant permission explicitly</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon">⚡</div>
+      <h4>Real-time</h4>
+      <p>Bidirectional streaming — server can push updates to the AI</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon">🧩</div>
+      <h4>Composable</h4>
+      <p>Mix and match servers: file system + database + API in one session</p>
+    </div>
+  </div>
+
+  <h3>The core idea in one sentence</h3>
+  <div class="callout info">
+    <p><strong>Key insight</strong>An MCP Server is a lightweight process that <em>exposes capabilities</em> (tools, data, prompts) to an AI model via a standardised protocol, so the model can call those capabilities at runtime — without ever seeing your raw API keys or internal logic.</p>
+  </div>
+
+  <h3>Real-world analogy</h3>
+  <p>Imagine a restaurant kitchen. You (the user) place an order with the waiter (the AI). The waiter doesn't cook — they carry your request to the kitchen (MCP Server). The kitchen has its own tools, recipes, and ingredients (your database, file system, APIs). The kitchen prepares the dish and hands it back via the waiter.</p>
+  <p>The waiter never needs to know how to cook. The kitchen never needs to know how the dining room works. The menu (<strong>tool definitions</strong>) is the contract between them.</p>
+</section>
+
+<!-- ─── WHY ─── -->
+<section id="why" class="section">
+  <div class="section-badge badge-teal">02 · Motivation</div>
+  <h2>Why MCP exists</h2>
+  <p class="lead">Before MCP, connecting an AI to external tools required brittle, one-off integrations for every AI platform and every tool. MCP solves this with a single protocol.</p>
+
+  <h3>The "N × M" problem</h3>
+  <p>If you have <strong>N</strong> different AI models and <strong>M</strong> different tools, you needed <strong>N × M</strong> custom integrations. With MCP, you only need <strong>N + M</strong> — each AI implements MCP once, each tool implements MCP once.</p>
+
+  <div class="arch-diagram">
+    <svg width="100%" viewBox="0 0 820 260" role="img">
+      <title>N×M problem vs MCP solution</title>
+      <!-- WITHOUT MCP -->
+      <text x="175" y="22" text-anchor="middle" fill="#8b8f9a" font-size="12" font-family="DM Sans" font-weight="600">WITHOUT MCP (N × M integrations)</text>
+      <!-- AI boxes -->
+      <rect x="20" y="40" width="80" height="32" rx="6" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/>
+      <text x="60" y="61" text-anchor="middle" fill="#6C8EF5" font-size="12" font-family="DM Sans" font-weight="500">Claude</text>
+      <rect x="20" y="84" width="80" height="32" rx="6" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/>
+      <text x="60" y="105" text-anchor="middle" fill="#6C8EF5" font-size="12" font-family="DM Sans" font-weight="500">GPT</text>
+      <rect x="20" y="128" width="80" height="32" rx="6" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/>
+      <text x="60" y="149" text-anchor="middle" fill="#6C8EF5" font-size="12" font-family="DM Sans" font-weight="500">Gemini</text>
+      <!-- Tool boxes -->
+      <rect x="220" y="40" width="90" height="32" rx="6" fill="rgba(78,205,196,0.12)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+      <text x="265" y="61" text-anchor="middle" fill="#4ECDC4" font-size="12" font-family="DM Sans" font-weight="500">Database</text>
+      <rect x="220" y="84" width="90" height="32" rx="6" fill="rgba(78,205,196,0.12)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+      <text x="265" y="105" text-anchor="middle" fill="#4ECDC4" font-size="12" font-family="DM Sans" font-weight="500">File System</text>
+      <rect x="220" y="128" width="90" height="32" rx="6" fill="rgba(78,205,196,0.12)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+      <text x="265" y="149" text-anchor="middle" fill="#4ECDC4" font-size="12" font-family="DM Sans" font-weight="500">Slack API</text>
+      <!-- 9 arrows (spaghetti) -->
+      <line x1="100" y1="56" x2="220" y2="56" stroke="#FF6B6B" stroke-width="1" opacity="0.6"/>
+      <line x1="100" y1="56" x2="220" y2="100" stroke="#FF6B6B" stroke-width="1" opacity="0.4"/>
+      <line x1="100" y1="56" x2="220" y2="144" stroke="#FF6B6B" stroke-width="1" opacity="0.3"/>
+      <line x1="100" y1="100" x2="220" y2="56" stroke="#FF6B6B" stroke-width="1" opacity="0.4"/>
+      <line x1="100" y1="100" x2="220" y2="100" stroke="#FF6B6B" stroke-width="1" opacity="0.6"/>
+      <line x1="100" y1="100" x2="220" y2="144" stroke="#FF6B6B" stroke-width="1" opacity="0.4"/>
+      <line x1="100" y1="144" x2="220" y2="56" stroke="#FF6B6B" stroke-width="1" opacity="0.3"/>
+      <line x1="100" y1="144" x2="220" y2="100" stroke="#FF6B6B" stroke-width="1" opacity="0.4"/>
+      <line x1="100" y1="144" x2="220" y2="144" stroke="#FF6B6B" stroke-width="1" opacity="0.6"/>
+      <text x="175" y="200" text-anchor="middle" fill="#FF6B6B" font-size="12" font-family="DM Sans" font-weight="700">9 custom integrations</text>
+
+      <!-- DIVIDER -->
+      <line x1="360" y1="20" x2="360" y2="220" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="4 4"/>
+
+      <!-- WITH MCP -->
+      <text x="590" y="22" text-anchor="middle" fill="#8b8f9a" font-size="12" font-family="DM Sans" font-weight="600">WITH MCP (N + M integrations)</text>
+      <!-- AI boxes -->
+      <rect x="400" y="40" width="80" height="32" rx="6" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/>
+      <text x="440" y="61" text-anchor="middle" fill="#6C8EF5" font-size="12" font-family="DM Sans" font-weight="500">Claude</text>
+      <rect x="400" y="84" width="80" height="32" rx="6" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/>
+      <text x="440" y="105" text-anchor="middle" fill="#6C8EF5" font-size="12" font-family="DM Sans" font-weight="500">GPT</text>
+      <rect x="400" y="128" width="80" height="32" rx="6" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/>
+      <text x="440" y="149" text-anchor="middle" fill="#6C8EF5" font-size="12" font-family="DM Sans" font-weight="500">Gemini</text>
+      <!-- MCP Hub -->
+      <rect x="535" y="68" width="80" height="60" rx="8" fill="rgba(155,126,219,0.2)" stroke="rgba(155,126,219,0.5)" stroke-width="1.5"/>
+      <text x="575" y="95" text-anchor="middle" fill="#9B7EDB" font-size="13" font-family="DM Sans" font-weight="700">MCP</text>
+      <text x="575" y="113" text-anchor="middle" fill="#9B7EDB" font-size="11" font-family="DM Sans">Protocol</text>
+      <!-- Tool boxes -->
+      <rect x="680" y="40" width="90" height="32" rx="6" fill="rgba(78,205,196,0.12)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+      <text x="725" y="61" text-anchor="middle" fill="#4ECDC4" font-size="12" font-family="DM Sans" font-weight="500">Database</text>
+      <rect x="680" y="84" width="90" height="32" rx="6" fill="rgba(78,205,196,0.12)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+      <text x="725" y="105" text-anchor="middle" fill="#4ECDC4" font-size="12" font-family="DM Sans" font-weight="500">File System</text>
+      <rect x="680" y="128" width="90" height="32" rx="6" fill="rgba(78,205,196,0.12)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+      <text x="725" y="149" text-anchor="middle" fill="#4ECDC4" font-size="12" font-family="DM Sans" font-weight="500">Slack API</text>
+      <!-- Arrows to hub -->
+      <line x1="480" y1="56" x2="535" y2="88" stroke="#6C8EF5" stroke-width="1.5" opacity="0.7"/>
+      <line x1="480" y1="100" x2="535" y2="100" stroke="#6C8EF5" stroke-width="1.5" opacity="0.7"/>
+      <line x1="480" y1="144" x2="535" y2="112" stroke="#6C8EF5" stroke-width="1.5" opacity="0.7"/>
+      <!-- Arrows from hub -->
+      <line x1="615" y1="88" x2="680" y2="56" stroke="#4ECDC4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="615" y1="100" x2="680" y2="100" stroke="#4ECDC4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="615" y1="112" x2="680" y2="144" stroke="#4ECDC4" stroke-width="1.5" opacity="0.7"/>
+      <text x="590" y="200" text-anchor="middle" fill="#A8E063" font-size="12" font-family="DM Sans" font-weight="700">6 simple integrations</text>
+    </svg>
+  </div>
+
+  <h3>Timeline: how we got here</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-title">2022 — Tool calling arrives</div>
+      <div class="tl-body">OpenAI introduces function calling. Each model has its own schema format, no standard.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-title">2023 — Plugin chaos</div>
+      <div class="tl-body">Hundreds of custom AI plugins, each needing its own integration per model. Maintenance nightmare.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-title">Nov 2024 — MCP launched</div>
+      <div class="tl-body">Anthropic open-sources MCP, a universal protocol. SDK for Python, TypeScript, Java, Kotlin, C#.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-title">2025 — Industry adoption</div>
+      <div class="tl-body">Google, OpenAI, and major cloud providers announce MCP compatibility.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ARCHITECTURE ─── -->
+<section id="arch" class="section">
+  <div class="section-badge badge-purple">03 · Architecture</div>
+  <h2>Architecture overview</h2>
+  <p class="lead">MCP uses a client-server architecture. Three roles exist: <strong>Host</strong>, <strong>Client</strong>, and <strong>Server</strong>. Understanding the difference is the key to understanding MCP.</p>
+
+  <div class="arch-diagram">
+    <svg width="100%" viewBox="0 0 820 340" role="img">
+      <title>MCP Architecture: Host, Client, Server</title>
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- HOST container -->
+      <rect x="20" y="20" width="460" height="280" rx="14" fill="rgba(108,142,245,0.05)" stroke="rgba(108,142,245,0.25)" stroke-width="1" stroke-dasharray="6 3"/>
+      <text x="36" y="44" fill="rgba(108,142,245,0.7)" font-size="11" font-family="DM Sans" font-weight="700" letter-spacing="0.06em">HOST PROCESS (e.g. Claude Desktop)</text>
+
+      <!-- AI Model -->
+      <rect x="40" y="56" width="140" height="60" rx="8" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.4)" stroke-width="1"/>
+      <text x="110" y="83" text-anchor="middle" fill="#6C8EF5" font-size="13" font-family="DM Sans" font-weight="700">AI Model</text>
+      <text x="110" y="101" text-anchor="middle" fill="#6C8EF5" font-size="11" font-family="DM Sans">(LLM / Claude)</text>
+
+      <!-- MCP Client 1 -->
+      <rect x="240" y="56" width="120" height="52" rx="8" fill="rgba(155,126,219,0.15)" stroke="rgba(155,126,219,0.4)" stroke-width="1"/>
+      <text x="300" y="79" text-anchor="middle" fill="#9B7EDB" font-size="13" font-family="DM Sans" font-weight="600">MCP Client 1</text>
+      <text x="300" y="96" text-anchor="middle" fill="#9B7EDB" font-size="10" font-family="DM Sans">1 conn per server</text>
+
+      <!-- MCP Client 2 -->
+      <rect x="240" y="122" width="120" height="52" rx="8" fill="rgba(155,126,219,0.15)" stroke="rgba(155,126,219,0.4)" stroke-width="1"/>
+      <text x="300" y="145" text-anchor="middle" fill="#9B7EDB" font-size="13" font-family="DM Sans" font-weight="600">MCP Client 2</text>
+      <text x="300" y="162" text-anchor="middle" fill="#9B7EDB" font-size="10" font-family="DM Sans">1 conn per server</text>
+
+      <!-- MCP Client 3 -->
+      <rect x="240" y="188" width="120" height="52" rx="8" fill="rgba(155,126,219,0.15)" stroke="rgba(155,126,219,0.4)" stroke-width="1"/>
+      <text x="300" y="211" text-anchor="middle" fill="#9B7EDB" font-size="13" font-family="DM Sans" font-weight="600">MCP Client 3</text>
+      <text x="300" y="228" text-anchor="middle" fill="#9B7EDB" font-size="10" font-family="DM Sans">1 conn per server</text>
+
+      <!-- AI → Client arrows -->
+      <line x1="180" y1="82" x2="238" y2="82" stroke="#6C8EF5" stroke-width="1.5" marker-end="url(#arr)" opacity="0.8"/>
+      <line x1="180" y1="86" x2="238" y2="148" stroke="#6C8EF5" stroke-width="1.5" marker-end="url(#arr)" opacity="0.5"/>
+      <line x1="180" y1="86" x2="238" y2="214" stroke="#6C8EF5" stroke-width="1.5" marker-end="url(#arr)" opacity="0.3"/>
+
+      <!-- SERVER containers on right -->
+      <!-- Server 1 -->
+      <rect x="520" y="30" width="180" height="82" rx="10" fill="rgba(78,205,196,0.1)" stroke="rgba(78,205,196,0.35)" stroke-width="1"/>
+      <text x="610" y="54" text-anchor="middle" fill="#4ECDC4" font-size="13" font-family="DM Sans" font-weight="700">MCP Server A</text>
+      <text x="610" y="72" text-anchor="middle" fill="#4ECDC4" font-size="11" font-family="DM Sans">File System tools</text>
+      <text x="610" y="88" text-anchor="middle" fill="rgba(78,205,196,0.6)" font-size="10" font-family="DM Sans">read_file · write_file · ls</text>
+
+      <!-- Server 2 -->
+      <rect x="520" y="128" width="180" height="82" rx="10" fill="rgba(78,205,196,0.1)" stroke="rgba(78,205,196,0.35)" stroke-width="1"/>
+      <text x="610" y="152" text-anchor="middle" fill="#4ECDC4" font-size="13" font-family="DM Sans" font-weight="700">MCP Server B</text>
+      <text x="610" y="170" text-anchor="middle" fill="#4ECDC4" font-size="11" font-family="DM Sans">Database tools</text>
+      <text x="610" y="186" text-anchor="middle" fill="rgba(78,205,196,0.6)" font-size="10" font-family="DM Sans">query · insert · update</text>
+
+      <!-- Server 3 -->
+      <rect x="520" y="226" width="180" height="82" rx="10" fill="rgba(78,205,196,0.1)" stroke="rgba(78,205,196,0.35)" stroke-width="1"/>
+      <text x="610" y="250" text-anchor="middle" fill="#4ECDC4" font-size="13" font-family="DM Sans" font-weight="700">MCP Server C</text>
+      <text x="610" y="268" text-anchor="middle" fill="#4ECDC4" font-size="11" font-family="DM Sans">External API tools</text>
+      <text x="610" y="284" text-anchor="middle" fill="rgba(78,205,196,0.6)" font-size="10" font-family="DM Sans">send_email · post_slack</text>
+
+      <!-- Client → Server arrows -->
+      <line x1="360" y1="82" x2="518" y2="71" stroke="#9B7EDB" stroke-width="1.5" marker-end="url(#arr)" opacity="0.8"/>
+      <line x1="360" y1="148" x2="518" y2="169" stroke="#9B7EDB" stroke-width="1.5" marker-end="url(#arr)" opacity="0.8"/>
+      <line x1="360" y1="214" x2="518" y2="267" stroke="#9B7EDB" stroke-width="1.5" marker-end="url(#arr)" opacity="0.8"/>
+
+      <!-- Labels -->
+      <text x="194" y="76" fill="rgba(255,255,255,0.35)" font-size="9" font-family="DM Sans">calls</text>
+      <text x="422" y="106" fill="rgba(255,255,255,0.35)" font-size="9" font-family="DM Sans">JSON-RPC</text>
+    </svg>
+  </div>
+
+  <h3>The three roles</h3>
+  <div class="card-grid">
+    <div class="info-card" style="border-color:rgba(108,142,245,0.3)">
+      <div class="card-icon">🏠</div>
+      <h4 style="color:var(--accent)">Host</h4>
+      <p>The application the user runs — Claude Desktop, an IDE plugin, your custom app. It manages MCP clients and exposes them to the AI model.</p>
+    </div>
+    <div class="info-card" style="border-color:rgba(155,126,219,0.3)">
+      <div class="card-icon">🔗</div>
+      <h4 style="color:var(--purple)">Client</h4>
+      <p>Lives inside the Host. Maintains exactly one connection to one MCP Server. Handles protocol translation, capability negotiation.</p>
+    </div>
+    <div class="info-card" style="border-color:rgba(78,205,196,0.3)">
+      <div class="card-icon">⚙️</div>
+      <h4 style="color:var(--accent2)">Server</h4>
+      <p>The external process you build. Exposes tools, resources, and prompts. Can be local (stdio) or remote (HTTP/SSE).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── LIFECYCLE ─── -->
+<section id="lifecycle" class="section">
+  <div class="section-badge badge-yellow">04 · Lifecycle</div>
+  <h2>Connection lifecycle</h2>
+  <p class="lead">Every MCP connection goes through four phases. Understanding these phases is critical to debugging and building reliable integrations.</p>
+
+  <div class="stepper-wrap">
+    <div class="step-controls">
+      <button class="step-btn" onclick="prevStep('lc')">← Prev</button>
+      <button class="step-btn primary" onclick="nextStep('lc')">Next →</button>
+      <span class="step-indicator" id="lc-indicator">Step 1 of 5</span>
+      <div class="step-dots" id="lc-dots"></div>
     </div>
 
-    <h2>2. The End-to-End Data Flow</h2>
-    <div class="flow-list">
-        <ol>
-            <li><strong>User Action:</strong> User types a prompt in the UI and hits send.</li>
-            <li><strong>To the Brain:</strong> The UI sends the text to the <em>AI Host Server</em>.</li>
-            <li><strong>Evaluation:</strong> The AI Host asks the LLM what to do. The LLM realizes it needs to use the `addToCart` tool.</li>
-            <li><strong>The Bridge:</strong> The AI Host pauses, formats a JSON-RPC request, and sends it across the MCP connection to the <em>MCP Server</em>.</li>
-            <li><strong>Execution:</strong> The MCP Server receives the JSON, triggers the annotated Java method, and saves to the database.</li>
-            <li><strong>Return Trip:</strong> The MCP Server sends a "Success" JSON response back across the bridge.</li>
-            <li><strong>Synthesis:</strong> The LLM reads the success message and generates a friendly text response ("I've added the apples!").</li>
-            <li><strong>Final Delivery:</strong> The AI Host sends this text back to the UI to display to the user.</li>
-        </ol>
+    <!-- Step 1: Initialization -->
+    <div class="step-panel active" data-stepper="lc" data-step="0">
+      <div class="flow-panel">
+        <div class="flow-row">
+          <div class="flow-step-num">1</div>
+          <div class="flow-row-content">
+            <h3 style="margin:0 0 6px">Initialization</h3>
+            <p>Client sends an <code style="color:var(--accent4);background:var(--bg4);padding:1px 5px;border-radius:3px;font-size:12px">initialize</code> request with its protocol version and capabilities.</p>
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">JSON-RPC</span>
+            <span class="code-title">Client → Server: initialize</span>
+          </div>
+          <pre>{
+  <span class="str">"jsonrpc"</span>: <span class="str">"2.0"</span>,
+  <span class="str">"id"</span>: <span class="nu">1</span>,
+  <span class="str">"method"</span>: <span class="str">"initialize"</span>,
+  <span class="str">"params"</span>: {
+    <span class="str">"protocolVersion"</span>: <span class="str">"2024-11-05"</span>,
+    <span class="str">"capabilities"</span>: {
+      <span class="str">"roots"</span>: { <span class="str">"listChanged"</span>: <span class="kw">true</span> },
+      <span class="str">"sampling"</span>: {}
+    },
+    <span class="str">"clientInfo"</span>: {
+      <span class="str">"name"</span>: <span class="str">"MyJavaClient"</span>,
+      <span class="str">"version"</span>: <span class="str">"1.0.0"</span>
+    }
+  }
+}</pre>
+        </div>
+      </div>
     </div>
 
-    <h2>3. The Full Code Implementation</h2>
-    
-    <div class="code-section">
-        <div class="code-header">1. frontend.js (The UI)</div>
-        <div class="code-block">
-<span class="keyword">async function</span> sendToAI() {
-    <span class="keyword">const</span> userText = document.getElementById(<span class="string">"userInput"</span>).value;
-    
-    <span class="comment">// Send message to our Spring Boot AI API</span>
-    <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(<span class="string">'http://localhost:8080/api/chat'</span>, {
-        method: <span class="string">'POST'</span>,
-        headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
-        body: JSON.stringify({ message: userText })
-    });
-
-    <span class="comment">// Display the final AI response</span>
-    <span class="keyword">const</span> finalAnswer = <span class="keyword">await</span> response.text();
-    document.getElementById(<span class="string">"chatBox"</span>).innerText = finalAnswer;
-}
+    <!-- Step 2: Server responds -->
+    <div class="step-panel" data-stepper="lc" data-step="1">
+      <div class="flow-panel">
+        <div class="flow-row">
+          <div class="flow-step-num">2</div>
+          <div class="flow-row-content">
+            <h3 style="margin:0 0 6px">Capability exchange</h3>
+            <p>Server responds with <em>its</em> protocol version and what it supports — tools, resources, prompts, logging, etc.</p>
+          </div>
         </div>
-
-        <div class="code-header">2. AiChatController.java (The AI Host - Port 8080)</div>
         <div class="code-block">
-<span class="keyword">import</span> org.springframework.ai.chat.client.ChatClient;
-<span class="keyword">import</span> org.springframework.ai.mcp.client.McpSyncClient;
-<span class="keyword">import</span> org.springframework.web.bind.annotation.*;
-
-<span class="annotation">@RestController</span>
-<span class="annotation">@RequestMapping</span>(<span class="string">"/api"</span>)
-<span class="keyword">public class</span> AiChatController {
-
-    <span class="keyword">private final</span> ChatClient chatClient;
-
-    <span class="keyword">public</span> AiChatController(ChatClient.Builder builder, McpSyncClient mcpClient) {
-        <span class="comment">// Give the AI access to the MCP Tools menu!</span>
-        <span class="keyword">this</span>.chatClient = builder
-                .defaultFunctions(mcpClient.listTools()) 
-                .build();
+          <div class="code-header">
+            <span class="code-lang">JSON-RPC</span>
+            <span class="code-title">Server → Client: initialize response</span>
+          </div>
+          <pre>{
+  <span class="str">"jsonrpc"</span>: <span class="str">"2.0"</span>,
+  <span class="str">"id"</span>: <span class="nu">1</span>,
+  <span class="str">"result"</span>: {
+    <span class="str">"protocolVersion"</span>: <span class="str">"2024-11-05"</span>,
+    <span class="str">"capabilities"</span>: {
+      <span class="str">"tools"</span>: { <span class="str">"listChanged"</span>: <span class="kw">true</span> },
+      <span class="str">"resources"</span>: { <span class="str">"subscribe"</span>: <span class="kw">true</span> },
+      <span class="str">"prompts"</span>: {},
+      <span class="str">"logging"</span>: {}
+    },
+    <span class="str">"serverInfo"</span>: {
+      <span class="str">"name"</span>: <span class="str">"MyJavaServer"</span>,
+      <span class="str">"version"</span>: <span class="str">"1.0.0"</span>
     }
-
-    <span class="annotation">@PostMapping</span>(<span class="string">"/chat"</span>)
-    <span class="keyword">public</span> String chatWithUser(<span class="annotation">@RequestBody</span> ChatRequest request) {
-        <span class="comment">// Spring AI handles the prompt, pausing, tool calling, and resuming automatically!</span>
-        <span class="keyword">return this</span>.chatClient.prompt()
-                .user(request.message())
-                .call()
-                .content();
-    }
-}
+  }
+}</pre>
         </div>
-
-        <div class="code-header">3. ShoppingCartService.java (The MCP Server - Port 9090)</div>
-        <div class="code-block">
-<span class="keyword">import</span> org.springframework.ai.mcp.server.annotation.McpTool;
-<span class="keyword">import</span> org.springframework.ai.mcp.server.annotation.McpToolParam;
-<span class="keyword">import</span> org.springframework.stereotype.Service;
-
-<span class="annotation">@Service</span>
-<span class="keyword">public class</span> ShoppingCartService {
-
-    <span class="comment">// This annotation exposes this method to the AI via MCP</span>
-    <span class="annotation">@McpTool</span>(description = <span class="string">"Adds an item to the user's shopping cart"</span>)
-    <span class="keyword">public</span> String addToCart(
-            <span class="annotation">@McpToolParam</span>(description = <span class="string">"The item name"</span>) String item,
-            <span class="annotation">@McpToolParam</span>(description = <span class="string">"How many to add"</span>) <span class="keyword">int</span> quantity) {
-        
-        <span class="comment">// Real business logic / database saving goes here</span>
-        System.out.println(<span class="string">"Saving "</span> + quantity + <span class="string">" "</span> + item + <span class="string">" to DB..."</span>);
-        
-        <span class="keyword">return</span> <span class="string">"SUCCESS: Added "</span> + quantity + <span class="string">" "</span> + item + <span class="string">" to the cart."</span>;
-    }
-}
-        </div>
+      </div>
     </div>
+
+    <!-- Step 3: Initialized notification -->
+    <div class="step-panel" data-stepper="lc" data-step="2">
+      <div class="flow-panel">
+        <div class="flow-row">
+          <div class="flow-step-num">3</div>
+          <div class="flow-row-content">
+            <h3 style="margin:0 0 6px">Initialized notification</h3>
+            <p>Client sends an <code style="color:var(--accent4);background:var(--bg4);padding:1px 5px;border-radius:3px;font-size:12px">initialized</code> notification — a fire-and-forget signal that the handshake is complete. No response expected.</p>
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">JSON-RPC</span>
+            <span class="code-title">Client → Server: notification (no id!)</span>
+          </div>
+          <pre>{
+  <span class="str">"jsonrpc"</span>: <span class="str">"2.0"</span>,
+  <span class="str">"method"</span>: <span class="str">"notifications/initialized"</span>
+  <span class="cm">// Note: no "id" field — this is a notification, not a request</span>
+}</pre>
+        </div>
+        <div class="callout tip">
+          <p><strong>Key distinction</strong>In MCP, <em>requests</em> have an <code style="font-size:12px">id</code> field and expect a response. <em>Notifications</em> have no <code style="font-size:12px">id</code> and are fire-and-forget.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Active operation -->
+    <div class="step-panel" data-stepper="lc" data-step="3">
+      <div class="flow-panel">
+        <div class="flow-row">
+          <div class="flow-step-num">4</div>
+          <div class="flow-row-content">
+            <h3 style="margin:0 0 6px">Active operation</h3>
+            <p>The connection is live. Client can now call tools, read resources, get prompts, and the server can send back results or push notifications.</p>
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">JSON-RPC</span>
+            <span class="code-title">Client → Server: tool call</span>
+          </div>
+          <pre>{
+  <span class="str">"jsonrpc"</span>: <span class="str">"2.0"</span>,
+  <span class="str">"id"</span>: <span class="nu">42</span>,
+  <span class="str">"method"</span>: <span class="str">"tools/call"</span>,
+  <span class="str">"params"</span>: {
+    <span class="str">"name"</span>: <span class="str">"read_file"</span>,
+    <span class="str">"arguments"</span>: {
+      <span class="str">"path"</span>: <span class="str">"/home/user/report.txt"</span>
+    }
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Shutdown -->
+    <div class="step-panel" data-stepper="lc" data-step="4">
+      <div class="flow-panel">
+        <div class="flow-row">
+          <div class="flow-step-num">5</div>
+          <div class="flow-row-content">
+            <h3 style="margin:0 0 6px">Shutdown</h3>
+            <p>Either side can close the connection. Graceful shutdown uses the transport's close mechanism (close stdin for stdio, HTTP disconnect for SSE).</p>
+          </div>
+        </div>
+        <div class="callout warn">
+          <p><strong>Important</strong>Servers must handle abrupt disconnections gracefully. Clean up resources, close database connections, and flush any pending logs on shutdown.</p>
+        </div>
+        <div class="arch-diagram" style="padding:16px">
+          <svg width="100%" viewBox="0 0 640 60" role="img">
+            <title>Lifecycle phases</title>
+            <rect x="10" y="18" width="110" height="28" rx="6" fill="rgba(108,142,245,0.2)" stroke="rgba(108,142,245,0.5)" stroke-width="1"/>
+            <text x="65" y="36" text-anchor="middle" fill="#6C8EF5" font-size="11" font-family="DM Sans" font-weight="600">Initialization</text>
+            <line x1="120" y1="32" x2="148" y2="32" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <rect x="150" y="18" width="120" height="28" rx="6" fill="rgba(155,126,219,0.2)" stroke="rgba(155,126,219,0.5)" stroke-width="1"/>
+            <text x="210" y="36" text-anchor="middle" fill="#9B7EDB" font-size="11" font-family="DM Sans" font-weight="600">Capability Exchange</text>
+            <line x1="270" y1="32" x2="298" y2="32" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <rect x="300" y="18" width="90" height="28" rx="6" fill="rgba(168,224,99,0.15)" stroke="rgba(168,224,99,0.4)" stroke-width="1"/>
+            <text x="345" y="36" text-anchor="middle" fill="#A8E063" font-size="11" font-family="DM Sans" font-weight="600">Initialized</text>
+            <line x1="390" y1="32" x2="418" y2="32" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <rect x="420" y="18" width="90" height="28" rx="6" fill="rgba(78,205,196,0.15)" stroke="rgba(78,205,196,0.4)" stroke-width="1"/>
+            <text x="465" y="36" text-anchor="middle" fill="#4ECDC4" font-size="11" font-family="DM Sans" font-weight="600">Active Ops</text>
+            <line x1="510" y1="32" x2="538" y2="32" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <rect x="540" y="18" width="80" height="28" rx="6" fill="rgba(255,107,107,0.15)" stroke="rgba(255,107,107,0.4)" stroke-width="1"/>
+            <text x="580" y="36" text-anchor="middle" fill="#FF6B6B" font-size="11" font-family="DM Sans" font-weight="600">Shutdown</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRIMITIVES ─── -->
+<section id="primitives" class="section">
+  <div class="section-badge badge-green">05 · Primitives</div>
+  <h2>Tools, Resources & Prompts</h2>
+  <p class="lead">MCP servers expose three types of capabilities, each with a distinct purpose and interaction pattern.</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('prim', 'tools')">🔧 Tools</button>
+    <button class="tab" onclick="switchTab('prim', 'resources')">📂 Resources</button>
+    <button class="tab" onclick="switchTab('prim', 'prompts')">💬 Prompts</button>
+  </div>
+
+  <div id="prim-tools" class="tab-panel active">
+    <p><strong>Tools</strong> are functions the AI can call. They are <em>model-controlled</em> — the AI decides when to call them based on context. Tools can have side effects (write files, send emails).</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">JSON</span>
+        <span class="code-title">Tool definition schema</span>
+      </div>
+      <pre>{
+  <span class="str">"name"</span>: <span class="str">"send_email"</span>,
+  <span class="str">"description"</span>: <span class="str">"Send an email to a recipient"</span>,
+  <span class="str">"inputSchema"</span>: {
+    <span class="str">"type"</span>: <span class="str">"object"</span>,
+    <span class="str">"properties"</span>: {
+      <span class="str">"to"</span>: { <span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"description"</span>: <span class="str">"Recipient email"</span> },
+      <span class="str">"subject"</span>: { <span class="str">"type"</span>: <span class="str">"string"</span> },
+      <span class="str">"body"</span>: { <span class="str">"type"</span>: <span class="str">"string"</span> }
+    },
+    <span class="str">"required"</span>: [<span class="str">"to"</span>, <span class="str">"subject"</span>, <span class="str">"body"</span>]
+  }
+}</pre>
+    </div>
+    <div class="pill-row">
+      <span class="pill" style="color:var(--accent3);border-color:rgba(255,107,107,0.3);background:rgba(255,107,107,0.1)">May have side effects</span>
+      <span class="pill" style="color:var(--accent);border-color:rgba(108,142,245,0.3);background:rgba(108,142,245,0.1)">Model-controlled</span>
+      <span class="pill" style="color:var(--accent4);border-color:rgba(255,217,61,0.3);background:rgba(255,217,61,0.1)">Human approval possible</span>
+    </div>
+  </div>
+
+  <div id="prim-resources" class="tab-panel">
+    <p><strong>Resources</strong> are data the AI can read. They are <em>application-controlled</em> — the host decides when to expose them. Resources are typically read-only and identified by a URI.</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">JSON</span>
+        <span class="code-title">Resource definition</span>
+      </div>
+      <pre>{
+  <span class="str">"uri"</span>: <span class="str">"file:///home/user/config.json"</span>,
+  <span class="str">"name"</span>: <span class="str">"App Configuration"</span>,
+  <span class="str">"description"</span>: <span class="str">"Main application configuration file"</span>,
+  <span class="str">"mimeType"</span>: <span class="str">"application/json"</span>
+}
+
+<span class="cm">// Reading a resource:</span>
+{
+  <span class="str">"method"</span>: <span class="str">"resources/read"</span>,
+  <span class="str">"params"</span>: { <span class="str">"uri"</span>: <span class="str">"file:///home/user/config.json"</span> }
+}</pre>
+    </div>
+    <div class="pill-row">
+      <span class="pill" style="color:var(--accent5);border-color:rgba(168,224,99,0.3);background:rgba(168,224,99,0.1)">Read-only (typically)</span>
+      <span class="pill" style="color:var(--purple);border-color:rgba(155,126,219,0.3);background:rgba(155,126,219,0.1)">Application-controlled</span>
+      <span class="pill" style="color:var(--accent2);border-color:rgba(78,205,196,0.3);background:rgba(78,205,196,0.1)">URI-addressed</span>
+    </div>
+  </div>
+
+  <div id="prim-prompts" class="tab-panel">
+    <p><strong>Prompts</strong> are reusable templates that servers can provide to the AI. They are <em>user-controlled</em> — the user explicitly selects which prompt template to use. Think of them as slash commands.</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">JSON</span>
+        <span class="code-title">Prompt definition</span>
+      </div>
+      <pre>{
+  <span class="str">"name"</span>: <span class="str">"code_review"</span>,
+  <span class="str">"description"</span>: <span class="str">"Review Java code for bugs and style issues"</span>,
+  <span class="str">"arguments"</span>: [
+    {
+      <span class="str">"name"</span>: <span class="str">"code"</span>,
+      <span class="str">"description"</span>: <span class="str">"The Java code to review"</span>,
+      <span class="str">"required"</span>: <span class="kw">true</span>
+    }
+  ]
+}</pre>
+    </div>
+    <div class="pill-row">
+      <span class="pill" style="color:var(--accent4);border-color:rgba(255,217,61,0.3);background:rgba(255,217,61,0.1)">User-controlled</span>
+      <span class="pill" style="color:var(--accent);border-color:rgba(108,142,245,0.3);background:rgba(108,142,245,0.1)">Reusable templates</span>
+      <span class="pill" style="color:var(--muted);border-color:var(--border2);background:var(--bg4)">Parameterized</span>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+  <h3>Who controls what?</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Primitive</th><th>Controlled by</th><th>Side effects?</th><th>Use case</th></tr></thead>
+      <tbody>
+        <tr><td>🔧 Tool</td><td>AI Model</td><td>Yes (can mutate)</td><td>send_email, write_file, query_db</td></tr>
+        <tr><td>📂 Resource</td><td>Host Application</td><td>No (read-only)</td><td>config files, database rows, live data</td></tr>
+        <tr><td>💬 Prompt</td><td>User</td><td>No</td><td>slash commands, workflow templates</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── TRANSPORT ─── -->
+<section id="transport" class="section">
+  <div class="section-badge badge-red">06 · Transport</div>
+  <h2>Transport layer</h2>
+  <p class="lead">MCP is transport-agnostic. The same JSON-RPC protocol runs over two very different transports. Choosing the right one depends on where your server runs.</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tr', 'stdio')">Stdio (Local)</button>
+    <button class="tab" onclick="switchTab('tr', 'sse')">HTTP + SSE (Remote)</button>
+  </div>
+
+  <div id="tr-stdio" class="tab-panel active">
+    <div class="callout info">
+      <p><strong>When to use Stdio</strong>Server runs locally as a subprocess. The Client spawns the Server process and communicates via stdin/stdout pipes. No network overhead. Perfect for local tools (file system, local DB, code tools).</p>
+    </div>
+    <div class="arch-diagram">
+      <svg width="100%" viewBox="0 0 620 120" role="img">
+        <title>Stdio transport</title>
+        <rect x="20" y="30" width="150" height="60" rx="8" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.3)" stroke-width="1"/>
+        <text x="95" y="57" text-anchor="middle" fill="#6C8EF5" font-size="13" font-family="DM Sans" font-weight="600">MCP Client</text>
+        <text x="95" y="75" text-anchor="middle" fill="rgba(108,142,245,0.6)" font-size="11" font-family="DM Sans">(Host process)</text>
+
+        <rect x="450" y="30" width="150" height="60" rx="8" fill="rgba(78,205,196,0.12)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+        <text x="525" y="57" text-anchor="middle" fill="#4ECDC4" font-size="13" font-family="DM Sans" font-weight="600">MCP Server</text>
+        <text x="525" y="75" text-anchor="middle" fill="rgba(78,205,196,0.6)" font-size="11" font-family="DM Sans">(Subprocess)</text>
+
+        <line x1="170" y1="52" x2="448" y2="52" stroke="#A8E063" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="448" y1="68" x2="170" y2="68" stroke="#FFD93D" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="309" y="46" text-anchor="middle" fill="rgba(168,224,99,0.8)" font-size="11" font-family="DM Sans">stdin → JSON-RPC requests</text>
+        <text x="309" y="84" text-anchor="middle" fill="rgba(255,217,61,0.8)" font-size="11" font-family="DM Sans">stdout ← JSON-RPC responses</text>
+      </svg>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">Java</span>
+        <span class="code-title">Stdio server bootstrap</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="kw">import</span> io.modelcontextprotocol.server.McpServer;
+<span class="kw">import</span> io.modelcontextprotocol.server.McpServerFeatures;
+<span class="kw">import</span> io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
+
+<span class="kw">public class</span> <span class="cl">MyMcpServer</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+
+        <span class="cm">// Use STDIO transport — communicate via stdin/stdout</span>
+        <span class="kw">var</span> transportProvider = <span class="kw">new</span> <span class="cl">StdioServerTransportProvider</span>();
+
+        <span class="kw">var</span> server = McpServer.<span class="fn">sync</span>(transportProvider)
+            .<span class="fn">serverInfo</span>(<span class="str">"my-server"</span>, <span class="str">"1.0.0"</span>)
+            .<span class="fn">build</span>();
+
+        <span class="cm">// Server now reads JSON-RPC from stdin, writes to stdout</span>
+        System.err.<span class="fn">println</span>(<span class="str">"Server running on stdio"</span>);
+    }
+}</pre>
+    </div>
+  </div>
+
+  <div id="tr-sse" class="tab-panel">
+    <div class="callout info">
+      <p><strong>When to use HTTP+SSE</strong>Server runs remotely (different machine, container, cloud). Client sends HTTP POST requests; server pushes responses via Server-Sent Events. Allows multi-client connections.</p>
+    </div>
+    <div class="arch-diagram">
+      <svg width="100%" viewBox="0 0 620 130" role="img">
+        <title>HTTP SSE transport</title>
+        <rect x="20" y="30" width="150" height="60" rx="8" fill="rgba(108,142,245,0.15)" stroke="rgba(108,142,245,0.3)" stroke-width="1"/>
+        <text x="95" y="57" text-anchor="middle" fill="#6C8EF5" font-size="13" font-family="DM Sans" font-weight="600">MCP Client</text>
+        <text x="95" y="75" text-anchor="middle" fill="rgba(108,142,245,0.6)" font-size="11" font-family="DM Sans">(Any machine)</text>
+
+        <rect x="450" y="30" width="150" height="60" rx="8" fill="rgba(78,205,196,0.12)" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+        <text x="525" y="57" text-anchor="middle" fill="#4ECDC4" font-size="13" font-family="DM Sans" font-weight="600">MCP Server</text>
+        <text x="525" y="75" text-anchor="middle" fill="rgba(78,205,196,0.6)" font-size="11" font-family="DM Sans">(Remote / Cloud)</text>
+
+        <line x1="170" y1="50" x2="448" y2="50" stroke="#A8E063" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="309" y="44" text-anchor="middle" fill="rgba(168,224,99,0.8)" font-size="11" font-family="DM Sans">HTTP POST /message</text>
+
+        <line x1="448" y1="70" x2="170" y2="70" stroke="#FFD93D" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="309" y="90" text-anchor="middle" fill="rgba(255,217,61,0.8)" font-size="11" font-family="DM Sans">SSE stream (/sse endpoint)</text>
+
+        <text x="309" y="118" text-anchor="middle" fill="rgba(255,255,255,0.25)" font-size="10" font-family="DM Sans">GET /sse — persistent event stream for server → client push</text>
+      </svg>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">Java</span>
+        <span class="code-title">HTTP+SSE server with Spring Boot</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre><span class="an">@SpringBootApplication</span>
+<span class="kw">public class</span> <span class="cl">McpServerApplication</span> {
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> WebMvcSseServerTransportProvider <span class="fn">sseTransport</span>(<span class="ty">ObjectMapper</span> mapper) {
+        <span class="cm">// SSE transport provider — registers /sse and /message endpoints</span>
+        <span class="kw">return new</span> <span class="cl">WebMvcSseServerTransportProvider</span>(mapper, <span class="str">"/mcp/message"</span>);
+    }
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> McpSyncServer <span class="fn">mcpServer</span>(WebMvcSseServerTransportProvider transport) {
+        <span class="kw">return</span> McpServer.<span class="fn">sync</span>(transport)
+            .<span class="fn">serverInfo</span>(<span class="str">"remote-server"</span>, <span class="str">"1.0.0"</span>)
+            .<span class="fn">build</span>();
+    }
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PROTOCOL ─── -->
+<section id="protocol" class="section">
+  <div class="section-badge badge-blue">07 · Protocol</div>
+  <h2>JSON-RPC protocol</h2>
+  <p class="lead">MCP uses JSON-RPC 2.0 as its message format. Every message is a JSON object. There are three types of messages.</p>
+
+  <div class="card-grid">
+    <div class="info-card" style="border-color:rgba(108,142,245,0.3)">
+      <h4 style="color:var(--accent)">Request</h4>
+      <p>Has <code style="font-size:12px">id</code>, <code style="font-size:12px">method</code>, and <code style="font-size:12px">params</code>. Expects a response from the other side.</p>
+    </div>
+    <div class="info-card" style="border-color:rgba(255,217,61,0.3)">
+      <h4 style="color:var(--accent4)">Notification</h4>
+      <p>Has <code style="font-size:12px">method</code> but <strong>no</strong> <code style="font-size:12px">id</code>. Fire-and-forget — no response expected.</p>
+    </div>
+    <div class="info-card" style="border-color:rgba(78,205,196,0.3)">
+      <h4 style="color:var(--accent2)">Response</h4>
+      <p>Has <code style="font-size:12px">id</code> matching the request. Contains either <code style="font-size:12px">result</code> or <code style="font-size:12px">error</code>.</p>
+    </div>
+  </div>
+
+  <h3>Core MCP methods</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Method</th><th>Direction</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>initialize</td><td>Client → Server</td><td>Start handshake, share capabilities</td></tr>
+        <tr><td>tools/list</td><td>Client → Server</td><td>Get list of available tools</td></tr>
+        <tr><td>tools/call</td><td>Client → Server</td><td>Execute a specific tool</td></tr>
+        <tr><td>resources/list</td><td>Client → Server</td><td>Get available resources</td></tr>
+        <tr><td>resources/read</td><td>Client → Server</td><td>Read a resource's content</td></tr>
+        <tr><td>prompts/list</td><td>Client → Server</td><td>Get available prompt templates</td></tr>
+        <tr><td>prompts/get</td><td>Client → Server</td><td>Get a specific prompt template</td></tr>
+        <tr><td>notifications/tools/list_changed</td><td>Server → Client</td><td>Tools have been updated</td></tr>
+        <tr><td>sampling/createMessage</td><td>Server → Client</td><td>Server requests AI completion</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── JAVA SERVER ─── -->
+<section id="java-server" class="section">
+  <div class="section-badge badge-teal">08 · Java Server</div>
+  <h2>Building an MCP server in Java</h2>
+  <p class="lead">The official Java MCP SDK (<code>io.modelcontextprotocol.sdk:mcp</code>) provides both synchronous and reactive (Project Reactor) server implementations.</p>
+
+  <h3>Maven dependency</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">XML</span>
+      <span class="code-title">pom.xml</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="op">&lt;</span><span class="cl">dependency</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="cl">groupId</span><span class="op">&gt;</span>io.modelcontextprotocol.sdk<span class="op">&lt;/</span><span class="cl">groupId</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="cl">artifactId</span><span class="op">&gt;</span>mcp<span class="op">&lt;/</span><span class="cl">artifactId</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="cl">version</span><span class="op">&gt;</span>0.8.1<span class="op">&lt;/</span><span class="cl">version</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="cl">dependency</span><span class="op">&gt;</span></pre>
+  </div>
+
+  <h3>Defining and registering a tool</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Java</span>
+      <span class="code-title">Tool registration — file reader tool</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="kw">import</span> io.modelcontextprotocol.server.McpServer;
+<span class="kw">import</span> io.modelcontextprotocol.spec.McpSchema.*;
+
+<span class="kw">var</span> fileReadTool = <span class="kw">new</span> <span class="cl">Tool</span>(
+    <span class="str">"read_file"</span>,        <span class="cm">// Tool name (AI uses this to call it)</span>
+    <span class="str">"Read a file from the local filesystem"</span>,
+    <span class="kw">new</span> <span class="cl">Schema</span>(            <span class="cm">// JSON Schema for input validation</span>
+        Map.<span class="fn">of</span>(
+            <span class="str">"type"</span>, <span class="str">"object"</span>,
+            <span class="str">"properties"</span>, Map.<span class="fn">of</span>(
+                <span class="str">"path"</span>, Map.<span class="fn">of</span>(
+                    <span class="str">"type"</span>, <span class="str">"string"</span>,
+                    <span class="str">"description"</span>, <span class="str">"Absolute path to the file"</span>
+                )
+            ),
+            <span class="str">"required"</span>, List.<span class="fn">of</span>(<span class="str">"path"</span>)
+        )
+    )
+);
+
+<span class="cm">// Handler: receives arguments, returns result</span>
+<span class="ty">SyncToolSpecification</span> spec = <span class="kw">new</span> <span class="cl">SyncToolSpecification</span>(
+    fileReadTool,
+    (exchange, args) -> {
+        <span class="ty">String</span> path = (<span class="ty">String</span>) args.<span class="fn">get</span>(<span class="str">"path"</span>);
+        <span class="kw">try</span> {
+            <span class="ty">String</span> content = Files.<span class="fn">readString</span>(Path.<span class="fn">of</span>(path));
+            <span class="kw">return new</span> <span class="cl">CallToolResult</span>(
+                List.<span class="fn">of</span>(<span class="kw">new</span> <span class="cl">TextContent</span>(content)),
+                <span class="kw">false</span>  <span class="cm">// isError = false</span>
+            );
+        } <span class="kw">catch</span> (<span class="ty">IOException</span> e) {
+            <span class="kw">return new</span> <span class="cl">CallToolResult</span>(
+                List.<span class="fn">of</span>(<span class="kw">new</span> <span class="cl">TextContent</span>(<span class="str">"Error: "</span> + e.<span class="fn">getMessage</span>())),
+                <span class="kw">true</span>  <span class="cm">// isError = true</span>
+            );
+        }
+    }
+);</pre>
+  </div>
+
+  <h3>Registering a resource</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Java</span>
+      <span class="code-title">Resource registration</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="ty">SyncResourceSpecification</span> configResource = <span class="kw">new</span> <span class="cl">SyncResourceSpecification</span>(
+    <span class="kw">new</span> <span class="cl">Resource</span>(
+        <span class="str">"config://app/settings"</span>,       <span class="cm">// URI</span>
+        <span class="str">"Application Settings"</span>,          <span class="cm">// Name</span>
+        <span class="str">"Current app configuration"</span>,     <span class="cm">// Description</span>
+        <span class="str">"application/json"</span>,              <span class="cm">// MIME type</span>
+        <span class="kw">null</span>                             <span class="cm">// annotations</span>
+    ),
+    (exchange, request) -> {
+        <span class="cm">// Load and return the configuration JSON</span>
+        <span class="ty">String</span> configJson = loadAppConfig();
+        <span class="kw">return new</span> <span class="cl">ReadResourceResult</span>(
+            List.<span class="fn">of</span>(<span class="kw">new</span> <span class="cl">TextResourceContents</span>(
+                request.<span class="fn">uri</span>(), <span class="str">"application/json"</span>, configJson
+            ))
+        );
+    }
+);</pre>
+  </div>
+
+  <h3>Building and starting the server</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Java</span>
+      <span class="code-title">Complete server assembly</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="kw">var</span> server = McpServer.<span class="fn">sync</span>(<span class="kw">new</span> <span class="cl">StdioServerTransportProvider</span>())
+    .<span class="fn">serverInfo</span>(<span class="str">"file-tools"</span>, <span class="str">"1.0.0"</span>)
+    .<span class="fn">capabilities</span>(ServerCapabilities.<span class="fn">builder</span>()
+        .<span class="fn">tools</span>(<span class="kw">true</span>)      <span class="cm">// Supports tools</span>
+        .<span class="fn">resources</span>(<span class="kw">true</span>, <span class="kw">true</span>)  <span class="cm">// Supports resources + subscribe</span>
+        .<span class="fn">logging</span>()         <span class="cm">// Supports logging</span>
+        .<span class="fn">build</span>())
+    .<span class="fn">tools</span>(spec)           <span class="cm">// Register our file read tool</span>
+    .<span class="fn">resources</span>(configResource)  <span class="cm">// Register our config resource</span>
+    .<span class="fn">build</span>();
+
+<span class="cm">// Server is now running, listening on stdin/stdout</span>
+System.err.<span class="fn">println</span>(<span class="str">"MCP server started"</span>);</pre>
+  </div>
+</section>
+
+<!-- ─── JAVA CLIENT ─── -->
+<section id="java-client" class="section">
+  <div class="section-badge badge-purple">09 · Java Client</div>
+  <h2>Building an MCP client in Java</h2>
+  <p class="lead">The MCP Client connects to a Server, negotiates capabilities, and then lets you call tools and read resources programmatically.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Java</span>
+      <span class="code-title">Synchronous MCP client — list tools and call one</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="kw">import</span> io.modelcontextprotocol.client.McpClient;
+<span class="kw">import</span> io.modelcontextprotocol.client.transport.ServerParameters;
+<span class="kw">import</span> io.modelcontextprotocol.client.transport.StdioClientTransport;
+<span class="kw">import</span> io.modelcontextprotocol.spec.McpSchema.*;
+
+<span class="kw">public class</span> <span class="cl">McpClientExample</span> {
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) {
+
+        <span class="cm">// 1. Define how to launch the server subprocess</span>
+        <span class="kw">var</span> serverParams = ServerParameters.<span class="fn">builder</span>(<span class="str">"java"</span>)
+            .<span class="fn">args</span>(<span class="str">"-jar"</span>, <span class="str">"my-mcp-server.jar"</span>)
+            .<span class="fn">build</span>();
+
+        <span class="cm">// 2. Create transport (STDIO)</span>
+        <span class="kw">var</span> transport = <span class="kw">new</span> <span class="cl">StdioClientTransport</span>(serverParams);
+
+        <span class="cm">// 3. Create client and connect — handshake happens here</span>
+        <span class="kw">try</span> (<span class="kw">var</span> client = McpClient.<span class="fn">sync</span>(transport)
+                .<span class="fn">clientInfo</span>(<span class="str">"my-client"</span>, <span class="str">"1.0.0"</span>)
+                .<span class="fn">build</span>()) {
+
+            client.<span class="fn">initialize</span>();  <span class="cm">// Runs the handshake</span>
+
+            <span class="cm">// 4. List available tools</span>
+            <span class="ty">ListToolsResult</span> tools = client.<span class="fn">listTools</span>();
+            System.out.<span class="fn">println</span>(<span class="str">"Available tools:"</span>);
+            tools.<span class="fn">tools</span>().<span class="fn">forEach</span>(t ->
+                System.out.<span class="fn">println</span>(<span class="str">"  - "</span> + t.<span class="fn">name</span>() + <span class="str">": "</span> + t.<span class="fn">description</span>())
+            );
+
+            <span class="cm">// 5. Call a specific tool</span>
+            <span class="ty">CallToolResult</span> result = client.<span class="fn">callTool</span>(
+                <span class="kw">new</span> <span class="cl">CallToolRequest</span>(
+                    <span class="str">"read_file"</span>,
+                    Map.<span class="fn">of</span>(<span class="str">"path"</span>, <span class="str">"/tmp/hello.txt"</span>)
+                )
+            );
+
+            <span class="cm">// 6. Process result</span>
+            result.<span class="fn">content</span>().<span class="fn">forEach</span>(content -> {
+                <span class="kw">if</span> (content <span class="kw">instanceof</span> <span class="ty">TextContent</span> text) {
+                    System.out.<span class="fn">println</span>(<span class="str">"File content: "</span> + text.<span class="fn">text</span>());
+                }
+            });
+        }  <span class="cm">// auto-closes — sends disconnect</span>
+    }
+}</pre>
+  </div>
+
+  <h3>Listing and reading resources</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Java</span>
+      <span class="code-title">Resource operations</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="cm">// List all resources the server exposes</span>
+<span class="ty">ListResourcesResult</span> resources = client.<span class="fn">listResources</span>();
+
+<span class="cm">// Read a specific resource by URI</span>
+<span class="ty">ReadResourceResult</span> config = client.<span class="fn">readResource</span>(
+    <span class="kw">new</span> <span class="cl">ReadResourceRequest</span>(<span class="str">"config://app/settings"</span>)
+);
+
+config.<span class="fn">contents</span>().<span class="fn">forEach</span>(c -> {
+    <span class="kw">if</span> (c <span class="kw">instanceof</span> <span class="ty">TextResourceContents</span> text) {
+        System.out.<span class="fn">println</span>(<span class="str">"Config: "</span> + text.<span class="fn">text</span>());
+    }
+});</pre>
+  </div>
+</section>
+
+<!-- ─── JAVA FULL ─── -->
+<section id="java-full" class="section">
+  <div class="section-badge badge-green">10 · Full Example</div>
+  <h2>Full working example</h2>
+  <p class="lead">A complete Java MCP server that exposes a database query tool, a file reader tool, and a configuration resource — with full error handling.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Java</span>
+      <span class="code-title">ProductDatabaseMcpServer.java — production-ready</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="kw">package</span> com.example.mcp;
+
+<span class="kw">import</span> io.modelcontextprotocol.server.*;
+<span class="kw">import</span> io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
+<span class="kw">import</span> io.modelcontextprotocol.spec.McpSchema.*;
+<span class="kw">import</span> java.sql.*;
+<span class="kw">import</span> java.util.*;
+
+<span class="kw">public class</span> <span class="cl">ProductDatabaseMcpServer</span> {
+
+    <span class="kw">private static final</span> <span class="ty">String</span> DB_URL = <span class="str">"jdbc:postgresql://localhost/products"</span>;
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="ty">String</span>[] args) <span class="kw">throws</span> <span class="ty">Exception</span> {
+
+        <span class="cm">// ── Tool: search products ──────────────────────────────</span>
+        <span class="kw">var</span> searchTool = <span class="kw">new</span> <span class="cl">Tool</span>(
+            <span class="str">"search_products"</span>,
+            <span class="str">"Search the product catalog by name or category"</span>,
+            <span class="fn">buildSearchSchema</span>()
+        );
+
+        <span class="ty">SyncToolSpecification</span> searchSpec = <span class="kw">new</span> <span class="cl">SyncToolSpecification</span>(
+            searchTool,
+            (exchange, args_) -> {
+                <span class="ty">String</span> query  = (<span class="ty">String</span>) args_.<span class="fn">getOrDefault</span>(<span class="str">"query"</span>, <span class="str">""</span>);
+                <span class="ty">Integer</span> limit = (<span class="ty">Integer</span>) args_.<span class="fn">getOrDefault</span>(<span class="str">"limit"</span>, <span class="nu">10</span>);
+
+                <span class="kw">try</span> (<span class="ty">Connection</span> conn = DriverManager.<span class="fn">getConnection</span>(DB_URL);
+                     <span class="ty">PreparedStatement</span> ps = conn.<span class="fn">prepareStatement</span>(
+                         <span class="str">"SELECT id, name, price, stock FROM products "</span> +
+                         <span class="str">"WHERE name ILIKE ? LIMIT ?"</span>)) {
+
+                    ps.<span class="fn">setString</span>(<span class="nu">1</span>, <span class="str">"%" + query + "%"</span>);
+                    ps.<span class="fn">setInt</span>(<span class="nu">2</span>, limit);
+
+                    <span class="ty">ResultSet</span> rs = ps.<span class="fn">executeQuery</span>();
+                    <span class="ty">StringBuilder</span> sb = <span class="kw">new</span> <span class="cl">StringBuilder</span>();
+                    <span class="kw">int</span> count = <span class="nu">0</span>;
+
+                    <span class="kw">while</span> (rs.<span class="fn">next</span>()) {
+                        sb.<span class="fn">append</span>(String.<span class="fn">format</span>(
+                            <span class="str">"ID: %d | %s | $%.2f | Stock: %d\n"</span>,
+                            rs.<span class="fn">getInt</span>(<span class="str">"id"</span>),
+                            rs.<span class="fn">getString</span>(<span class="str">"name"</span>),
+                            rs.<span class="fn">getDouble</span>(<span class="str">"price"</span>),
+                            rs.<span class="fn">getInt</span>(<span class="str">"stock"</span>)
+                        ));
+                        count++;
+                    }
+
+                    <span class="ty">String</span> result = count == <span class="nu">0</span>
+                        ? <span class="str">"No products found for: "</span> + query
+                        : sb.<span class="fn">toString</span>();
+
+                    <span class="kw">return new</span> <span class="cl">CallToolResult</span>(
+                        List.<span class="fn">of</span>(<span class="kw">new</span> <span class="cl">TextContent</span>(result)), <span class="kw">false</span>
+                    );
+
+                } <span class="kw">catch</span> (<span class="ty">SQLException</span> e) {
+                    <span class="kw">return new</span> <span class="cl">CallToolResult</span>(
+                        List.<span class="fn">of</span>(<span class="kw">new</span> <span class="cl">TextContent</span>(<span class="str">"DB error: "</span> + e.<span class="fn">getMessage</span>())),
+                        <span class="kw">true</span>  <span class="cm">// isError = true</span>
+                    );
+                }
+            }
+        );
+
+        <span class="cm">// ── Tool: get product by ID ────────────────────────────</span>
+        <span class="kw">var</span> getByIdTool = <span class="kw">new</span> <span class="cl">Tool</span>(
+            <span class="str">"get_product"</span>,
+            <span class="str">"Get full details for a product by its ID"</span>,
+            <span class="fn">buildGetByIdSchema</span>()
+        );
+
+        <span class="ty">SyncToolSpecification</span> getByIdSpec = <span class="kw">new</span> <span class="cl">SyncToolSpecification</span>(
+            getByIdTool,
+            (exchange, args_) -> {
+                <span class="kw">int</span> id = ((Number) args_.<span class="fn">get</span>(<span class="str">"id"</span>)).<span class="fn">intValue</span>();
+                <span class="kw">try</span> (<span class="ty">Connection</span> conn = DriverManager.<span class="fn">getConnection</span>(DB_URL);
+                     <span class="ty">PreparedStatement</span> ps = conn.<span class="fn">prepareStatement</span>(
+                         <span class="str">"SELECT * FROM products WHERE id = ?"</span>)) {
+                    ps.<span class="fn">setInt</span>(<span class="nu">1</span>, id);
+                    <span class="ty">ResultSet</span> rs = ps.<span class="fn">executeQuery</span>();
+                    <span class="kw">if</span> (rs.<span class="fn">next</span>()) {
+                        <span class="ty">String</span> json = String.<span class="fn">format</span>(
+                            <span class="str">"""
+                            {
+                              "id": %d,
+                              "name": "%s",
+                              "price": %.2f,
+                              "stock": %d,
+                              "description": "%s"
+                            }"""</span>,
+                            rs.<span class="fn">getInt</span>(<span class="str">"id"</span>), rs.<span class="fn">getString</span>(<span class="str">"name"</span>),
+                            rs.<span class="fn">getDouble</span>(<span class="str">"price"</span>), rs.<span class="fn">getInt</span>(<span class="str">"stock"</span>),
+                            rs.<span class="fn">getString</span>(<span class="str">"description"</span>)
+                        );
+                        <span class="kw">return new</span> <span class="cl">CallToolResult</span>(
+                            List.<span class="fn">of</span>(<span class="kw">new</span> <span class="cl">TextContent</span>(json)), <span class="kw">false</span>);
+                    }
+                    <span class="kw">return new</span> <span class="cl">CallToolResult</span>(
+                        List.<span class="fn">of</span>(<span class="kw">new</span> <span class="cl">TextContent</span>(<span class="str">"Product not found: "</span> + id)), <span class="kw">true</span>);
+                } <span class="kw">catch</span> (<span class="ty">SQLException</span> e) {
+                    <span class="kw">return new</span> <span class="cl">CallToolResult</span>(
+                        List.<span class="fn">of</span>(<span class="kw">new</span> <span class="cl">TextContent</span>(<span class="str">"DB error: "</span> + e.<span class="fn">getMessage</span>())), <span class="kw">true</span>);
+                }
+            }
+        );
+
+        <span class="cm">// ── Resource: database stats ───────────────────────────</span>
+        <span class="ty">SyncResourceSpecification</span> statsResource = <span class="kw">new</span> <span class="cl">SyncResourceSpecification</span>(
+            <span class="kw">new</span> <span class="cl">Resource</span>(<span class="str">"db://stats"</span>, <span class="str">"Database Stats"</span>,
+                         <span class="str">"Live product count and inventory stats"</span>,
+                         <span class="str">"application/json"</span>, <span class="kw">null</span>),
+            (exchange, req) -> {
+                <span class="kw">try</span> (<span class="ty">Connection</span> conn = DriverManager.<span class="fn">getConnection</span>(DB_URL);
+                     <span class="ty">Statement</span> stmt = conn.<span class="fn">createStatement</span>()) {
+                    <span class="ty">ResultSet</span> rs = stmt.<span class="fn">executeQuery</span>(
+                        <span class="str">"SELECT COUNT(*) as total, SUM(stock) as stock FROM products"</span>);
+                    rs.<span class="fn">next</span>();
+                    <span class="ty">String</span> json = <span class="str">"""
+                        {"total_products": %d, "total_stock": %d}"""</span>
+                        .<span class="fn">formatted</span>(rs.<span class="fn">getInt</span>(<span class="str">"total"</span>), rs.<span class="fn">getLong</span>(<span class="str">"stock"</span>));
+                    <span class="kw">return new</span> <span class="cl">ReadResourceResult</span>(List.<span class="fn">of</span>(
+                        <span class="kw">new</span> <span class="cl">TextResourceContents</span>(req.<span class="fn">uri</span>(), <span class="str">"application/json"</span>, json)));
+                } <span class="kw">catch</span> (<span class="ty">SQLException</span> e) {
+                    <span class="kw">throw new</span> <span class="cl">RuntimeException</span>(e);
+                }
+            }
+        );
+
+        <span class="cm">// ── Assemble and start the server ─────────────────────</span>
+        <span class="kw">var</span> server = McpServer.<span class="fn">sync</span>(<span class="kw">new</span> <span class="cl">StdioServerTransportProvider</span>())
+            .<span class="fn">serverInfo</span>(<span class="str">"product-db"</span>, <span class="str">"1.0.0"</span>)
+            .<span class="fn">capabilities</span>(ServerCapabilities.<span class="fn">builder</span>()
+                .<span class="fn">tools</span>(<span class="kw">true</span>)
+                .<span class="fn">resources</span>(<span class="kw">true</span>, <span class="kw">false</span>)
+                .<span class="fn">logging</span>()
+                .<span class="fn">build</span>())
+            .<span class="fn">tools</span>(searchSpec, getByIdSpec)
+            .<span class="fn">resources</span>(statsResource)
+            .<span class="fn">build</span>();
+
+        System.err.<span class="fn">println</span>(<span class="str">"ProductDB MCP Server started on stdio"</span>);
+    }
+
+    <span class="kw">private static</span> Schema <span class="fn">buildSearchSchema</span>() {
+        <span class="kw">return new</span> <span class="cl">Schema</span>(Map.<span class="fn">of</span>(
+            <span class="str">"type"</span>, <span class="str">"object"</span>,
+            <span class="str">"properties"</span>, Map.<span class="fn">of</span>(
+                <span class="str">"query"</span>, Map.<span class="fn">of</span>(<span class="str">"type"</span>, <span class="str">"string"</span>, <span class="str">"description"</span>, <span class="str">"Search term"</span>),
+                <span class="str">"limit"</span>, Map.<span class="fn">of</span>(<span class="str">"type"</span>, <span class="str">"integer"</span>, <span class="str">"default"</span>, <span class="nu">10</span>)
+            ),
+            <span class="str">"required"</span>, List.<span class="fn">of</span>(<span class="str">"query"</span>)
+        ));
+    }
+
+    <span class="kw">private static</span> Schema <span class="fn">buildGetByIdSchema</span>() {
+        <span class="kw">return new</span> <span class="cl">Schema</span>(Map.<span class="fn">of</span>(
+            <span class="str">"type"</span>, <span class="str">"object"</span>,
+            <span class="str">"properties"</span>, Map.<span class="fn">of</span>(
+                <span class="str">"id"</span>, Map.<span class="fn">of</span>(<span class="str">"type"</span>, <span class="str">"integer"</span>, <span class="str">"description"</span>, <span class="str">"Product ID"</span>)
+            ),
+            <span class="str">"required"</span>, List.<span class="fn">of</span>(<span class="str">"id"</span>)
+        ));
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ─── SECURITY ─── -->
+<section id="security" class="section">
+  <div class="section-badge badge-red">11 · Security</div>
+  <h2>Security model</h2>
+  <p class="lead">MCP has a layered security model. Understanding it is essential before exposing any real-world data through an MCP server.</p>
+
+  <div class="card-grid">
+    <div class="info-card" style="border-color:rgba(255,107,107,0.3)">
+      <div class="card-icon">🛡️</div>
+      <h4 style="color:var(--accent3)">Tool approval</h4>
+      <p>Hosts can require user approval before executing any tool call. The AI proposes the call; the user confirms it.</p>
+    </div>
+    <div class="info-card" style="border-color:rgba(255,217,61,0.3)">
+      <div class="card-icon">🔒</div>
+      <h4 style="color:var(--accent4)">No key exposure</h4>
+      <p>API keys and secrets live inside the MCP server process. The AI never sees them — only the tool's results.</p>
+    </div>
+    <div class="info-card" style="border-color:rgba(108,142,245,0.3)">
+      <div class="card-icon">📋</div>
+      <h4 style="color:var(--accent)">Capability scoping</h4>
+      <p>Servers declare only what they support. A read-only server declares no tool capabilities — writes are impossible.</p>
+    </div>
+    <div class="info-card" style="border-color:rgba(168,224,99,0.3)">
+      <div class="card-icon">🔍</div>
+      <h4 style="color:var(--accent5)">Audit logging</h4>
+      <p>The <code style="font-size:11px">logging</code> capability lets servers stream structured logs to the host for full audit trails.</p>
+    </div>
+  </div>
+
+  <h3>Input validation in Java</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Java</span>
+      <span class="code-title">Always validate tool inputs — never trust the AI blindly</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="ty">SyncToolSpecification</span> safeSpec = <span class="kw">new</span> <span class="cl">SyncToolSpecification</span>(
+    deleteFileTool,
+    (exchange, args) -> {
+        <span class="ty">String</span> path = (<span class="ty">String</span>) args.<span class="fn">get</span>(<span class="str">"path"</span>);
+
+        <span class="cm">// 1. Validate input is present</span>
+        <span class="kw">if</span> (path == <span class="kw">null</span> || path.<span class="fn">isBlank</span>()) {
+            <span class="kw">return</span> <span class="fn">error</span>(<span class="str">"path is required"</span>);
+        }
+
+        <span class="cm">// 2. Prevent path traversal attacks</span>
+        <span class="ty">Path</span> resolved = Path.<span class="fn">of</span>(<span class="str">"/allowed/base"</span>).<span class="fn">resolve</span>(path).<span class="fn">normalize</span>();
+        <span class="kw">if</span> (!resolved.<span class="fn">startsWith</span>(<span class="str">"/allowed/base"</span>)) {
+            <span class="kw">return</span> <span class="fn">error</span>(<span class="str">"Path traversal not allowed"</span>);
+        }
+
+        <span class="cm">// 3. Check file exists before acting</span>
+        <span class="kw">if</span> (!Files.<span class="fn">exists</span>(resolved)) {
+            <span class="kw">return</span> <span class="fn">error</span>(<span class="str">"File not found: "</span> + path);
+        }
+
+        <span class="cm">// 4. Log the action for audit trail</span>
+        exchange.<span class="fn">loggingNotification</span>(LoggingMessageNotification.<span class="fn">builder</span>()
+            .<span class="fn">level</span>(LoggingLevel.WARNING)
+            .<span class="fn">data</span>(<span class="str">"Deleting file: "</span> + resolved)
+            .<span class="fn">build</span>());
+
+        Files.<span class="fn">delete</span>(resolved);
+        <span class="kw">return</span> <span class="fn">success</span>(<span class="str">"Deleted: "</span> + path);
+    }
+);</pre>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Prompt injection risk</strong>Malicious content in files or databases can attempt to hijack the AI's behaviour. Always sanitise content before returning it as a tool result — especially when the AI will act on the output.</p>
+  </div>
+</section>
+
+<!-- ─── DEMO ─── -->
+<section id="demo" class="section">
+  <div class="section-badge badge-teal">12 · Interactive Demo</div>
+  <h2>Interactive protocol demo</h2>
+  <p class="lead">Simulate MCP message exchange in real time. Type a prompt, watch the client send JSON-RPC messages, the server process them, and return results.</p>
+
+  <div class="demo-box">
+    <div class="demo-header">
+      <div class="demo-dot" style="background:#FF6B6B"></div>
+      <div class="demo-dot" style="background:#FFD93D"></div>
+      <div class="demo-dot" style="background:#A8E063"></div>
+      <span>MCP Protocol Simulator</span>
+    </div>
+    <div class="demo-body">
+      <div class="demo-input-row">
+        <input class="demo-input" id="demoInput" placeholder="Type a command: list tools · call read_file · call send_email · call search_products · get resource" value="list tools"/>
+        <button class="demo-send" onclick="runDemo()">Send ▶</button>
+      </div>
+      <div class="demo-log" id="demoLog">
+        <div class="log-entry"><span class="log-time">[ready]</span> <span style="color:var(--muted)">MCP Protocol Simulator — type a command above and press Send</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pill-row">
+    <span class="pill" style="cursor:pointer;color:var(--accent2);border-color:rgba(78,205,196,0.3);background:rgba(78,205,196,0.08)" onclick="setDemo('list tools')">list tools</span>
+    <span class="pill" style="cursor:pointer;color:var(--accent);border-color:rgba(108,142,245,0.3);background:rgba(108,142,245,0.08)" onclick="setDemo('call read_file')">call read_file</span>
+    <span class="pill" style="cursor:pointer;color:var(--accent4);border-color:rgba(255,217,61,0.3);background:rgba(255,217,61,0.08)" onclick="setDemo('call send_email')">call send_email</span>
+    <span class="pill" style="cursor:pointer;color:var(--purple);border-color:rgba(155,126,219,0.3);background:rgba(155,126,219,0.08)" onclick="setDemo('call search_products')">call search_products</span>
+    <span class="pill" style="cursor:pointer;color:var(--accent5);border-color:rgba(168,224,99,0.3);background:rgba(168,224,99,0.08)" onclick="setDemo('get resource')">get resource</span>
+    <span class="pill" style="cursor:pointer;color:var(--accent3);border-color:rgba(255,107,107,0.3);background:rgba(255,107,107,0.08)" onclick="setDemo('error demo')">error demo</span>
+  </div>
+</section>
+
+<!-- ─── COMPARE ─── -->
+<section id="compare" class="section">
+  <div class="section-badge badge-yellow">13 · Comparison</div>
+  <h2>MCP vs alternatives</h2>
+  <p class="lead">How does MCP compare to other approaches for giving AI models access to external tools and data?</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>MCP</th><th>Function Calling</th><th>LangChain Tools</th><th>Custom APIs</th></tr></thead>
+      <tbody>
+        <tr><td>Standardised protocol</td><td>✅ Yes</td><td>❌ Per-model</td><td>❌ Framework-specific</td><td>❌ Bespoke</td></tr>
+        <tr><td>Works across AI models</td><td>✅ Yes</td><td>❌ Vendor lock-in</td><td>⚠️ With adapters</td><td>✅ Yes</td></tr>
+        <tr><td>Bidirectional comms</td><td>✅ Yes</td><td>❌ No</td><td>❌ No</td><td>⚠️ Webhooks</td></tr>
+        <tr><td>Resource/data exposure</td><td>✅ Built-in</td><td>❌ Manual</td><td>⚠️ Limited</td><td>✅ Manual</td></tr>
+        <tr><td>Server-side prompts</td><td>✅ Built-in</td><td>❌ No</td><td>⚠️ Limited</td><td>✅ Manual</td></tr>
+        <tr><td>Reuse existing servers</td><td>✅ Yes</td><td>❌ No</td><td>❌ No</td><td>❌ No</td></tr>
+        <tr><td>Java SDK</td><td>✅ Official</td><td>✅ Per vendor</td><td>✅ Yes</td><td>✅ Yes</td></tr>
+        <tr><td>User approval flow</td><td>✅ Built-in</td><td>❌ Manual</td><td>❌ Manual</td><td>❌ Manual</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <p><strong>Bottom line</strong>MCP wins when you want <em>portability</em> — build once, use with any MCP-compatible AI. Function calling wins when you need tight vendor-specific control. Use LangChain when you're already in that ecosystem and don't need cross-model support.</p>
+  </div>
+
+  <h3>When to choose MCP</h3>
+  <div class="card-grid">
+    <div class="info-card">
+      <div class="card-icon">✅</div>
+      <h4>Use MCP when...</h4>
+      <p>You want tools reusable across Claude, GPT, and others. You need real-time server-to-client push. You want a standard audit and approval flow.</p>
+    </div>
+    <div class="info-card">
+      <div class="card-icon">⚠️</div>
+      <h4>Consider alternatives when...</h4>
+      <p>You're locked to one AI provider. Performance is critical and you need zero protocol overhead. You have an existing tool system that works well.</p>
+    </div>
+  </div>
+</section>
+
+</main>
 </div>
 
+<script>
+// ── Navigation ──
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const section = document.getElementById(id);
+  if (section) {
+    section.classList.add('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(`'${id}'`)) {
+      n.classList.add('active');
+    }
+  });
+}
+
+// ── Tabs ──
+function switchTab(group, id) {
+  document.querySelectorAll(`[id^="${group}-"]`).forEach(p => p.classList.remove('active'));
+  document.getElementById(`${group}-${id}`).classList.add('active');
+  const panels = document.querySelectorAll(`[id^="${group}-"]`);
+  const tabs = [];
+  panels.forEach((_, i) => { const t = document.querySelectorAll(`[onclick*="switchTab('${group}'"]`)[i]; if(t) tabs.push(t); });
+  document.querySelectorAll(`[onclick*="switchTab('${group}'"]`).forEach(t => t.classList.remove('active'));
+  const activeBtn = document.querySelector(`[onclick="switchTab('${group}', '${id}')"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+// ── Stepper ──
+const steppers = {};
+function initStepper(name) {
+  const panels = document.querySelectorAll(`[data-stepper="${name}"]`);
+  const count = panels.length;
+  steppers[name] = { current: 0, count };
+  const dotsEl = document.getElementById(`${name}-dots`);
+  for (let i = 0; i < count; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'step-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goStep(name, i);
+    dot.style.cursor = 'pointer';
+    dotsEl.appendChild(dot);
+  }
+  updateIndicator(name);
+}
+function goStep(name, idx) {
+  const panels = document.querySelectorAll(`[data-stepper="${name}"]`);
+  panels.forEach(p => p.classList.remove('active'));
+  panels[idx].classList.add('active');
+  steppers[name].current = idx;
+  document.querySelectorAll(`#${name}-dots .step-dot`).forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  updateIndicator(name);
+}
+function nextStep(name) {
+  const { current, count } = steppers[name];
+  goStep(name, Math.min(current + 1, count - 1));
+}
+function prevStep(name) {
+  const { current } = steppers[name];
+  goStep(name, Math.max(current - 1, 0));
+}
+function updateIndicator(name) {
+  const { current, count } = steppers[name];
+  const el = document.getElementById(`${name}-indicator`);
+  if (el) el.textContent = `Step ${current + 1} of ${count}`;
+}
+initStepper('lc');
+
+// ── Copy code ──
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+// ── Demo simulator ──
+let msgId = 1;
+const log = document.getElementById('demoLog');
+
+function ts() {
+  return new Date().toLocaleTimeString('en', { hour12: false });
+}
+function addLog(cls, msg) {
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.innerHTML = msg;
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setDemo(val) {
+  document.getElementById('demoInput').value = val;
+}
+
+async function runDemo() {
+  const cmd = document.getElementById('demoInput').value.trim().toLowerCase();
+  addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-client">CLIENT ▶</span> <span style="color:var(--text)">${cmd}</span>`);
+
+  await delay(300);
+
+  if (cmd === 'list tools') {
+    const req = { jsonrpc:'2.0', id: msgId++, method:'tools/list', params:{} };
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-client">CLIENT→SERVER</span> <span class="log-tool">${JSON.stringify(req)}</span>`);
+    await delay(500);
+    const resp = {
+      jsonrpc:'2.0', id: req.id,
+      result: { tools: [
+        { name:'read_file', description:'Read a file from disk' },
+        { name:'send_email', description:'Send an email' },
+        { name:'search_products', description:'Search product catalog' }
+      ]}
+    };
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER→CLIENT</span> <span class="log-result">${JSON.stringify(resp)}</span>`);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-result">✓ Found 3 tools: read_file, send_email, search_products</span>`);
+
+  } else if (cmd.includes('read_file')) {
+    const req = { jsonrpc:'2.0', id: msgId++, method:'tools/call', params:{ name:'read_file', arguments:{ path:'/tmp/hello.txt' }}};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-client">CLIENT→SERVER</span> <span class="log-tool">${JSON.stringify(req)}</span>`);
+    await delay(400);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER</span> <span style="color:var(--muted)">→ reading /tmp/hello.txt from disk...</span>`);
+    await delay(300);
+    const resp = { jsonrpc:'2.0', id: req.id, result:{ content:[{ type:'text', text:'Hello from MCP! File read successfully.' }], isError:false }};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER→CLIENT</span> <span class="log-result">${JSON.stringify(resp)}</span>`);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-result">✓ Tool result: "Hello from MCP! File read successfully."</span>`);
+
+  } else if (cmd.includes('send_email')) {
+    const req = { jsonrpc:'2.0', id: msgId++, method:'tools/call', params:{ name:'send_email', arguments:{ to:'alice@example.com', subject:'Hello', body:'Test from MCP' }}};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-client">CLIENT→SERVER</span> <span class="log-tool">${JSON.stringify(req)}</span>`);
+    await delay(200);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER</span> <span style="color:var(--accent4)">⚠ Awaiting user approval for side-effecting tool...</span>`);
+    await delay(800);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span style="color:var(--accent5)">USER</span> <span style="color:var(--text)">✓ Approved</span>`);
+    await delay(400);
+    const resp = { jsonrpc:'2.0', id: req.id, result:{ content:[{ type:'text', text:'Email sent to alice@example.com' }], isError:false }};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER→CLIENT</span> <span class="log-result">${JSON.stringify(resp)}</span>`);
+
+  } else if (cmd.includes('search_products')) {
+    const req = { jsonrpc:'2.0', id: msgId++, method:'tools/call', params:{ name:'search_products', arguments:{ query:'laptop', limit:3 }}};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-client">CLIENT→SERVER</span> <span class="log-tool">${JSON.stringify(req)}</span>`);
+    await delay(600);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER</span> <span style="color:var(--muted)">→ querying PostgreSQL: SELECT ... WHERE name ILIKE '%laptop%' LIMIT 3</span>`);
+    await delay(400);
+    const result = 'ID: 1 | ThinkPad X1 | $1299.99 | Stock: 42\nID: 2 | MacBook Air M3 | $1099.00 | Stock: 18\nID: 3 | Dell XPS 15 | $1549.00 | Stock: 7';
+    const resp = { jsonrpc:'2.0', id: req.id, result:{ content:[{ type:'text', text: result }], isError:false }};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER→CLIENT</span> <span class="log-result">${JSON.stringify(resp)}</span>`);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-result">✓ Found 3 products matching "laptop"</span>`);
+
+  } else if (cmd.includes('resource')) {
+    const req = { jsonrpc:'2.0', id: msgId++, method:'resources/read', params:{ uri:'db://stats' }};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-client">CLIENT→SERVER</span> <span class="log-tool">${JSON.stringify(req)}</span>`);
+    await delay(500);
+    const resp = { jsonrpc:'2.0', id: req.id, result:{ contents:[{ uri:'db://stats', mimeType:'application/json', text:'{"total_products":1247,"total_stock":8934}' }]}};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER→CLIENT</span> <span class="log-result">${JSON.stringify(resp)}</span>`);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-result">✓ Resource content: 1247 products, 8934 units in stock</span>`);
+
+  } else if (cmd.includes('error')) {
+    const req = { jsonrpc:'2.0', id: msgId++, method:'tools/call', params:{ name:'read_file', arguments:{ path:'../../../etc/passwd' }}};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-client">CLIENT→SERVER</span> <span class="log-tool">${JSON.stringify(req)}</span>`);
+    await delay(400);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER</span> <span style="color:var(--accent4)">⚠ Path traversal detected: ../../../etc/passwd</span>`);
+    await delay(200);
+    const resp = { jsonrpc:'2.0', id: req.id, result:{ content:[{ type:'text', text:'Error: Path traversal not allowed' }], isError:true }};
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-server">SERVER→CLIENT</span> <span class="log-error">${JSON.stringify(resp)}</span>`);
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-error">✗ isError=true — security violation blocked</span>`);
+
+  } else {
+    addLog('', `<span class="log-time">[${ts()}]</span> <span class="log-error">Unknown command. Try: list tools · call read_file · call send_email · get resource · error demo</span>`);
+  }
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+document.getElementById('demoInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') runDemo();
+});
+</script>
 </body>
 </html>
