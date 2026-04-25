@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Interface vs Abstract Class Visualizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        h2 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        p.subtitle {
+            color: #666;
+            margin-bottom: 40px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .row {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        .box {
+            padding: 20px 30px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        /* Categories */
+        .abstract-class {
+            background-color: #e3f2fd;
+            border: 3px solid #1976d2;
+            color: #1565c0;
+        }
+        .abstract-class::before { content: 'Abstract Class'; font-size: 0.75rem; display: block; margin-bottom: 5px; opacity: 0.8; }
+
+        .interface {
+            background-color: #e8f5e9;
+            border: 3px solid #388e3c;
+            color: #2e7d32;
+        }
+        .interface::before { content: 'Interface'; font-size: 0.75rem; display: block; margin-bottom: 5px; opacity: 0.8; }
+
+        .concrete-class {
+            background-color: #fff3e0;
+            border: 3px solid #f57c00;
+            color: #e65100;
+            cursor: pointer;
+        }
+        .concrete-class::before { content: 'Concrete Class'; font-size: 0.75rem; display: block; margin-bottom: 5px; opacity: 0.8; }
+        .concrete-class:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Highlighting States */
+        .active-isa {
+            background-color: #1976d2 !important;
+            color: white !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #1976d2;
+        }
+        .active-cando {
+            background-color: #388e3c !important;
+            color: white !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #388e3c;
+        }
+
+        .legend {
+            margin-top: 50px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 600px;
+        }
+        .legend div {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>IS-A vs CAN-DO Visualizer</h2>
+    <p class="subtitle">Click on the bottom classes to see their core identity (IS-A) and abilities (CAN-DO).</p>
+
+    <div class="container">
+        <!-- Top Row: The Rules (Abstract Classes & Interfaces) -->
+        <div class="row">
+            <div class="box abstract-class" id="animal">Animal<br><span style="font-size:0.8rem; font-weight:normal;">(State: age, name)</span></div>
+            <div class="box abstract-class" id="machine">Machine<br><span style="font-size:0.8rem; font-weight:normal;">(State: batteryLevel)</span></div>
+            
+            <div class="box interface" id="flyable">Flyable<br><span style="font-size:0.8rem; font-weight:normal;">(Behavior: fly())</span></div>
+            <div class="box interface" id="swimmable">Swimmable<br><span style="font-size:0.8rem; font-weight:normal;">(Behavior: swim())</span></div>
+        </div>
+
+        <!-- Space for visual flow -->
+        <div style="height: 20px;"></div>
+
+        <!-- Bottom Row: The Objects (Concrete Classes) -->
+        <div class="row">
+            <div class="box concrete-class" onclick="highlight('dog')">Dog</div>
+            <div class="box concrete-class" onclick="highlight('duck')">Duck</div>
+            <div class="box concrete-class" onclick="highlight('drone')">Drone</div>
+            <div class="box concrete-class" onclick="highlight('submarine')">Submarine</div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <strong>Relationship Key:</strong>
+        <div><div class="color-box" style="background:#1976d2;"></div> <strong>extends</strong> (IS-A Relationship) - Only ONE allowed per class.</div>
+        <div><div class="color-box" style="background:#388e3c;"></div> <strong>implements</strong> (CAN-DO Relationship) - MULTIPLE allowed per class.</div>
+    </div>
+
+    <script>
+        // Data mapping the relationships
+        const relationships = {
+            'dog': { isA: ['animal'], canDo: ['swimmable'] },
+            'duck': { isA: ['animal'], canDo: ['flyable', 'swimmable'] },
+            'drone': { isA: ['machine'], canDo: ['flyable'] },
+            'submarine': { isA: ['machine'], canDo: ['swimmable'] }
+        };
+
+        function highlight(className) {
+            // Reset all highlights
+            document.querySelectorAll('.box').forEach(el => {
+                el.classList.remove('active-isa', 'active-cando');
+            });
+
+            const rel = relationships[className];
+
+            // Highlight Abstract Class (IS-A)
+            rel.isA.forEach(id => {
+                document.getElementById(id).classList.add('active-isa');
+            });
+
+            // Highlight Interfaces (CAN-DO)
+            rel.canDo.forEach(id => {
+                document.getElementById(id).classList.add('active-cando');
+            });
+        }
+    </script>
+</body>
+</html>
