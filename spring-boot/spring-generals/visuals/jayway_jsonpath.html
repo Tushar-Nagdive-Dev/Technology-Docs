@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jayway JsonPath Cheat Sheet</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+        h1 {
+            color: #58a6ff;
+            text-align: center;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 15px;
+        }
+        h2 { color: #7ee787; margin-top: 40px; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #161b22;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+        }
+        th { background-color: #21262d; color: #58a6ff; }
+        td.code { font-family: monospace; color: #ff7b72; font-weight: bold; width: 25%; }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background-color: #161b22;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #d2a8ff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .card h3 { margin-top: 0; color: #d2a8ff; font-family: monospace; }
+        .card code {
+            display: block;
+            background: #0d1117;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            color: #a5d6ff;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Jayway JsonPath Cheat Sheet</h1>
+
+    <h2>1. Core Syntax (The Path)</h2>
+    <table>
+        <tr><th>Operator</th><th>Description</th></tr>
+        <tr><td class="code">$</td><td>The root element to start the query.</td></tr>
+        <tr><td class="code">@</td><td>The current node being processed (used in filters).</td></tr>
+        <tr><td class="code">*</td><td>Wildcard. Returns all elements regardless of their names.</td></tr>
+        <tr><td class="code">..</td><td>Deep scan. Searches for a key anywhere down the tree.</td></tr>
+        <tr><td class="code">.&lt;name&gt;</td><td>Child operator. (e.g., <code>$.store</code>)</td></tr>
+        <tr><td class="code">[&lt;number&gt;]</td><td>Array index. (e.g., <code>$.book[2]</code>)</td></tr>
+        <tr><td class="code">[start:end]</td><td>Array slice operator. (e.g., <code>$.book[0:2]</code>)</td></tr>
+        <tr><td class="code">[?(&lt;expression&gt;)]</td><td>Filter expression to match specific criteria.</td></tr>
+    </table>
+
+    <h2>2. Useful Filter Examples</h2>
+    <table>
+        <tr><th>Filter Path</th><th>What it does</th></tr>
+        <tr><td class="code">$.store.book[?(@.price &lt; 10)]</td><td>Books where the price is less than 10.</td></tr>
+        <tr><td class="code">$.store.book[?(@.author == 'Nigel')]</td><td>Books written by exactly 'Nigel'.</td></tr>
+        <tr><td class="code">$.store.book[?(@.title =~ /.*Sword.*/i)]</td><td>Regex: Books with 'Sword' in title (case insensitive).</td></tr>
+        <tr><td class="code">$.store.book[?(@.isbn)]</td><td>Books that possess the 'isbn' key (regardless of value).</td></tr>
+        <tr><td class="code">$..book[?(@.price &lt; 10 &amp;&amp; @.category == 'fiction')]</td><td>Multiple conditions using AND.</td></tr>
+    </table>
+
+    <h2>3. Java API Operations (DocumentContext)</h2>
+    <div class="card-grid">
+        <div class="card">
+            <h3>read(path)</h3>
+            <p>Extracts data based on the path.</p>
+            <code>String name = ctx.read("$.user.name");</code>
+        </div>
+        <div class="card">
+            <h3>set(path, newValue)</h3>
+            <p>Updates an existing value.</p>
+            <code>ctx.set("$.user.age", 30);</code>
+        </div>
+        <div class="card">
+            <h3>put(path, key, value)</h3>
+            <p>Adds a new key-value to an Object.</p>
+            <code>ctx.put("$.user", "status", "active");</code>
+        </div>
+        <div class="card">
+            <h3>add(path, value)</h3>
+            <p>Appends a new element to an Array.</p>
+            <code>ctx.add("$.user.roles", "ADMIN");</code>
+        </div>
+        <div class="card">
+            <h3>delete(path)</h3>
+            <p>Removes the node entirely.</p>
+            <code>ctx.delete("$.user.password");</code>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
