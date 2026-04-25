@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Java Stream teeing() · Interactive Guide & Demos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #f6f9fc 0%, #eef2f5 100%);
+            color: #1a2c3e;
+            padding: 2rem 1.5rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* header & cards */
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #1E3C72, #2A5298);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #2c5a7a;
+            max-width: 720px;
+            margin: 0.5rem auto 0;
+        }
+
+        .badge {
+            background: #e9ecef;
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2c5282;
+            margin-top: 0.75rem;
+        }
+
+        /* cards layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            padding: 1.5rem 1.8rem;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 24px 36px -12px rgba(0,0,0,0.12);
+            background: white;
+        }
+
+        .card h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border-left: 5px solid #3b82f6;
+            padding-left: 1rem;
+            color: #0f3b5c;
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            margin: 1.2rem 0 0.5rem 0;
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem 1.2rem;
+            border-radius: 1rem;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 1rem 0;
+            box-shadow: inset 0 0 0 1px #334155;
+        }
+
+        .inline-code {
+            background: #eef2ff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #1e40af;
+        }
+
+        hr {
+            margin: 1.2rem 0;
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, #cbd5e1, transparent);
+        }
+
+        .demo-area {
+            margin-top: 1rem;
+            background: #f8fafc;
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+        }
+
+        input, select, button {
+            font-family: inherit;
+            font-size: 0.95rem;
+            padding: 0.6rem 0.9rem;
+            border-radius: 1.2rem;
+            border: 1px solid #cbd5e1;
+            background: white;
+            transition: 0.15s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        button {
+            background: #2c5282;
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            background: #1e3a5f;
+            transform: scale(0.98);
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .result-box {
+            background: #ffffffdb;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 4px solid #3b82f6;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+            margin-top: 0.7rem;
+        }
+
+        .stat-card {
+            background: #f1f5f9;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+        }
+
+        .value {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5b6e8c;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 1.8rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚡ Java Stream · <span style="background: #1e293b; color: white; padding: 0 0.4rem; border-radius: 12px;">teeing()</span> collector</h1>
+        <p>One stream, two collectors, one elegant merge — process data in a single pass without compromise</p>
+        <div class="badge">📌 Java 12+ · dual aggregation · production-ready pattern</div>
+    </div>
+
+    <!-- explanation + mechanics -->
+    <div class="grid-2">
+        <div class="card">
+            <h2>🧠 What is <span class="inline-code">teeing()</span> ?</h2>
+            <p><span class="inline-code">Collectors.teeing(downstream1, downstream2, merger)</span> combines two collectors into one. The stream is traversed <strong>once</strong>, each element is fed to <strong>both</strong> downstream collectors simultaneously. After processing all elements, the merger function combines the two results.</p>
+            <div class="code-block">
+                // signature
+                public static &lt;T, R1, R2, R&gt; Collector&lt;T, ?, R&gt; teeing(
+                    Collector&lt;? super T, ?, R1&gt; downstream1,
+                    Collector&lt;? super T, ?, R2&gt; downstream2,
+                    BiFunction&lt;? super R1, ? super R2, R&gt; merger
+                )
+            </div>
+            <h3>⚙️ Internal mechanics</h3>
+            <ul style="margin-left: 1.4rem; margin-top: 0.3rem; color: #2d3e50;">
+                <li>✔ Two separate accumulators (one per collector)</li>
+                <li>✔ Each element → both accumulators (single iteration)</li>
+                <li>✔ Final step: merger(R1, R2) → R</li>
+                <li>✔ Works in parallel streams (if downstream collectors are concurrent)</li>
+            </ul>
+            <h3>🏭 Production superpowers</h3>
+            <ul style="margin-left: 1.4rem;">
+                <li>🚀 <strong>One-pass reports</strong> – total + average, min + max, count + distinct</li>
+                <li>📁 <strong>Non-rewindable sources</strong> (files, network, Kafka streams) – process once</li>
+                <li>🧪 <strong>Validation rules</strong> e.g., sum of squares vs square of sum</li>
+                <li>⚡ <strong>Parallel efficiency</strong> – combine complex aggregations in accurate way</li>
+                <li>🧩 <strong>Nested teeing</strong> for three or more metrics</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h2>🎮 Interactive simulator</h2>
+            <p>Below: <strong>simulate teeing behavior</strong> on a list of integers. We'll traverse the array <strong>exactly once</strong> and compute <strong>two aggregates</strong> in parallel, then merge them – exactly how Java's <code>teeing()</code> works.</p>
+            <div class="demo-area">
+                <label style="font-weight: 500;">📋 Numbers (comma or space separated):</label>
+                <input type="text" id="numbersInput" value="12, 45, 67, 23, 9, 31, 18, 52" style="width: 100%; margin-top: 6px;">
+                <div class="flex-row">
+                    <select id="teeingScenario">
+                        <option value="sumCount">📊 Sum + Count → Average (merger returns average)</option>
+                        <option value="minMax">🏆 Min + Max → Range description</option>
+                        <option value="sumSquares">🔢 Sum + Sum of Squares → variance-like check</option>
+                        <option value="firstLast">📌 First element + Last element → edge tuple</option>
+                        <option value="nestedTee">🌀 Nested teeing: sum, count, product (three metrics)</option>
+                    </select>
+                    <button id="runTeeingBtn">▶ Apply teeing() simulation</button>
+                </div>
+                <div id="simulationResult" class="result-box">
+                    ⚡ Click "Apply" to see single‑pass dual aggregation.
+                </div>
+                <div class="code-block" id="javaSnippetBlock" style="font-size: 0.75rem; margin-top: 0.8rem;">
+                    // Java code equivalent will appear here
+                </div>
+            </div>
+            <p style="font-size: 0.8rem; margin-top: 0.8rem;">💡 Under the hood: we use a single <span class="inline-code">for</span> loop updating two accumulators → exactly what <code>teeing()</code> does internally.</p>
+        </div>
+    </div>
+
+    <!-- advanced real-world showcase -->
+    <div class="grid-2">
+        <div class="card">
+            <h2>📈 Use case: Report generation</h2>
+            <p>Imagine processing transactions from a log file: you need <strong>total amount</strong> and <strong>max transaction value</strong> for fraud checks, without scanning twice. <code>teeing()</code> makes it trivial:</p>
+            <div class="code-block">
+                // Java real example
+                record Transaction(double amount, String id) {}
+                
+                var stats = transactions.stream().collect(teeing(
+                    summingDouble(Transaction::amount),
+                    maxBy(Comparator.comparingDouble(Transaction::amount)),
+                    (total, maxTx) -> new Report(total, maxTx.orElse(null))
+                ));
+            </div>
+            <div style="background: #eef2ff; border-radius: 1rem; padding: 0.5rem 1rem; margin-top: 0.5rem;">
+                <strong>✨ Why better?</strong> Avoids second stream scan -> less I/O, deterministic for infinite or non-replayable streams.
+            </div>
+        </div>
+        <div class="card">
+            <h2>🧬 Nested teeing (3+ metrics)</h2>
+            <p>You can nest <code>teeing()</code> to handle three aggregates in one go. For example: <strong>sum, count, product</strong> of elements.</p>
+            <div class="code-block">
+                // three metrics using nesting
+                var result = numbers.stream().collect(teeing(
+                    summingInt(i -> i),
+                    teeing(
+                        counting(),
+                        reducing(1, (a,b) -> a * b),
+                        (cnt, prod) -> new Pair(cnt, prod)
+                    ),
+                    (sum, pair) -> new Triple(sum, pair.cnt, pair.prod)
+                ));
+            </div>
+            <p>Interactive demo includes a nested teeing option (sum, count, product). <strong>All computed in one pass!</strong></p>
+            <hr>
+            <h3>⚡ Parallel streams ready</h3>
+            <p>Both downstream collectors can benefit from fork-join pool when using <code>.parallelStream()</code>. Single teeing collector shares the stream spliterator without double parallel overhead.</p>
+        </div>
+    </div>
+
+    <!-- extra: when to avoid / best practices -->
+    <div class="card" style="margin-top: 0.2rem;">
+        <h2>🔍 Best practices & caveats in production</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between;">
+            <div style="flex: 1;">
+                <span style="font-weight: 700;">✅ Perfect for:</span>
+                <ul style="margin-top: 0.5rem;">
+                    <li>statistical summaries (avg, sum, min, max, count)</li>
+                    <li>validation rules across one dataset</li>
+                    <li>enriching DTOs with derived fields</li>
+                </ul>
+            </div>
+            <div style="flex: 1;">
+                <span style="font-weight: 700;">⚠️ Watch out:</span>
+                <ul style="margin-top: 0.5rem;">
+                    <li>Avoid stateful collectors with side-effects</li>
+                    <li>Merger runs once – don't modify external state</li>
+                    <li>For many aggregations (>3), consider custom collector or record</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        🧪 Interactive simulation mimics Java’s <code>Collectors.teeing()</code> — single iteration, dual reduction + merge. 
+        All results calculated in one loop over your data. Java 12+ code shown is fully runnable in any project.
+    </footer>
+</div>
+
+<script>
+    (function() {
+        const numbersInput = document.getElementById('numbersInput');
+        const scenarioSelect = document.getElementById('teeingScenario');
+        const runBtn = document.getElementById('runTeeingBtn');
+        const simulationResultDiv = document.getElementById('simulationResult');
+        const javaSnippetBlock = document.getElementById('javaSnippetBlock');
+
+        // helper: parse numbers from comma/space separated list
+        function parseNumbers(inputStr) {
+            const cleaned = inputStr.replace(/\s+/g, ',').split(',').filter(s => s.trim().length > 0);
+            const nums = [];
+            for (let part of cleaned) {
+                const num = Number(part.trim());
+                if (!isNaN(num) && isFinite(num)) {
+                    nums.push(num);
+                }
+            }
+            return nums;
+        }
+
+        // Single-pass simulation: given array, compute two aggregates based on scenario
+        // returns { resultDisplay, javaCode, details }
+        function simulateTeeing(numbers, scenario) {
+            if (numbers.length === 0) {
+                return {
+                    resultDisplay: "⚠️ No valid numbers provided. Please enter at least one number.",
+                    javaCode: "// No data to process",
+                    details: null
+                };
+            }
+
+            // 1) Sum + Count scenario (merged to average)
+            if (scenario === "sumCount") {
+                let sum = 0;
+                let count = 0;
+                for (let n of numbers) {
+                    sum += n;
+                    count++;
+                }
+                const average = sum / count;
+                const resultStr = `📐 Sum = ${sum}  |  Count = ${count}  →  Average = ${average.toFixed(4)}`;
+                const javaCode = `// Java equivalent using teeing()
+List<Integer> numbers = Arrays.asList(${numbers.join(", ")});
+var average = numbers.stream().collect(teeing(
+    summingInt(Integer::intValue),
+    counting(),
+    (sum, cnt) -> sum / (double) cnt
+));
+// result: ${average.toFixed(4)}`;
+                return { resultDisplay: resultStr, javaCode: javaCode, details: { sum, count, average } };
+            }
+            // 2) Min + Max scenario
+            else if (scenario === "minMax") {
+                let min = Infinity;
+                let max = -Infinity;
+                for (let n of numbers) {
+                    if (n < min) min = n;
+                    if (n > max) max = n;
+                }
+                const resultStr = `🏅 Minimum = ${min}  |  Maximum = ${max}  →  Range: [${min}, ${max}]`;
+                const javaCode = `// Find min and max in one pass with teeing()
+var minMax = numbers.stream().collect(teeing(
+    minBy(Integer::compareTo),
+    maxBy(Integer::compareTo),
+    (minOpt, maxOpt) -> "Min=" + minOpt.get() + ", Max=" + maxOpt.get()
+));
+// => ${resultStr}`;
+                return { resultDisplay: resultStr, javaCode: javaCode, details: { min, max } };
+            }
+            // 3) Sum of elements + Sum of squares -> (sum^2, sumSq) relation
+            else if (scenario === "sumSquares") {
+                let sum = 0;
+                let sumSq = 0;
+                for (let n of numbers) {
+                    sum += n;
+                    sumSq += n * n;
+                }
+                const diff = (sum * sum) - sumSq;
+                const resultStr = `Σx = ${sum}  |  Σx² = ${sumSq}  →  (Σx)² - Σx² = ${diff}  |  variance indicator = ${(sumSq - (sum*sum)/numbers.length).toFixed(2)}`;
+                const javaCode = `// Teeing: sum of values and sum of squares
+var stats = numbers.stream().collect(teeing(
+    summingInt(Integer::intValue),
+    summingInt(n -> n * n),
+    (sum, sumSq) -> "Σ=" + sum + ", Σ²=" + sumSq
+));
+// => ${resultStr}`;
+                return { resultDisplay: resultStr, javaCode: javaCode, details: { sum, sumSq } };
+            }
+            // 4) First + Last element (like edge collector)
+            else if (scenario === "firstLast") {
+                let first = numbers[0];
+                let last = numbers[numbers.length - 1];
+                const resultStr = `🎯 First element = ${first}  |  Last element = ${last}  →  Pair: (${first}, ${last})`;
+                const javaCode = `// Using teeing with custom collectors: first and last
+var edges = numbers.stream().collect(teeing(
+    Collectors.collectingAndThen(Collectors.toList(), list -> list.get(0)),
+    Collectors.collectingAndThen(Collectors.toList(), list -> list.get(list.size() - 1)),
+    (f, l) -> "First=" + f + ", Last=" + l
+));
+// => ${resultStr}`;
+                return { resultDisplay: resultStr, javaCode: javaCode, details: { first, last } };
+            }
+            // 5) Nested teeing: sum + count + product (three metrics)
+            else if (scenario === "nestedTee") {
+                let sum = 0;
+                let count = 0;
+                let product = 1;
+                let hasZero = false;
+                for (let n of numbers) {
+                    sum += n;
+                    count++;
+                    product *= n;
+                    if (n === 0) hasZero = true;
+                }
+                const productStr = hasZero ? "0 (contains zero)" : product.toString();
+                const resultStr = `🌀 Sum = ${sum} | Count = ${count} | Product = ${productStr}\n  → single pass over ${count} elements.`;
+                const javaCode = `// Three metrics using nested teeing()
+var result = numbers.stream().collect(teeing(
+    summingInt(Integer::intValue),
+    teeing(
+        counting(),
+        reducing(1L, (a, b) -> a * b),
+        (cnt, prod) -> "count=" + cnt + ", product=" + prod
+    ),
+    (sum, pair) -> "Sum=" + sum + ", " + pair
+));
+// => Sum=${sum}, count=${count}, product=${productStr}`;
+                return { resultDisplay: resultStr, javaCode: javaCode, details: { sum, count, product: productStr } };
+            }
+            return { resultDisplay: "Unknown scenario", javaCode: "//" };
+        }
+
+        // update UI with result and Java code snippet
+        function updateSimulation() {
+            const rawInput = numbersInput.value;
+            const numbers = parseNumbers(rawInput);
+            const scenario = scenarioSelect.value;
+            const { resultDisplay, javaCode } = simulateTeeing(numbers, scenario);
+            simulationResultDiv.innerHTML = `<div style="font-weight: 500;">✨ Result (single pass simulation)</div><div style="margin-top: 8px;">${resultDisplay}</div>`;
+            javaSnippetBlock.textContent = javaCode;
+        }
+
+        // additional note: also highlight the single-pass nature visually
+        function highlightSinglePass() {
+            const numbers = parseNumbers(numbersInput.value);
+            const scenario = scenarioSelect.value;
+            if (numbers.length === 0) return;
+            // just an extra visual note
+            const msg = `✓ Processed ${numbers.length} elements in 1 loop → both collectors updated simultaneously.`;
+            if (!simulationResultDiv.innerHTML.includes(msg) && numbers.length > 0) {
+                const footerNote = document.createElement('div');
+                footerNote.style.fontSize = '0.75rem';
+                footerNote.style.marginTop = '10px';
+                footerNote.style.color = '#2c6b2f';
+                footerNote.innerHTML = `🔄 ${msg}`;
+                simulationResultDiv.appendChild(footerNote);
+                setTimeout(() => {
+                    if (simulationResultDiv.contains(footerNote)) footerNote.remove();
+                }, 3000);
+            }
+        }
+
+        runBtn.addEventListener('click', () => {
+            updateSimulation();
+            // add extra single-pass note for educational clarity
+            setTimeout(() => {
+                const numbers = parseNumbers(numbersInput.value);
+                if (numbers.length > 0) {
+                    const extraNote = document.createElement('div');
+                    extraNote.className = 'stat-card';
+                    extraNote.style.marginTop = '12px';
+                    extraNote.style.background = "#e6f7e6";
+                    extraNote.innerHTML = `<span class="label">⚡ Single pass guarantee</span><div style="font-size:0.85rem;">Traversed ${numbers.length} elements once, updating both accumulators. Merger called after loop.</div>`;
+                    if (!simulationResultDiv.querySelector('.extra-note')) {
+                        extraNote.classList.add('extra-note');
+                        simulationResultDiv.appendChild(extraNote);
+                        setTimeout(() => { if(extraNote.parentNode) extraNote.remove(); }, 4000);
+                    }
+                }
+            }, 50);
+        });
+
+        // initial demo load with default values
+        updateSimulation();
+
+        // provide live explanation on scenario changes
+        scenarioSelect.addEventListener('change', () => {
+            updateSimulation();
+        });
+    })();
+</script>
+</body>
+</html>
