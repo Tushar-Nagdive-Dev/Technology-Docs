@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Headers Visualized: The Shipping Box Analogy</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+        }
+        .flow-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 5px solid #3498db;
+        }
+        .flow-section.response {
+            border-left-color: #2ecc71;
+            flex-direction: row-reverse;
+        }
+        .actor {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+        .actor-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .package {
+            position: relative;
+            width: 250px;
+            height: 200px;
+            background: #e67e22;
+            border-radius: 8px;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+        .package-lid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #d35400;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+        }
+        .shipping-label {
+            position: absolute;
+            top: 50px;
+            right: -20px;
+            background: white;
+            color: #333;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-family: monospace;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: rotate(5deg);
+            border: 1px dashed #7f8c8d;
+            width: 140px;
+            z-index: 2;
+        }
+        .shipping-label strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #e74c3c;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 2px;
+        }
+        .body-content {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .arrow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            margin: 0 20px;
+        }
+        .arrow-text {
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+        .arrow {
+            width: 100px;
+            height: 4px;
+            background: #bdc3c7;
+            position: relative;
+        }
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: -6px;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 12px solid #bdc3c7;
+        }
+        .flow-section.response .arrow::after {
+            right: auto;
+            left: -10px;
+            border-left: none;
+            border-right: 12px solid #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>API Requests & Responses</h1>
+    <p class="subtitle">Visualizing the "Shipping Box" Analogy</p>
+
+    <!-- Request Flow -->
+    <div class="flow-section">
+        <div class="actor">
+            <div class="actor-icon">💻</div>
+            Client (You)
+        </div>
+
+        <div class="arrow-container">
+            <div class="arrow-text">1. API Request</div>
+            <div class="arrow"></div>
+        </div>
+
+        <div class="package">
+            <div class="package-lid">📦 The Package</div>
+            
+            <div class="shipping-label">
+                <strong>[HEADERS]</strong>
+                Auth: Bearer abc...<br>
+                Accept: application/json<br>
+                Content-Type: application/json
+            </div>
+
+            <div class="body-content">
+                <strong>[BODY]</strong><br>
+                { "username": "Maya" }
+            </div>
+        </div>
+
+        <div class="arrow-container">
+            <div class="arrow"></div>
+        </div>
+
+        <div class="actor">
+            <div class="actor-icon">☁️</div>
+            Server
+        </div>
+    </div>
+
+    <!-- Response Flow -->
+    <div class="flow-section response">
+        <div class="actor">
+            <div class="actor-icon">💻</div>
+            Client (You)
+        </div>
+
+        <div class="arrow-container">
+            <div class="arrow-text">2. API Response</div>
+            <div class="arrow"></div>
+        </div>
+
+        <div class="package" style="background: #27ae60;">
+            <div class="package-lid" style="background: #2ecc71;">📦 The Return Package</div>
+            
+            <div class="shipping-label" style="transform: rotate(-5deg); left: -20px;">
+                <strong>[HEADERS]</strong>
+                Status: 200 OK<br>
+                Content-Type: application/json<br>
+                Cache-Control: max-age=3600
+            </div>
+
+            <div class="body-content">
+                <strong>[BODY]</strong><br>
+                { "status": "success",<br>
+                  "id": 101 }
+            </div>
+        </div>
+
+        <div class="arrow-container">
+            <div class="arrow"></div>
+        </div>
+
+        <div class="actor">
+            <div class="actor-icon">☁️</div>
+            Server
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
