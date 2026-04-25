@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot Startup: Visual Explanation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            line-height: 1.6;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #6db33f; /* Spring Boot Green */
+            margin-bottom: 10px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .step {
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(109, 179, 63, 0.15);
+            border-color: #6db33f;
+        }
+        .step-number {
+            background: #6db33f;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 20px;
+        }
+        .step-content h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.3em;
+            color: #212529;
+        }
+        .step-content p {
+            margin: 0;
+            color: #495057;
+        }
+        .arrow {
+            text-align: center;
+            color: #adb5bd;
+            font-size: 30px;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>How Spring Boot Starts Up</h1>
+    <p class="subtitle">The "Opening a Restaurant" Analogy</p>
+
+    <div class="flow-container">
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <h2>The Trigger (main method)</h2>
+                <p><strong>Analogy:</strong> The manager turns the key to unlock the restaurant doors.</p>
+                <p><em>Tech:</em> You run `SpringApplication.run()`. Spring checks if this is a web app or a console app.</p>
+            </div>
+        </div>
+
+        <div class="arrow">⬇</div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <h2>Reading the Rules (Environment Setup)</h2>
+                <p><strong>Analogy:</strong> Reading the manager's checklist, turning on the lights, and checking the weather.</p>
+                <p><em>Tech:</em> Spring loads your `application.properties` or `.yml` files, environment variables, and active profiles.</p>
+            </div>
+        </div>
+
+        <div class="arrow">⬇</div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <h2>Building the Kitchen (Application Context)</h2>
+                <p><strong>Analogy:</strong> Setting up the physical kitchen space where all the cooking will happen.</p>
+                <p><em>Tech:</em> Spring creates the "Inversion of Control (IoC) Container" to hold and manage all your application components.</p>
+            </div>
+        </div>
+
+        <div class="arrow">⬇</div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <h2>Hiring Staff & Prep (Component Scan & Auto-Config)</h2>
+                <p><strong>Analogy:</strong> Hiring chefs, waiters, and automatically hooking up the ovens based on the menu.</p>
+                <p><em>Tech:</em> Spring scans your code for `@Component`, `@Service`, and `@RestController`. It automatically configures databases and security if it sees the libraries.</p>
+            </div>
+        </div>
+
+        <div class="arrow">⬇</div>
+
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+                <h2>Opening the Drive-Thru (Embedded Server)</h2>
+                <p><strong>Analogy:</strong> Opening the drive-thru window so customers can actually start ordering.</p>
+                <p><em>Tech:</em> Spring starts Tomcat (or another server) on port 8080. Your application is now listening for HTTP requests!</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
+spring_boot_visual.html
+Displaying spring_boot_visual.html.
