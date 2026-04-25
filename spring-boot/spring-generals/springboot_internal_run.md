@@ -45,4 +45,4 @@ Here is how the process works in simple terms:
    * **The Analogy:** Opening the drive-thru window and turning on the "Open" sign. Customers can now place orders!
    * **What happens:** Spring Boot starts up the embedded web server (usually Tomcat) on port 8080. The application is now fully running and ready to receive web requests.
 
-[Preview HTML](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/spring-boot/spring-generals/visuals/springboot-run.visual.html)
+[![Preview](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/spring-boot/spring-generals/visuals/springboot-run.visual.html)
