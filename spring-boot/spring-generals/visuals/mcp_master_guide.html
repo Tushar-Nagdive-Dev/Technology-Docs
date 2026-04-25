@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Guide: Spring Boot & MCP Integration</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #27ae60;
+            --bg-light: #f8f9fa;
+            --text-main: #333;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 { color: var(--primary); }
+        h1 { text-align: center; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; margin-bottom: 30px; }
+        
+        /* Architecture Visual Styles */
+        .architecture-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 40px 0;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        .box {
+            flex: 1;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .box h3 { color: white; margin-top: 0; }
+        .client-box { background: #8e44ad; }
+        .mcp-box { background: #2980b9; flex: 1.2; border: 2px dashed #fff; }
+        .server-box { background: var(--accent); }
+        
+        .arrow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 15px;
+            color: #7f8c8d;
+            font-weight: bold;
+            font-size: 0.85em;
+            text-align: center;
+        }
+        .arrow { width: 50px; height: 3px; background: #bdc3c7; position: relative; margin: 5px 0; }
+        .arrow.right::after { content: ''; position: absolute; right: -8px; top: -5px; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 10px solid #bdc3c7; }
+        .arrow.left::before { content: ''; position: absolute; left: -8px; top: -5px; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-right: 10px solid #bdc3c7; }
+
+        /* Code Block Styles */
+        .code-section { margin-top: 40px; }
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--secondary);
+        }
+        .code-header {
+            background: #333;
+            color: #fff;
+            padding: 5px 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            font-family: monospace;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: -5px;
+            position: relative;
+            z-index: 1;
+        }
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; font-style: italic; }
+        .annotation { color: #dcdcaa; }
+        
+        /* Flow List */
+        .flow-list {
+            background: #e8f4f8;
+            padding: 25px 40px;
+            border-radius: 8px;
+            border-left: 5px solid var(--secondary);
+            margin: 30px 0;
+        }
+        .flow-list li { margin-bottom: 12px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Master Guide: Spring Boot + MCP Integration</h1>
+    
+    <h2>1. The Big Picture Architecture</h2>
+    <div class="architecture-flow">
+        <div class="box client-box">
+            <h3>📱 Frontend UI</h3>
+            <p>User types: "Add 3 apples to my cart"</p>
+        </div>
+        <div class="arrow-container">
+            <div>HTTP POST</div>
+            <div class="arrow right"></div>
+        </div>
+        <div class="box mcp-box" style="background: #34495e;">
+            <h3>🧠 AI Host (Spring Boot)</h3>
+            <p>Talks to LLM & holds the MCP Bridge</p>
+        </div>
+        <div class="arrow-container">
+            <div>JSON-RPC</div>
+            <div class="arrow right"></div>
+            <div class="arrow left" style="margin-top:15px;"></div>
+        </div>
+        <div class="box server-box">
+            <h3>🛠️ MCP Server (Spring Boot)</h3>
+            <p>Executes actual Java code & DB logic</p>
+        </div>
+    </div>
+
+    <h2>2. The End-to-End Data Flow</h2>
+    <div class="flow-list">
+        <ol>
+            <li><strong>User Action:</strong> User types a prompt in the UI and hits send.</li>
+            <li><strong>To the Brain:</strong> The UI sends the text to the <em>AI Host Server</em>.</li>
+            <li><strong>Evaluation:</strong> The AI Host asks the LLM what to do. The LLM realizes it needs to use the `addToCart` tool.</li>
+            <li><strong>The Bridge:</strong> The AI Host pauses, formats a JSON-RPC request, and sends it across the MCP connection to the <em>MCP Server</em>.</li>
+            <li><strong>Execution:</strong> The MCP Server receives the JSON, triggers the annotated Java method, and saves to the database.</li>
+            <li><strong>Return Trip:</strong> The MCP Server sends a "Success" JSON response back across the bridge.</li>
+            <li><strong>Synthesis:</strong> The LLM reads the success message and generates a friendly text response ("I've added the apples!").</li>
+            <li><strong>Final Delivery:</strong> The AI Host sends this text back to the UI to display to the user.</li>
+        </ol>
+    </div>
+
+    <h2>3. The Full Code Implementation</h2>
+    
+    <div class="code-section">
+        <div class="code-header">1. frontend.js (The UI)</div>
+        <div class="code-block">
+<span class="keyword">async function</span> sendToAI() {
+    <span class="keyword">const</span> userText = document.getElementById(<span class="string">"userInput"</span>).value;
+    
+    <span class="comment">// Send message to our Spring Boot AI API</span>
+    <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(<span class="string">'http://localhost:8080/api/chat'</span>, {
+        method: <span class="string">'POST'</span>,
+        headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
+        body: JSON.stringify({ message: userText })
+    });
+
+    <span class="comment">// Display the final AI response</span>
+    <span class="keyword">const</span> finalAnswer = <span class="keyword">await</span> response.text();
+    document.getElementById(<span class="string">"chatBox"</span>).innerText = finalAnswer;
+}
+        </div>
+
+        <div class="code-header">2. AiChatController.java (The AI Host - Port 8080)</div>
+        <div class="code-block">
+<span class="keyword">import</span> org.springframework.ai.chat.client.ChatClient;
+<span class="keyword">import</span> org.springframework.ai.mcp.client.McpSyncClient;
+<span class="keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="annotation">@RestController</span>
+<span class="annotation">@RequestMapping</span>(<span class="string">"/api"</span>)
+<span class="keyword">public class</span> AiChatController {
+
+    <span class="keyword">private final</span> ChatClient chatClient;
+
+    <span class="keyword">public</span> AiChatController(ChatClient.Builder builder, McpSyncClient mcpClient) {
+        <span class="comment">// Give the AI access to the MCP Tools menu!</span>
+        <span class="keyword">this</span>.chatClient = builder
+                .defaultFunctions(mcpClient.listTools()) 
+                .build();
+    }
+
+    <span class="annotation">@PostMapping</span>(<span class="string">"/chat"</span>)
+    <span class="keyword">public</span> String chatWithUser(<span class="annotation">@RequestBody</span> ChatRequest request) {
+        <span class="comment">// Spring AI handles the prompt, pausing, tool calling, and resuming automatically!</span>
+        <span class="keyword">return this</span>.chatClient.prompt()
+                .user(request.message())
+                .call()
+                .content();
+    }
+}
+        </div>
+
+        <div class="code-header">3. ShoppingCartService.java (The MCP Server - Port 9090)</div>
+        <div class="code-block">
+<span class="keyword">import</span> org.springframework.ai.mcp.server.annotation.McpTool;
+<span class="keyword">import</span> org.springframework.ai.mcp.server.annotation.McpToolParam;
+<span class="keyword">import</span> org.springframework.stereotype.Service;
+
+<span class="annotation">@Service</span>
+<span class="keyword">public class</span> ShoppingCartService {
+
+    <span class="comment">// This annotation exposes this method to the AI via MCP</span>
+    <span class="annotation">@McpTool</span>(description = <span class="string">"Adds an item to the user's shopping cart"</span>)
+    <span class="keyword">public</span> String addToCart(
+            <span class="annotation">@McpToolParam</span>(description = <span class="string">"The item name"</span>) String item,
+            <span class="annotation">@McpToolParam</span>(description = <span class="string">"How many to add"</span>) <span class="keyword">int</span> quantity) {
+        
+        <span class="comment">// Real business logic / database saving goes here</span>
+        System.out.println(<span class="string">"Saving "</span> + quantity + <span class="string">" "</span> + item + <span class="string">" to DB..."</span>);
+        
+        <span class="keyword">return</span> <span class="string">"SUCCESS: Added "</span> + quantity + <span class="string">" "</span> + item + <span class="string">" to the cart."</span>;
+    }
+}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
