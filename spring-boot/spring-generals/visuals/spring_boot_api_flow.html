@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>What happens when you call a REST API in Spring Boot? | Internal Flow Deep Dive</title>
-    <meta name="description" content="Step-by-step explanation of how Spring Boot processes an incoming REST API request internally — from HTTP request to JSON response.">
+    <title>Inside Spring Boot REST API | Complete Internal Flow (including Filter Chain)</title>
+    <meta name="description" content="Deep dive into Spring Boot REST API request processing: from HTTP socket → Filter Chain → DispatcherServlet → Controller → response, with filter chain explained.">
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: linear-gradient(145deg, #f1f5f9 0%, #e6edf4 100%);
+            background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 100%);
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             color: #0a2540;
             line-height: 1.5;
@@ -23,22 +23,19 @@
         .container {
             max-width: 1280px;
             margin: 0 auto;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(0px);
-            border-radius: 2.5rem;
-            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.95);
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             overflow: hidden;
-            transition: all 0.2s;
         }
 
-        /* header area */
         .hero {
             background: #0f2b3d;
             padding: 2rem 2rem 1.8rem;
             color: white;
         }
         .hero h1 {
-            font-size: 2.2rem;
+            font-size: 2.1rem;
             font-weight: 700;
             letter-spacing: -0.02em;
             margin-bottom: 0.5rem;
@@ -49,7 +46,7 @@
         }
         .hero h1 span {
             background: #3b82f6;
-            font-size: 1rem;
+            font-size: 0.9rem;
             padding: 0.2rem 0.8rem;
             border-radius: 40px;
             font-weight: 500;
@@ -57,15 +54,15 @@
         .hero p {
             font-size: 1.1rem;
             color: #cbd5e6;
-            max-width: 85%;
+            max-width: 90%;
         }
-        .hero .badge {
+        .badge-group {
             margin-top: 1rem;
             display: flex;
-            gap: 1rem;
+            gap: 0.8rem;
             flex-wrap: wrap;
         }
-        .badge-item {
+        .badge {
             background: #1e3a5f;
             padding: 0.2rem 1rem;
             border-radius: 30px;
@@ -73,15 +70,14 @@
             font-weight: 500;
         }
 
-        /* main content */
         .content {
             padding: 2rem 2rem 2.5rem;
         }
 
         h2 {
             font-size: 1.8rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem;
+            font-weight: 700;
+            margin: 1.8rem 0 1rem;
             border-left: 6px solid #3b82f6;
             padding-left: 1rem;
             color: #0f2b3d;
@@ -102,12 +98,11 @@
             margin: 1rem 0;
             border: 1px solid #e2e8f0;
             transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
         .flow-step:hover {
             border-color: #b9d0f0;
             background: #ffffff;
-            box-shadow: 0 8px 18px -8px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 18px -8px rgba(0,0,0,0.06);
         }
         .step-number {
             display: inline-block;
@@ -137,7 +132,6 @@
             overflow-x: auto;
             margin: 1rem 0;
             white-space: pre-wrap;
-            word-break: break-word;
         }
         .inline-code {
             background: #eef2ff;
@@ -159,8 +153,8 @@
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 0.8rem;
-            margin: 0.8rem 0;
+            gap: 0.6rem;
+            margin: 0.6rem 0;
         }
         .flow-box {
             background: white;
@@ -169,10 +163,14 @@
             font-weight: 500;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             border: 1px solid #cbd5e1;
-            min-width: 130px;
+            min-width: 140px;
+        }
+        .filter-box {
+            background: #fef9e3;
+            border-left: 4px solid #f59e0b;
         }
         .arrow {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             color: #5b6e8c;
         }
         .component-grid {
@@ -185,7 +183,7 @@
             background: #ffffff;
             border-radius: 1.2rem;
             padding: 1rem;
-            flex: 1 1 180px;
+            flex: 1 1 200px;
             border-left: 4px solid #3b82f6;
             box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
@@ -193,6 +191,17 @@
             display: block;
             font-size: 1.1rem;
             color: #0f2b3d;
+        }
+        .note {
+            background: #e6f7ff;
+            border-left: 5px solid #0284c7;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+        }
+        .warning-note {
+            background: #fef9e3;
+            border-left-color: #f59e0b;
         }
         hr {
             margin: 2rem 0;
@@ -214,228 +223,216 @@
             .flow-row .arrow { display: none; }
             .flow-row { flex-direction: column; }
         }
-        .highlight {
-            background: #dbeafe;
-            border-radius: 12px;
-            padding: 0.1rem 0.3rem;
-            font-weight: 500;
-        }
-        .note {
-            background: #fef9e3;
-            border-left: 5px solid #f59e0b;
-            padding: 1rem;
-            border-radius: 1rem;
-            margin: 1rem 0;
-        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="hero">
-        <h1>⚙️ Inside Spring Boot REST API <span>internal request flow</span></h1>
-        <p>What really happens when you send a HTTP request to a `@RestController`? From the network socket to the JSON response – a simple yet deep look inside the magic.</p>
-        <div class="badge">
-            <div class="badge-item">🌐 DispatcherServlet</div>
-            <div class="badge-item">🔍 Handler Mapping</div>
-            <div class="badge-item">⚡ Handler Adapter</div>
-            <div class="badge-item">📦 HttpMessageConverter</div>
+        <h1>⚙️ Spring Boot REST API Internals <span>Complete Flow + Filter Chain</span></h1>
+        <p>What really happens from the moment an HTTP request hits your server to the JSON response? This guide covers the <strong>servlet filter chain</strong> (often missed) and Spring MVC's core dispatcher mechanics.</p>
+        <div class="badge-group">
+            <div class="badge">🔗 FilterChain (Authentication, Logging, etc.)</div>
+            <div class="badge">🌐 DispatcherServlet</div>
+            <div class="badge">🔍 HandlerMapping</div>
+            <div class="badge">⚡ HandlerAdapter & MessageConverters</div>
         </div>
     </div>
 
     <div class="content">
-        <!-- high-level overview -->
+        <!-- new: filter chain first! -->
         <section>
-            <h2>🧭 The Big Picture</h2>
-            <p>Spring Boot hides incredible complexity behind a few annotations like <span class="inline-code">@RestController</span> and <span class="inline-code">@GetMapping</span>. Under the hood, a chain of smart components transforms an HTTP request into a Java method call and then serializes the returned object into a response (JSON, XML, etc.). All of this happens <strong>synchronously</strong> inside the servlet container (Tomcat by default).</p>
+            <h2>🔗 Step 0: The Servlet Filter Chain (the missing piece)</h2>
+            <p>Before any Spring MVC logic runs, the request passes through a chain of <strong>filters</strong>. Filters are part of the Java Servlet specification, not Spring-specific. They can modify the request/response, perform authentication, log headers, compress data, or even abort the request early. Spring Security heavily relies on this.</p>
             <div class="diagram-flow">
                 <div class="flow-row">
-                    <div class="flow-box">🌍 HTTP Request<br>(GET /api/users)</div>
+                    <div class="flow-box">🌍 HTTP Request</div>
                     <div class="arrow">➡️</div>
-                    <div class="flow-box">🔄 DispatcherServlet<br>(Front Controller)</div>
+                    <div class="flow-box filter-box">🔐 Filter 1<br>(e.g., Auth)</div>
                     <div class="arrow">➡️</div>
-                    <div class="flow-box">🔎 HandlerMapping</div>
+                    <div class="flow-box filter-box">📝 Filter 2<br>(e.g., Logging)</div>
+                    <div class="arrow">➡️</div>
+                    <div class="flow-box filter-box">⚙️ Filter N<br>(e.g., Spring Security)</div>
                 </div>
                 <div class="flow-row">
-                    <div class="flow-box">⚙️ HandlerAdapter</div>
-                    <div class="arrow">➡️</div>
-                    <div class="flow-box">🎯 Controller Method<br>(@GetMapping)</div>
-                    <div class="arrow">➡️</div>
-                    <div class="flow-box">📦 HttpMessageConverter</div>
+                    <div class="arrow">⬇️</div>
+                    <div class="flow-box" style="background:#3b82f6; color:white;">DispatcherServlet</div>
+                    <div class="arrow">⬇️</div>
                 </div>
                 <div class="flow-row">
-                    <div class="flow-box">✅ HTTP Response<br>(JSON / status 200)</div>
-                    <div class="arrow">⬅️</div>
-                    <div class="flow-box">🌐 DispatcherServlet<br>(writes response)</div>
+                    <div class="flow-box filter-box">← Response goes back<br>through filters in reverse order</div>
                 </div>
             </div>
-        </section>
-
-        <!-- deep step-by-step -->
-        <section>
-            <h2>🔬 Step‑by‑Step Internal Flow (simple terms)</h2>
-            <p>Let's follow a real example: a client sends <span class="inline-code">GET http://localhost:8080/api/orders/42</span> and we have a Spring Boot controller with <span class="inline-code">@GetMapping("/api/orders/{id}")</span> that returns an <span class="inline-code">Order</span> object (converted to JSON).</p>
-
-            <div class="flow-step">
-                <div><span class="step-number">1</span> <span class="step-title">Request arrives at the servlet container (Tomcat)</span></div>
-                <p>Tomcat (or Jetty/Undertow) listens on port 8080. It receives the raw HTTP request, wraps it into <span class="inline-code">HttpServletRequest</span> and <span class="inline-code">HttpServletResponse</span> objects, and delegates to the Spring <strong>DispatcherServlet</strong> – the front controller configured by Spring Boot auto‑configuration.</p>
-            </div>
-
-            <div class="flow-step">
-                <div><span class="step-number">2</span> <span class="step-title">DispatcherServlet asks: "Which controller can handle this?" → HandlerMapping</span></div>
-                <p>DispatcherServlet consults one or more <span class="inline-code">HandlerMapping</span> implementations. They map incoming requests to handler objects (usually <span class="inline-code">@Controller</span> methods). For REST APIs, <span class="inline-code">RequestMappingHandlerMapping</span> scans all <span class="inline-code">@RequestMapping</span> annotations and builds a lookup table. It matches the HTTP method (GET), URL pattern (<code>/api/orders/42</code>) and extracts the path variable <span class="inline-code">id=42</span>.</p>
-                <div class="code-block">
-                    // Under the hood: The mapping registry stores method metadata
-                    // HandlerMapping returns a HandlerExecutionChain (handler + interceptors)
-                </div>
-            </div>
-
-            <div class="flow-step">
-                <div><span class="step-number">3</span> <span class="step-title">DispatcherServlet finds a HandlerAdapter that can execute the handler</span></div>
-                <p>Not every handler can be called directly. Spring uses <span class="inline-code">HandlerAdapter</span> to invoke the handler method in a uniform way. For annotated controllers, the <strong>RequestMappingHandlerAdapter</strong> is the perfect match. It knows how to resolve method parameters, convert arguments, and handle the return value.</p>
-            </div>
-
-            <div class="flow-step">
-                <div><span class="step-number">4</span> <span class="step-title">Argument resolvers prepare method parameters</span></div>
-                <p>Before invoking the controller method, Spring resolves all parameters: <span class="inline-code">@PathVariable</span>, <span class="inline-code">@RequestParam</span>, <span class="inline-code">@RequestBody</span>, <span class="inline-code">@ModelAttribute</span>, or even native <span class="inline-code">HttpServletRequest</span>. For our example, it:</p>
-                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                    <li>Reads <code>id</code> from the URI template → converts "42" to <code>Long</code> (using <code>ConversionService</code>)</li>
-                    <li>If there were query parameters or JSON body, special resolvers (like <code>RequestResponseBodyMethodProcessor</code>) would deserialize the body using <strong>HttpMessageConverter</strong>.</li>
-                </ul>
-                <div class="note">
-                    💡 <strong>Note:</strong> For GET requests without a request body, no deserialization is needed – only path/query parameters.
-                </div>
-            </div>
-
-            <div class="flow-step">
-                <div><span class="step-number">5</span> <span class="step-title">Controller method executes → business logic</span></div>
-                <p>Finally, the actual method on the <span class="inline-code">@RestController</span> is invoked. It runs your code (service call, DB query, etc.) and returns a domain object (e.g., <span class="inline-code">Order</span> object) or a <span class="inline-code">ResponseEntity</span>.</p>
-                <div class="code-block">
-                    @RestController
-                    public class OrderController {
-                        @GetMapping("/api/orders/{id}")
-                        public Order getOrder(@PathVariable Long id) {
-                            return orderService.findById(id);  // returns Order instance
-                        }
-                    }
-                </div>
-            </div>
-
-            <div class="flow-step">
-                <div><span class="step-number">6</span> <span class="step-title">Return value handling: HttpMessageConverter writes the response body</span></div>
-                <p>The <span class="inline-code">HandlerAdapter</span> uses <span class="inline-code">HandlerMethodReturnValueHandler</span> to process the returned object. For <span class="inline-code">@ResponseBody</span> (implicit in <code>@RestController</code>), it selects an appropriate <strong>HttpMessageConverter</strong> based on:</p>
-                <ul style="margin-left: 1.5rem;">
-                    <li>The <code>Accept</code> header sent by client (e.g. <code>application/json</code>)</li>
-                    <li>The available converters (Jackson2 for JSON, Jaxb2 for XML, etc.)</li>
-                </ul>
-                <p>Jackson's <code>MappingJackson2HttpMessageConverter</code> serializes the <code>Order</code> object into JSON bytes. Also sets <code>Content-Type: application/json</code>.</p>
-            </div>
-
-            <div class="flow-step">
-                <div><span class="step-number">7</span> <span class="step-title">DispatcherServlet writes the response and commits it</span></div>
-                <p>The servlet writes the serialized JSON to the <span class="inline-code">HttpServletResponse</span> output stream, sets the HTTP status code (200 OK by default). The container sends the final HTTP response back to the client. The request is complete.</p>
-            </div>
-        </section>
-
-        <!-- key components explained -->
-        <section>
-            <h2>📌 Key Spring MVC components (in plain english)</h2>
-            <div class="component-grid">
-                <div class="comp-card"><strong>🔹 DispatcherServlet</strong><br>Front controller – central orchestrator. Receives every request, delegates to mappings, adapters, and returns response.</div>
-                <div class="comp-card"><strong>🔹 HandlerMapping</strong><br>Maps HTTP request to handler method (based on URL, HTTP method, headers).</div>
-                <div class="comp-card"><strong>🔹 HandlerAdapter</strong><br>Invokes the controller method, manages argument resolvers and return value handlers. Decouples DispatcherServlet from controller signatures.</div>
-                <div class="comp-card"><strong>🔹 HandlerMethodArgumentResolver</strong><br>Extracts & converts request data into method parameters (<code>@PathVariable</code>, <code>@RequestParam</code>, <code>@RequestBody</code>).</div>
-                <div class="comp-card"><strong>🔹 HttpMessageConverter</strong><br>Converts HTTP request body to Java objects (deserialization) and Java objects to HTTP response body (serialization). JSON, XML, etc.</div>
-                <div class="comp-card"><strong>🔹 ReturnValueHandler</strong><br>Processes the object returned from controller: wraps with response status, uses message converter, or handles <code>ResponseEntity</code>.</div>
-            </div>
-        </section>
-
-        <!-- REAL example of request/response journey -->
-        <section>
-            <h2>🚀 Real-life walkthrough (console style)</h2>
-            <div class="code-block">
-                /* 1. Client sends HTTP request */
-                > GET /api/products/10 HTTP/1.1
-                > Host: localhost:8080
-                > Accept: application/json
-
-                /* 2. Tomcat receives -> DispatcherServlet */
-                /* 3. HandlerMapping: matches method getProduct(@PathVariable Long id) */
-
-                /* 4. HandlerAdapter invokes: productService.getById(10) */
-                /* 5. Returns Product("Laptop", 1200.0) */
-
-                /* 6. HttpMessageConverter (Jackson) */
-                > {"name":"Laptop","price":1200.0}
-
-                /* 7. HTTP Response */
-                < HTTP/1.1 200 OK
-                < Content-Type: application/json
-                < {"name":"Laptop","price":1200.0}
-            </div>
-        </section>
-
-        <!-- Exception handling & additional nuance -->
-        <section>
-            <h2>⚠️ What about errors & exceptions?</h2>
-            <p>If the controller throws an exception (e.g., <span class="inline-code">ProductNotFoundException</span>), the <span class="inline-code">HandlerAdapter</span> doesn't immediately crash. Instead, it propagates the exception up to the DispatcherServlet, which delegates to registered <strong>HandlerExceptionResolver</strong> components. The <code>@ExceptionHandler</code> methods inside <code>@RestControllerAdvice</code> are invoked, allowing you to return a custom error JSON body with proper HTTP status (404 etc.).</p>
             <div class="note">
-                🧠 <strong>Key takeaway:</strong> The whole chain is designed to be modular and pluggable – you can inject custom interceptors, converters, argument resolvers, or error handlers without changing the core flow.
+                <strong>📌 Critical point:</strong> The filter chain <strong>wraps</strong> the entire Spring MVC processing. Filters are invoked before the <code>DispatcherServlet</code> and after the servlet returns (in reverse order). This allows cross-cutting concerns like authentication, CORS, rate limiting, and request wrapping.
             </div>
         </section>
 
-        <!-- simple analogies -->
+        <!-- full step-by-step flow including filters -->
         <section>
-            <h2>🧩 Simple analogy: Restaurant Order</h2>
-            <div class="flow-step" style="background: #fefce8;">
-                <ul style="margin-left: 1.2rem;">
-                    <li><strong>Waiter</strong> = DispatcherServlet (receives your request, coordinates everything)</li>
-                    <li><strong>Host/Manager with seating map</strong> = HandlerMapping (finds which waiter/chef handles your dish)</li>
-                    <li><strong>Chef's assistant</strong> = HandlerAdapter (adapts order to specific chef and prepares ingredients)</li>
-                    <li><strong>Chef</strong> = Controller method (cooks the meal / executes business logic)</li>
-                    <li><strong>Plating & garnish</strong> = HttpMessageConverter (converts the meal into presentable JSON format)</li>
-                    <li><strong>Final delivery</strong> = HTTP Response back to customer</li>
+            <h2>🧩 Complete Step-by-Step Internal Flow</h2>
+            <p>Let's trace a <code>GET /api/users/5</code> request with a hypothetical <code>@RestController</code>.</p>
+
+            <div class="flow-step">
+                <div><span class="step-number">1</span> <span class="step-title">Request arrives at Servlet Container (Tomcat)</span></div>
+                <p>Tomcat accepts the TCP connection, parses HTTP protocol, creates <code>HttpServletRequest</code> and <code>HttpServletResponse</code> objects. It then locates the appropriate servlet based on the URL mapping – in Spring Boot, the <strong>DispatcherServlet</strong> is mapped to <code>/</code> (all requests).</p>
+            </div>
+
+            <div class="flow-step">
+                <div><span class="step-number">2</span> <span class="step-title">Servlet Filter Chain is executed (before servlet)</span></div>
+                <p>Tomcat calls <code>doFilter()</code> on the first filter in the chain. Each filter can:</p>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>Examine/modify request</strong> – e.g., add custom headers, validate JWT token</li>
+                    <li><strong>Short-circuit</strong> – respond directly (e.g., return 401 Unauthorized) without invoking subsequent filters or the servlet</li>
+                    <li><strong>Wrap request/response</strong> – e.g., use caching, compression</li>
+                    <li><strong>Pass to next filter</strong> via <code>chain.doFilter(request, response)</code></li>
                 </ul>
-                <p style="margin-top: 0.5rem;">Everything flows in a single organized pipeline — that’s Spring MVC under the hood.</p>
+                <p>Spring Security registers a single <code>DelegatingFilterProxy</code> that then invokes the security filter chain (authentication, authorization, CSRF, etc.). After all filters approve, the call reaches the <code>DispatcherServlet</code>.</p>
+                <div class="code-block">
+// Example custom filter
+public class LoggingFilter implements Filter {
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) {
+        System.out.println("Request received at " + new Date());
+        chain.doFilter(req, res);  // pass to next filter or servlet
+        System.out.println("Response sent back");
+    }
+}
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div><span class="step-number">3</span> <span class="step-title">DispatcherServlet starts processing</span></div>
+                <p><code>DispatcherServlet</code> is the front controller. It receives the request and begins orchestrating the Spring MVC workflow: identifies the handler (controller method), executes it, and renders the response.</p>
+            </div>
+
+            <div class="flow-step">
+                <div><span class="step-number">4</span> <span class="step-title">HandlerMapping finds the right controller method</span></div>
+                <p><code>RequestMappingHandlerMapping</code> matches the request URI (<code>/api/users/5</code>) and HTTP method (<code>GET</code>) against all <code>@RequestMapping</code> annotations. It extracts path variables (<code>id=5</code>) and returns a <code>HandlerExecutionChain</code> (handler + interceptors).</p>
+            </div>
+
+            <div class="flow-step">
+                <div><span class="step-number">5</span> <span class="step-title">HandlerAdapter executes the controller method</span></div>
+                <p><code>RequestMappingHandlerAdapter</code> invokes the method. Before invocation, it resolves method parameters using <code>HandlerMethodArgumentResolver</code> (e.g., converting <code>@PathVariable</code> to <code>Long</code>). After method execution, it processes the return value via <code>HandlerMethodReturnValueHandler</code>.</p>
+            </div>
+
+            <div class="flow-step">
+                <div><span class="step-number">6</span> <span class="step-title">The controller method runs (your business logic)</span></div>
+                <p>Your <code>@GetMapping</code> method executes, perhaps calling a service layer or database. It returns a domain object (e.g., <code>User</code>) or <code>ResponseEntity</code>.</p>
+            </div>
+
+            <div class="flow-step">
+                <div><span class="step-number">7</span> <span class="step-title">HttpMessageConverter serializes the response</span></div>
+                <p>The <code>HandlerAdapter</code> selects a <code>HttpMessageConverter</code> (usually <code>MappingJackson2HttpMessageConverter</code>) based on the <code>Accept</code> header. It converts the returned object into JSON (or XML) bytes and writes them to the <code>HttpServletResponse</code> output stream.</p>
+            </div>
+
+            <div class="flow-step">
+                <div><span class="step-number">8</span> <span class="step-title">DispatcherServlet completes, returns control to filter chain</span></div>
+                <p>After the servlet finishes, the response travels back through the filter chain <strong>in reverse order</strong>. Filters can modify the response (e.g., add headers, compress output). Finally, Tomcat sends the raw HTTP response back to the client.</p>
             </div>
         </section>
 
-        <!-- what makes spring boot 'magic': auto-configuration -->
+        <!-- visual big picture diagram -->
         <section>
-            <h2>✨ Spring Boot's extra magic (auto-configuration)</h2>
-            <p>When you add <span class="inline-code">spring-boot-starter-web</span>, Spring Boot automatically:</p>
-            <ul style="margin-left: 1.8rem;">
-                <li>✅ Configures DispatcherServlet and registers it with Tomcat</li>
-                <li>✅ Enables <code>RequestMappingHandlerMapping</code>, <code>RequestMappingHandlerAdapter</code></li>
-                <li>✅ Registers Jackson <code>HttpMessageConverter</code> if Jackson is on classpath</li>
-                <li>✅ Provides default exception handling with <code>BasicErrorController</code></li>
+            <h2>🖼️ Complete Visual Flow (Filters + Spring MVC)</h2>
+            <div class="diagram-flow">
+                <div class="flow-row"><div class="flow-box">🚪 Client Request</div><div class="arrow">→</div><div class="flow-box filter-box">🔒 Security Filter</div><div class="arrow">→</div><div class="flow-box filter-box">📋 Logging Filter</div><div class="arrow">→</div><div class="flow-box filter-box">🌐 CORS Filter</div></div>
+                <div class="flow-row"><div class="arrow">↓ (FilterChain.doFilter)</div></div>
+                <div class="flow-row"><div class="flow-box" style="background:#0f2b3d; color:white;">DispatcherServlet</div><div class="arrow">→</div><div class="flow-box">HandlerMapping</div><div class="arrow">→</div><div class="flow-box">HandlerAdapter</div><div class="arrow">→</div><div class="flow-box">@RestController</div><div class="arrow">→</div><div class="flow-box">MessageConverter</div></div>
+                <div class="flow-row"><div class="arrow">↑ (Response goes back)</div></div>
+                <div class="flow-row"><div class="flow-box filter-box">🔒 Security Filter (post-process)</div><div class="arrow">→</div><div class="flow-box filter-box">📋 Logging Filter (post)</div><div class="arrow">→</div><div class="flow-box">✅ Client receives response</div></div>
+                <div class="note" style="margin-top: 12px;">📌 Filters are executed <strong>before and after</strong> the servlet. They can wrap the entire request/response cycle.</div>
+            </div>
+        </section>
+
+        <!-- Spring Boot auto-configuration of filters -->
+        <section>
+            <h2>⚡ How Spring Boot integrates filters</h2>
+            <p>Spring Boot automatically registers many filters:</p>
+            <ul style="margin-left: 1.5rem;">
+                <li><code>CharacterEncodingFilter</code> – sets character encoding (UTF-8)</li>
+                <li><code>HiddenHttpMethodFilter</code> – enables <code>_method</code> parameter for PUT/DELETE in forms</li>
+                <li><code>FormContentFilter</code> – reads form data for PUT/PATCH requests</li>
+                <li><code>RequestContextFilter</code> – exposes Spring request context</li>
+                <li><strong>Spring Security Filter Chain</strong> – only if <code>spring-boot-starter-security</code> is present</li>
             </ul>
-            <p>This is why you can start a REST API with <strong>zero XML</strong> and just a few annotations.</p>
+            <p>You can register custom filters as <code>@Bean</code> of type <code>Filter</code> or <code>OncePerRequestFilter</code>. Spring Boot automatically adds them to the chain with proper ordering (using <code>@Order</code> or <code>FilterRegistrationBean</code>).</p>
+            <div class="code-block">
+@Bean
+public Filter tenantFilter() {
+    return (request, response, chain) -> {
+        String tenant = request.getHeader("X-Tenant-ID");
+        TenantContext.set(tenant);
+        chain.doFilter(request, response);
+        TenantContext.clear();
+    };
+}
+            </div>
+        </section>
+
+        <!-- comparison: filter vs interceptor -->
+        <section>
+            <h2>🔍 Filter vs. Spring Interceptor – what's the difference?</h2>
+            <div class="component-grid">
+                <div class="comp-card"><strong>Servlet Filter</strong><br>Part of Java Servlet API. Works for any servlet, not only Spring. Can wrap request/response. Executes before DispatcherServlet (and after).</div>
+                <div class="comp-card"><strong>Spring HandlerInterceptor</strong><br>Spring-specific. Executes <em>after</em> DispatcherServlet finds handler but <em>before</em> method call, and after view resolution (or JSON write). Has preHandle, postHandle, afterCompletion.</div>
+                <div class="comp-card"><strong>Use case example</strong><br>Filter: authentication, logging, compression. Interceptor: adding common model attributes, auditing controller metrics.</div>
+            </div>
+            <div class="note warning-note">
+                Many developers confuse filters and interceptors. Filters sit <strong>outside</strong> Spring MVC; Interceptors are <strong>inside</strong> the DispatcherServlet's handler execution chain. Filters are more powerful but less "Spring-aware".
+            </div>
+        </section>
+
+        <!-- why filter chain matters in production -->
+        <section>
+            <h2>🏭 Production impact: why you must understand the filter chain</h2>
+            <ul style="margin-left: 1.5rem;">
+                <li><strong>Performance:</strong> Heavy filters (e.g., authentication with database lookup) affect every request. Order matters – place lightweight filters first.</li>
+                <li><strong>Debugging:</strong> If a request never reaches your controller, a filter might have short‑circuited it (e.g., invalid token).</li>
+                <li><strong>Request/response modification:</strong> Need to add a correlation ID? That's a filter. Want to log request bodies? Wrap the request with a <code>ContentCachingRequestWrapper</code> in a filter.</li>
+                <li><strong>Security:</strong> Spring Security's filter chain is the cornerstone of authentication and authorization – it runs entirely within the filter chain.</li>
+            </ul>
+        </section>
+
+        <!-- full example with a filter and controller -->
+        <section>
+            <h2>📝 Realistic end-to-end example</h2>
+            <div class="code-block">
+// 1. Custom filter that checks API key
+@Component
+public class ApiKeyFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) req;
+        String apiKey = request.getHeader("X-API-Key");
+        if (!"secret".equals(apiKey)) {
+            ((HttpServletResponse) res).sendError(401, "Invalid API Key");
+            return;  // short-circuit, never reaches DispatcherServlet
+        }
+        chain.doFilter(req, res);  // proceed to next filter → DispatcherServlet
+    }
+}
+
+// 2. Controller
+@RestController
+@RequestMapping("/api")
+public class DataController {
+    @GetMapping("/data")
+    public Map<String, String> getData() {
+        return Map.of("message", "Sensitive data");
+    }
+}
+
+// Flow: Request → ApiKeyFilter (validates) → (if valid) DispatcherServlet → HandlerMapping → Controller → MessageConverter → Response goes back through filter → client.
+            </div>
         </section>
 
         <hr>
-        <!-- Q/A style deeper insight -->
-        <section>
-            <h2>❓ Common questions (deep clarity)</h2>
-            <div style="margin: 1rem 0;">
-                <h3>🔸 Does every request create a new controller instance?</h3>
-                <p><strong>No.</strong> By default, controllers are <strong>singletons</strong> (shared across all requests). They are thread‑safe if you avoid storing mutable state. Spring reuses the same controller bean for all matching requests.</p>
-                
-                <h3>🔸 How does Spring know to convert JSON body to Java object?</h3>
-                <p>The <span class="inline-code">@RequestBody</span> parameter triggers <strong>RequestResponseBodyMethodProcessor</strong> (an argument resolver). It reads the request body and selects a matching <span class="inline-code">HttpMessageConverter</span> (e.g., <code>MappingJackson2HttpMessageConverter</code>) based on the <code>Content-Type</code> header.</p>
-                
-                <h3>🔸 What if the controller returns <code>ResponseEntity</code>?</h3>
-                <p><span class="inline-code">ResponseEntity</span> gives you full control over status, headers, and body. The return value handler (<code>HttpEntityMethodProcessor</code>) picks it up, extracts status/headers, and then uses the body with a message converter — still the same underlying flow.</p>
-            </div>
-        </section>
-
-        <!-- summary -->
-        <div class="note" style="background: #e0f2fe; border-left-color: #0284c7;">
-            🧪 <strong>Summary in one sentence:</strong> The DispatcherServlet receives the request, asks HandlerMapping which controller method to call, uses HandlerAdapter to invoke it with resolved arguments, then converts the returned object into an HTTP response using message converters.
+        <div class="note" style="background:#e0f2fe;">
+            🧠 <strong>Final mental model:</strong> The filter chain is like a series of security checkpoints and processing stations before a request reaches the main office (DispatcherServlet). Inside the office, Spring MVC does its routing and response building. After leaving the office, the request goes back through the same checkpoints in reverse order. This design gives you complete control over the HTTP pipeline.
         </div>
     </div>
     <footer>
-        🧠 Understanding the internal flow of Spring Boot REST APIs empowers you to debug effectively, write custom interceptors, and extend the framework with confidence.  
-        Every request follows this elegant pipeline — from HTTP to your @RestController and back.
+        ✅ Understanding both the <strong>servlet filter chain</strong> and Spring MVC internals makes you a more effective developer — whether you're debugging, optimizing, or securing your REST APIs.
     </footer>
 </div>
 </body>
