@@ -1,4 +1,4 @@
-I can definitely help clear this up for you, Maya. The difference between an interface and an abstract class is one of the most common stumbling blocks in Java, but it becomes much easier when you look at it through a real-world lens.
+# Abstract Class vs Interface 
 
 Here is the golden rule to remember:
 *   Use an **Abstract Class** for an **"IS-A"** relationship (Core Identity).
