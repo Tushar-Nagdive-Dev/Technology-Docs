@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot Property Resolution Order</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        h1 {
+            color: #6db33f; /* Spring Green */
+            margin-bottom: 5px;
+        }
+        p.subtitle {
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .pyramid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .layer {
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .layer:hover {
+            transform: scale(1.02);
+        }
+        .layer-num {
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            margin-right: 15px;
+        }
+        .layer-text {
+            flex-grow: 1;
+            text-align: left;
+            font-size: 1.1em;
+        }
+        .layer-example {
+            font-family: monospace;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        /* Colors mapping precedence (Hot to Cold) */
+        .layer-1 { background: #c0392b; width: 100%; } /* Highest */
+        .layer-2 { background: #d35400; width: 95%; }
+        .layer-3 { background: #e67e22; width: 90%; }
+        .layer-4 { background: #f39c12; width: 85%; }
+        .layer-5 { background: #27ae60; width: 80%; }
+        .layer-6 { background: #2ecc71; width: 75%; }
+        .layer-7 { background: #16a085; width: 70%; }
+        .layer-8 { background: #2980b9; width: 65%; }
+        .layer-9 { background: #34495e; width: 60%; } /* Lowest */
+
+        .explanation {
+            margin-top: 40px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            border-left: 5px solid #6db33f;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Spring Boot Property Resolution</h1>
+    <p class="subtitle">The Hierarchy of Configuration (Highest to Lowest Precedence)</p>
+
+    <div class="pyramid">
+        <div class="layer layer-1">
+            <div class="layer-num">1</div>
+            <div class="layer-text">Command Line Arguments</div>
+            <div class="layer-example">--server.port=8080</div>
+        </div>
+        <div class="layer layer-2">
+            <div class="layer-num">2</div>
+            <div class="layer-text">Java System Properties</div>
+            <div class="layer-example">-Dserver.port=8080</div>
+        </div>
+        <div class="layer layer-3">
+            <div class="layer-num">3</div>
+            <div class="layer-text">OS Environment Variables</div>
+            <div class="layer-example">SERVER_PORT=8080</div>
+        </div>
+        <div class="layer layer-4">
+            <div class="layer-num">4</div>
+            <div class="layer-text">Profile Properties (Outside Jar)</div>
+            <div class="layer-example">/config/application-prod.yml</div>
+        </div>
+        <div class="layer layer-5">
+            <div class="layer-num">5</div>
+            <div class="layer-text">Profile Properties (Inside Jar)</div>
+            <div class="layer-example">src/main/resources/application-prod.yml</div>
+        </div>
+        <div class="layer layer-6">
+            <div class="layer-num">6</div>
+            <div class="layer-text">Standard Properties (Outside Jar)</div>
+            <div class="layer-example">/config/application.yml</div>
+        </div>
+        <div class="layer layer-7">
+            <div class="layer-num">7</div>
+            <div class="layer-text">Standard Properties (Inside Jar)</div>
+            <div class="layer-example">src/main/resources/application.yml</div>
+        </div>
+        <div class="layer layer-8">
+            <div class="layer-num">8</div>
+            <div class="layer-text">@PropertySource Annotations</div>
+            <div class="layer-example">@PropertySource("classpath:custom.properties")</div>
+        </div>
+        <div class="layer layer-9">
+            <div class="layer-num">9</div>
+            <div class="layer-text">Default Properties</div>
+            <div class="layer-example">SpringApplication.setDefaultProperties</div>
+        </div>
+    </div>
+
+    <div class="explanation">
+        <h3>💡 How to read this:</h3>
+        <p>If you set `server.port=8080` in your <strong>application.yml (Layer 7)</strong>, but your DevOps team sets an Environment Variable `SERVER_PORT=9090` <strong>(Layer 3)</strong>, your application will start on port <strong>9090</strong> because Layer 3 is higher up the pyramid and overrides Layer 7.</p>
+    </div>
+</div>
+
+</body>
+</html>
