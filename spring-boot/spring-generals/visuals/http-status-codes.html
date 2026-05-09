@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTTP Status Codes Explained</title>
+    <title>The Complete HTTP Status Code Master List</title>
     <style>
         :root {
-            --bg-color: #f8fafc;
+            --bg-color: #f0f4f8;
             --text-main: #1e293b;
             --card-bg: #ffffff;
             
@@ -22,13 +22,13 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            line-height: 1.6;
+            line-height: 1.5;
             margin: 0;
             padding: 20px;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -40,39 +40,29 @@
         h1 {
             color: #0f172a;
             font-size: 2.5rem;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
-        .intro {
-            font-size: 1.1rem;
-            color: #475569;
-            background: #e2e8f0;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-
-        .category-card {
+        .category-section {
             background: var(--card-bg);
             border-radius: 12px;
-            padding: 30px;
+            padding: 25px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border-left: 8px solid transparent;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-top: 6px solid transparent;
         }
 
-        .cat-1xx { border-left-color: var(--color-1xx); }
-        .cat-2xx { border-left-color: var(--color-2xx); }
-        .cat-3xx { border-left-color: var(--color-3xx); }
-        .cat-4xx { border-left-color: var(--color-4xx); }
-        .cat-5xx { border-left-color: var(--color-5xx); }
+        .cat-1xx { border-top-color: var(--color-1xx); }
+        .cat-2xx { border-top-color: var(--color-2xx); }
+        .cat-3xx { border-top-color: var(--color-3xx); }
+        .cat-4xx { border-top-color: var(--color-4xx); }
+        .cat-5xx { border-top-color: var(--color-5xx); }
 
         h2 {
-            display: flex;
-            align-items: center;
-            gap: 15px;
             margin-top: 0;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
         }
 
         .cat-1xx h2 { color: var(--color-1xx); }
@@ -81,254 +71,159 @@
         .cat-4xx h2 { color: var(--color-4xx); }
         .cat-5xx h2 { color: var(--color-5xx); }
 
-        .summary {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            background: #f1f5f9;
-            padding: 10px 15px;
-            border-radius: 6px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.95rem;
         }
 
-        .code-grid {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        .code-item {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
         }
 
-        .code-header {
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-            margin-bottom: 8px;
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
         }
 
         .code-num {
-            font-size: 1.3rem;
             font-weight: 800;
             font-family: monospace;
+            font-size: 1.1rem;
         }
 
         .code-title {
             font-weight: 600;
             color: #334155;
+            white-space: nowrap;
         }
 
-        .minute-detail {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #64748b;
-            border-top: 1px dashed #cbd5e1;
-            padding-top: 10px;
+        .easter-egg {
+            background-color: #fef3c7;
         }
-
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>HTTP Status Codes</h1>
-        <p>The 5 Categories of Internet Communication</p>
+        <h1>HTTP Status Code Master List</h1>
+        <p>The exhaustive, no-miss dictionary of every standard status code.</p>
     </header>
 
-    <div class="intro">
-        <strong>The "Cheat Sheet" Analogy:</strong> Imagine you are at a restaurant talking to a waiter.<br>
-        <strong>1xx:</strong> "Hold on, I'm thinking."<br>
-        <strong>2xx:</strong> "Here is your food!"<br>
-        <strong>3xx:</strong> "You need to go to a different table."<br>
-        <strong>4xx:</strong> "You ordered something that isn't on the menu. Your fault."<br>
-        <strong>5xx:</strong> "The kitchen is on fire. My fault."
-    </div>
-
     <!-- 1xx Informational -->
-    <div class="category-card cat-1xx">
-        <h2>1xx: Informational</h2>
-        <div class="summary">Meaning: "Message received, continuing process."</div>
-        <p>These are temporary responses. The server is saying it has received the start of the request and the client should keep sending the rest of it, or wait for the final response.</p>
-        
-        <div class="code-grid">
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-1xx)">100</span>
-                    <span class="code-title">Continue</span>
-                </div>
-                <div>The server has received the request headers and the client should proceed to send the request body.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> This is a bandwidth optimization. If you are uploading a massive 5GB video, your browser sends a quick "Can I send this?" header first. If the server says "100 Continue," the browser sends the heavy file. If the server says "401 Unauthorized," the browser saves bandwidth by never sending the 5GB file.</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-1xx)">101</span>
-                    <span class="code-title">Switching Protocols</span>
-                </div>
-                <div>The server agrees to change the communication protocol.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> Most commonly seen when upgrading a standard HTTP connection into a real-time WebSocket connection for things like live chat apps.</div>
-            </div>
-        </div>
+    <div class="category-section cat-1xx">
+        <h2>1xx: Informational (Hold on, I'm processing...)</h2>
+        <table>
+            <tr><th width="10%">Code</th><th width="25%">Title</th><th>Simple Explanation</th></tr>
+            <tr><td class="code-num" style="color: var(--color-1xx)">100</td><td class="code-title">Continue</td><td>The server got the initial part of the request. Please send the rest.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-1xx)">101</td><td class="code-title">Switching Protocols</td><td>The server agrees to switch protocols (e.g., from HTTP to WebSockets).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-1xx)">102</td><td class="code-title">Processing (WebDAV)</td><td>The server is processing a large request, but no response is available yet. Prevents timeouts.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-1xx)">103</td><td class="code-title">Early Hints</td><td>Lets the browser start pre-loading resources (like CSS/JS) while the server prepares the final response.</td></tr>
+        </table>
     </div>
 
     <!-- 2xx Success -->
-    <div class="category-card cat-2xx">
-        <h2>2xx: Success</h2>
-        <div class="summary">Meaning: "The action was successfully received, understood, and accepted."</div>
-        <p>This is what you always want to see. Everything went exactly as planned.</p>
-        
-        <div class="code-grid">
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-2xx)">200</span>
-                    <span class="code-title">OK</span>
-                </div>
-                <div>The standard success code. The requested data is enclosed in the response.</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-2xx)">201</span>
-                    <span class="code-title">Created</span>
-                </div>
-                <div>The request was successful, and a new resource was created as a result.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> Typically returned after a successful `POST` request (like registering a new user account or uploading a photo).</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-2xx)">204</span>
-                    <span class="code-title">No Content</span>
-                </div>
-                <div>The server successfully processed the request, but is not returning any content.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> Common with `DELETE` requests. You asked to delete a record. The server deleted it, so it replies "Success, but I have no data to send back to you."</div>
-            </div>
-        </div>
+    <div class="category-section cat-2xx">
+        <h2>2xx: Success (Here is your data!)</h2>
+        <table>
+            <tr><th width="10%">Code</th><th width="25%">Title</th><th>Simple Explanation</th></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">200</td><td class="code-title">OK</td><td>Standard success. Everything worked perfectly.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">201</td><td class="code-title">Created</td><td>Success, and a new record/resource was created (common for POST).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">202</td><td class="code-title">Accepted</td><td>The request was accepted, but the server is still working on it in the background.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">203</td><td class="code-title">Non-Authoritative Info</td><td>Success, but the data is being returned by a proxy/cache, not the original server.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">204</td><td class="code-title">No Content</td><td>Success, but there is absolutely no data to return (common for DELETE).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">205</td><td class="code-title">Reset Content</td><td>Success. The server tells the browser to clear the form the user just filled out.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">206</td><td class="code-title">Partial Content</td><td>Success, but returning only a chunk of the data (used for resuming paused video downloads).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">207</td><td class="code-title">Multi-Status (WebDAV)</td><td>Returns multiple status codes for multiple different operations at once inside an XML message.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">208</td><td class="code-title">Already Reported</td><td>Used to avoid sending the same data twice in a 207 Multi-Status response.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-2xx)">226</td><td class="code-title">IM Used</td><td>The server has fulfilled a GET request for the resource, and the response is a representation of the result of one or more instance-manipulations applied to the current instance.</td></tr>
+        </table>
     </div>
 
     <!-- 3xx Redirection -->
-    <div class="category-card cat-3xx">
-        <h2>3xx: Redirection</h2>
-        <div class="summary">Meaning: "Further action must be taken to complete the request."</div>
-        <p>The resource you are looking for is somewhere else. Your browser usually handles these automatically by following the new URL provided by the server.</p>
-        
-        <div class="code-grid">
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-3xx)">301</span>
-                    <span class="code-title">Moved Permanently</span>
-                </div>
-                <div>The URL has been permanently moved to a new location.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> Crucial for SEO. If you change your website URL from `old-page.html` to `new-page.html`, a 301 tells Google to transfer all the search engine ranking power to the new URL. Browser caching also remembers this permanently.</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-3xx)">302</span>
-                    <span class="code-title">Found (Temporary Redirect)</span>
-                </div>
-                <div>The URL is temporarily moved.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> Used when doing website maintenance or A/B testing. It tells Google: "Go here for now, but don't update your index because I'll bring the original URL back soon."</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-3xx)">304</span>
-                    <span class="code-title">Not Modified</span>
-                </div>
-                <div>Tells the client that the requested file hasn't changed since the last time they downloaded it.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> A vital performance trick! The browser loads the image/CSS file from its local cache instead of downloading it again, saving massive amounts of bandwidth.</div>
-            </div>
-        </div>
+    <div class="category-section cat-3xx">
+        <h2>3xx: Redirection (Go look over there)</h2>
+        <table>
+            <tr><th width="10%">Code</th><th width="25%">Title</th><th>Simple Explanation</th></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">300</td><td class="code-title">Multiple Choices</td><td>There are multiple options for the resource (e.g., a video in MP4, WebM, or OGG). The user must choose.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">301</td><td class="code-title">Moved Permanently</td><td>This URL is dead. The new permanent URL is provided. Update your bookmarks.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">302</td><td class="code-title">Found</td><td>Temporary redirect. Go to this new URL for now, but don't forget the old one.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">303</td><td class="code-title">See Other</td><td>Forces a GET request to the new URL (often used after a successful POST to prevent double-submitting forms).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">304</td><td class="code-title">Not Modified</td><td>Nothing changed since your last visit. Just use the copy saved in your browser cache.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">305</td><td class="code-title">Use Proxy</td><td>Deprecated. You must use a proxy to access this requested resource.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">306</td><td class="code-title">Switch Proxy</td><td>No longer used. Originally meant "subsequent requests should use the specified proxy."</td></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">307</td><td class="code-title">Temporary Redirect</td><td>Like 302, but strictly forbids the browser from changing the HTTP method (a POST must stay a POST).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-3xx)">308</td><td class="code-title">Permanent Redirect</td><td>Like 301, but strictly forbids changing the HTTP method (a POST must stay a POST).</td></tr>
+        </table>
     </div>
 
     <!-- 4xx Client Error -->
-    <div class="category-card cat-4xx">
-        <h2>4xx: Client Error</h2>
-        <div class="summary">Meaning: "You messed up. The request contains bad syntax or cannot be fulfilled."</div>
-        <p>This category means the fault lies with the person or application making the request (the frontend/browser).</p>
-        
-        <div class="code-grid">
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-4xx)">400</span>
-                    <span class="code-title">Bad Request</span>
-                </div>
-                <div>The server cannot understand the request due to malformed syntax (e.g., missing a required parameter or sending invalid JSON).</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-4xx)">401</span>
-                    <span class="code-title">Unauthorized</span>
-                </div>
-                <div>Authentication is required and has failed or has not yet been provided.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> Despite the name "Unauthorized," this actually means <em>"Unauthenticated."</em> It means the server is saying: "I don't know who you are. Please log in."</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-4xx)">403</span>
-                    <span class="code-title">Forbidden</span>
-                </div>
-                <div>The client does not have access rights to the content.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> This is the true <em>"Unauthorized."</em> The server knows exactly who you are (you are logged in), but you are just a regular user trying to access an Admin-only page.</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-4xx)">404</span>
-                    <span class="code-title">Not Found</span>
-                </div>
-                <div>The server cannot find the requested resource (the URL is broken or the data was deleted).</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-4xx)">429</span>
-                    <span class="code-title">Too Many Requests</span>
-                </div>
-                <div>The user has sent too many requests in a given amount of time (Rate Limiting).</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> Used to prevent DDoS attacks or stop an API from being overwhelmed by a bot.</div>
-            </div>
-        </div>
+    <div class="category-section cat-4xx">
+        <h2>4xx: Client Error (You messed up)</h2>
+        <table>
+            <tr><th width="10%">Code</th><th width="25%">Title</th><th>Simple Explanation</th></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">400</td><td class="code-title">Bad Request</td><td>Malformed syntax. The server literally cannot understand what you sent.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">401</td><td class="code-title">Unauthorized</td><td>You must log in to see this. (Actually means "Unauthenticated").</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">402</td><td class="code-title">Payment Required</td><td>Reserved for future use. (Originally intended for digital cash systems).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">403</td><td class="code-title">Forbidden</td><td>You are logged in, but you don't have admin privileges to see this.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">404</td><td class="code-title">Not Found</td><td>The classic dead link. The resource does not exist.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">405</td><td class="code-title">Method Not Allowed</td><td>You tried to use POST on a URL that only accepts GET.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">406</td><td class="code-title">Not Acceptable</td><td>The server cannot provide data in the format you requested (e.g., you asked for XML, it only has JSON).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">407</td><td class="code-title">Proxy Auth Required</td><td>Like 401, but you must authenticate with the proxy server first.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">408</td><td class="code-title">Request Timeout</td><td>You took too long to send your request. The server closed the connection.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">409</td><td class="code-title">Conflict</td><td>Your request conflicts with the server's current state (e.g., trying to create a username that already exists).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">410</td><td class="code-title">Gone</td><td>Like a 404, but implies the resource used to exist, but was intentionally and permanently deleted.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">411</td><td class="code-title">Length Required</td><td>You forgot to include the `Content-Length` header in your request.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">412</td><td class="code-title">Precondition Failed</td><td>You set certain conditions in your headers, and the server did not meet them.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">413</td><td class="code-title">Payload Too Large</td><td>The file or data you tried to upload is too big for the server to process.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">414</td><td class="code-title">URI Too Long</td><td>The URL you requested is too long (usually happens when putting too much data in a GET query string).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">415</td><td class="code-title">Unsupported Media Type</td><td>You sent data in a format the server doesn't support (e.g., sending an image when it wants text).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">416</td><td class="code-title">Range Not Satisfiable</td><td>You asked for a portion of a file that doesn't exist (e.g., asking for byte 1000 of a 500-byte file).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">417</td><td class="code-title">Expectation Failed</td><td>The server cannot meet the requirements of the `Expect` request-header field.</td></tr>
+            <tr class="easter-egg"><td class="code-num" style="color: var(--color-4xx)">418</td><td class="code-title">I'm a teapot</td><td>An April Fools' joke from 1998 (RFC 2324). Returned by teapots requested to brew coffee.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">421</td><td class="code-title">Misdirected Request</td><td>The request was directed at a server that is not configured to produce a response.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">422</td><td class="code-title">Unprocessable Entity</td><td>The syntax was correct, but the data inside was semantically invalid (e.g., negative age).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">423</td><td class="code-title">Locked (WebDAV)</td><td>The file or resource you are trying to access is locked.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">424</td><td class="code-title">Failed Dependency</td><td>The request failed because it depended on another request that failed.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">425</td><td class="code-title">Too Early</td><td>The server is unwilling to risk processing a request that might be replayed (security feature).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">426</td><td class="code-title">Upgrade Required</td><td>The server refuses to perform the request using the current protocol, but might if the client upgrades.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">428</td><td class="code-title">Precondition Required</td><td>The server requires the request to be conditional (prevents the "lost update" problem in databases).</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">429</td><td class="code-title">Too Many Requests</td><td>Rate limiting. You are spamming the server. Slow down.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">431</td><td class="code-title">Header Fields Too Large</td><td>The server refuses to process the request because the HTTP headers are too large.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-4xx)">451</td><td class="code-title">Unavailable For Legal Reasons</td><td>Censorship. The server is denying access due to a legal demand (e.g., a court order or government block).</td></tr>
+        </table>
     </div>
 
     <!-- 5xx Server Error -->
-    <div class="category-card cat-5xx">
-        <h2>5xx: Server Error</h2>
-        <div class="summary">Meaning: "I messed up. The server failed to fulfill an apparently valid request."</div>
-        <p>Your request was perfect, but the backend server crashed, timed out, or has a bug in its code.</p>
-        
-        <div class="code-grid">
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-5xx)">500</span>
-                    <span class="code-title">Internal Server Error</span>
-                </div>
-                <div>A generic error message, given when an unexpected condition was encountered (usually a NullPointerException or unhandled bug in the backend code).</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-5xx)">502</span>
-                    <span class="code-title">Bad Gateway</span>
-                </div>
-                <div>The server was acting as a gateway or proxy and received an invalid response from the upstream server.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> Imagine your request goes to a Load Balancer (Nginx), which forwards it to your Spring Boot app. If the Spring Boot app is dead/crashed, Nginx sends a 502 Bad Gateway back to the user.</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-5xx)">503</span>
-                    <span class="code-title">Service Unavailable</span>
-                </div>
-                <div>The server is not ready to handle the request (usually down for maintenance or heavily overloaded).</div>
-            </div>
-            <div class="code-item">
-                <div class="code-header">
-                    <span class="code-num" style="color: var(--color-5xx)">504</span>
-                    <span class="code-title">Gateway Timeout</span>
-                </div>
-                <div>The server acting as a gateway did not get a response in time from the upstream server.</div>
-                <div class="minute-detail"><strong>Minute Detail:</strong> The upstream server isn't dead (like in 502), it's just taking WAY too long to respond (e.g., stuck on a 5-minute database query), so the proxy gives up and cuts the connection.</div>
-            </div>
-        </div>
+    <div class="category-section cat-5xx">
+        <h2>5xx: Server Error (The server messed up)</h2>
+        <table>
+            <tr><th width="10%">Code</th><th width="25%">Title</th><th>Simple Explanation</th></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">500</td><td class="code-title">Internal Server Error</td><td>The backend code crashed or encountered a bug it didn't know how to handle.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">501</td><td class="code-title">Not Implemented</td><td>The server does not support the functionality required to fulfill the request.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">502</td><td class="code-title">Bad Gateway</td><td>The proxy server (like a load balancer) received an invalid response from the upstream server.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">503</td><td class="code-title">Service Unavailable</td><td>The server is down for maintenance or completely overloaded and cannot handle the request.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">504</td><td class="code-title">Gateway Timeout</td><td>The proxy server gave up waiting for the slow upstream server to reply.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">505</td><td class="code-title">HTTP Version Not Supported</td><td>The HTTP protocol version used in the request is not supported by the server.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">506</td><td class="code-title">Variant Also Negotiates</td><td>Internal configuration error causing a circular reference in content negotiation.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">507</td><td class="code-title">Insufficient Storage</td><td>The server has run out of disk space or memory to process the request.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">508</td><td class="code-title">Loop Detected (WebDAV)</td><td>The server detected an infinite loop while processing the request.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">510</td><td class="code-title">Not Extended</td><td>Further extensions to the request are required for the server to fulfill it.</td></tr>
+            <tr><td class="code-num" style="color: var(--color-5xx)">511</td><td class="code-title">Network Auth Required</td><td>You need to authenticate to gain network access (like accepting terms on a public airport Wi-Fi).</td></tr>
+        </table>
     </div>
 
 </div>
