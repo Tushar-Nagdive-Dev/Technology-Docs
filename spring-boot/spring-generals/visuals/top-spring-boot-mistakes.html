@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot: 10 Silent Production Killers</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fdf5f6; /* Subtle red tint for danger theme */
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(231, 76, 60, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #c0392b;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+        }
+        .mistake-card {
+            background: #fff;
+            border: 1px solid #fadbd8;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+        .mistake-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            font-size: 1.4em;
+        }
+        .number-badge {
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            font-size: 0.8em;
+        }
+        .explanation {
+            font-size: 1.05em;
+            margin-bottom: 15px;
+        }
+        .the-fix {
+            background-color: #e8f8f5;
+            padding: 15px;
+            border-left: 5px solid #1abc9c;
+            border-radius: 0 4px 4px 0;
+        }
+        .the-fix strong {
+            color: #16a085;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+        code {
+            background-color: #f4f6f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c0392b;
+            font-family: monospace;
+        }
+        .divider {
+            text-align: center;
+            color: #95a5a6;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 40px 0;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚨 Spring Boot: Top 10 Silent Production Killers</h1>
+
+    <!-- Mistake 1 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">1</span> ddl-auto=update in Production</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> Using <code>spring.jpa.hibernate.ddl-auto=update</code> allows Hibernate to automatically alter your database schema on startup. In production, this can accidentally lock massive tables, drop crucial constraints, or fail silently midway through, taking down your entire database. It is highly unpredictable.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Set it to <code>validate</code> or <code>none</code> in production. Use proper database migration tools like <strong>Flyway</strong> or <strong>Liquibase</strong> to version control and safely apply schema changes.
+        </div>
+    </div>
+
+    <!-- Mistake 2 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">2</span> No Read Timeouts on HTTP Clients</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> When calling an external API (using RestTemplate, WebClient, or Feign), if you don't set a timeout and the external server hangs, your application's thread hangs with it. If 200 users hit that endpoint, 200 of your threads will wait indefinitely. This exhausts your thread pool, and your app crashes (Thread Starvation).
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Always set explicit timeouts. Connection Timeout (e.g., 3s), Read Timeout (e.g., 5s), and Connection Request Timeout (e.g., 2s). Treat all external systems as if they might fail at any moment.
+        </div>
+    </div>
+
+    <!-- Mistake 3 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">3</span> @Transactional on Private Methods</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> Spring uses "proxies" (wrappers) around your beans to magically handle transactions, caching, and async logic. However, these proxies only intercept calls coming from <i>outside</i> the class. If you put <code>@Transactional</code> on a private method (or call it from another method within the same class), the proxy is bypassed. The transaction simply never starts, leading to incomplete data saves if an error occurs.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Only apply <code>@Transactional</code>, <code>@Async</code>, <code>@Cacheable</code>, and <code>@Retryable</code> to <strong>public</strong> methods, and ensure they are called from another bean/class.
+        </div>
+    </div>
+
+    <!-- Mistake 4 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">4</span> Returning Entities Directly from Controllers</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> Returning JPA Entities (like a <code>User</code> class) directly as JSON is a recipe for disaster. It couples your database design directly to your API contract. Worse, it often causes <i>Infinite Recursion</i> (e.g., User has Orders, Order has User... leading to a StackOverflow) and can accidentally leak sensitive data like password hashes to the frontend.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Always use <strong>DTOs (Data Transfer Objects)</strong>. Map your Entity to a DTO (using tools like MapStruct or manual mapping) and only return exactly what the client needs.
+        </div>
+    </div>
+
+    <!-- Mistake 5 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">5</span> Default HikariCP Pool + Long Transactions</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> HikariCP is the default, incredibly fast connection pool in Spring Boot, but its default max pool size is only <strong>10</strong>. If you wrap a long-running process (like making a slow HTTP call to a 3rd party API or processing a huge file) inside a <code>@Transactional</code> block, you hold onto a database connection for that entire time. Just 10 concurrent users can exhaust the pool, causing the whole app to freeze for everyone else.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Keep transactions as short as possible. Fetch data, close the transaction, do the heavy/slow non-DB work, and open a new transaction only when it's time to save.
+        </div>
+    </div>
+
+    <div class="divider">--- Added from Maya's End ---</div>
+
+    <!-- Mistake 6 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">6</span> The N+1 Query Problem</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> You fetch a list of 100 <code>Authors</code> (1 query). Your code then loops through them to get their <code>Books</code>. Because of lazy loading, Hibernate executes a separate query for each author's books (100 queries). You just executed 101 queries to load a single page. It works fine in dev with 3 rows, but silently kills server performance in production.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Use <code>JOIN FETCH</code> in your JPQL queries, or use Spring Data JPA <code>@EntityGraph</code> to fetch the related entities in a single, optimized SQL query.
+        </div>
+    </div>
+
+    <!-- Mistake 7 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">7</span> Exposing All Actuator Endpoints</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> Spring Boot Actuator provides amazing metrics, but if you set <code>management.endpoints.web.exposure.include=*</code> without security, you've just handed hackers the keys to the kingdom. Endpoints like <code>/actuator/env</code> can expose AWS keys or database passwords, and <code>/actuator/heapdump</code> can let attackers download your server's entire RAM memory.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Only expose <code>health</code> and <code>info</code> publicly. If you need other endpoints, secure the <code>/actuator/**</code> path behind Spring Security so only admins can access them.
+        </div>
+    </div>
+
+    <!-- Mistake 8 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">8</span> Using findAll() Without Pagination</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> Writing <code>repository.findAll()</code> seems harmless. But over time, as your table grows to millions of rows, fetching all of them at once will load the entire dataset into your JVM memory. This causes an immediate <code>OutOfMemoryError</code> (OOM), crashing your application pod instantly.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Never use plain <code>findAll()</code> on large tables. Always use Spring Data's <code>Pageable</code> or <code>Slice</code> to process data in manageable chunks.
+        </div>
+    </div>
+
+    <!-- Mistake 9 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">9</span> Field Injection (@Autowired on Variables)</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> Using <code>@Autowired</code> directly on private fields allows you to easily create circular dependencies (A depends on B, B depends on A) that Spring will try to magically resolve, leading to fragile startup sequences. It also makes writing unit tests incredibly annoying, as you have to use reflection to inject mocks.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Use <strong>Constructor Injection</strong>. Make your dependencies <code>final</code>. (Pro-tip: Use Lombok's <code>@RequiredArgsConstructor</code> to generate the constructor automatically, keeping your code clean and enforcing immutability).
+        </div>
+    </div>
+
+    <!-- Mistake 10 -->
+    <div class="mistake-card">
+        <h2><span class="number-badge">10</span> Ignoring Graceful Shutdown</h2>
+        <div class="explanation">
+            <strong>The Problem:</strong> When deploying a new version to Kubernetes or Docker, the orchestration tool sends a kill signal to your old container. By default, Spring Boot shuts down instantly, dropping any HTTP requests or database transactions that were currently in progress. Users get random 500 errors or corrupted data during deployments.
+        </div>
+        <div class="the-fix">
+            <strong>🔧 The Fix:</strong> Add <code>server.shutdown=graceful</code> to your properties. This tells Spring Boot to stop accepting new requests, but wait a few seconds (configurable) for currently processing requests to finish before pulling the plug.
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
