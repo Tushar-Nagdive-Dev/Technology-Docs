@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 5 Best Practices for Securing Spring Boot APIs</title>
+    <style>
+        :root {
+            --primary: #6db33f;
+            --secondary: #2d3436;
+            --bg: #f8f9fa;
+            --text: #2d3436;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--secondary);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-bottom: 5px solid var(--primary);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--secondary);
+            margin-top: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .scenario-box {
+            background-color: #e8f5e9;
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: "Consolas", "Monaco", monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .annotation { color: #b5cea8; }
+        .comment { color: #6a9955; font-style: italic; }
+        .class-name { color: #4ec9b0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Top 5 Best Practices for Securing Spring Boot APIs</h1>
+        <p>An in-depth guide with concepts, real-world scenarios, and implementation code.</p>
+    </header>
+
+    <div class="container">
+
+        <!-- Practice 1 -->
+        <div class="section">
+            <h2>1. Implement Stateless Authentication (JWT & OAuth2)</h2>
+            <p><strong>Deep Dive:</strong> Traditional web applications use server-side sessions (JSESSIONID) to remember logged-in users. In a modern API ecosystem, this is a bottleneck. It requires servers to share session state (which is hard to scale) and leaves APIs vulnerable to Cross-Site Request Forgery (CSRF). The best practice is stateless authentication using JSON Web Tokens (JWT). The server issues a cryptographically signed token, and the client sends this token in the <code>Authorization</code> header with every request. The server verifies the math behind the signature rather than looking up a session in a database.</p>
+            
+            <div class="scenario-box">
+                <strong>Real-Time Scenario:</strong> Imagine a <strong>Ride-sharing app</strong>. A user’s app connects to a gateway, which routes traffic to 50 different microservices (Billing, Location, Matching). If the system used sessions, all 50 services would need to constantly check a centralized Redis cache to see if the user is logged in. With a JWT, any microservice can instantly verify the user's identity just by reading the token's signature.
+            </div>
+
+            <h3>Spring Boot Implementation:</h3>
+            <p>You must configure your API to reject sessions and disable CSRF (since stateless APIs are immune to CSRF if tokens are handled correctly by the client).</p>
+            <pre><code><span class="annotation">@Configuration</span>
+<span class="annotation">@EnableWebSecurity</span>
+<span class="keyword">public class</span> <span class="class-name">SecurityConfig</span> {
+
+    <span class="annotation">@Bean</span>
+    <span class="keyword">public</span> <span class="class-name">SecurityFilterChain</span> filterChain(<span class="class-name">HttpSecurity</span> http) <span class="keyword">throws</span> Exception {
+        http
+            <span class="comment">// 1. Disable CSRF (safe because we don't use cookies/sessions)</span>
+            .csrf(csrf -> csrf.disable())
+            
+            <span class="comment">// 2. Make the application strictly stateless</span>
+            .sessionManagement(session -> 
+                session.sessionCreationPolicy(<span class="class-name">SessionCreationPolicy</span>.STATELESS))
+            
+            <span class="comment">// 3. Define authorization rules</span>
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(<span class="string">"/api/auth/login"</span>).permitAll()
+                .anyRequest().authenticated()
+            )
+            
+            <span class="comment">// 4. Tell Spring to look for and validate JWTs in the Authorization header</span>
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(<span class="class-name">Customizer</span>.withDefaults()));
+        
+        <span class="keyword">return</span> http.build();
+    }
+}</code></pre>
+        </div>
+
+        <!-- Practice 2 -->
+        <div class="section">
+            <h2>2. Enforce Object-Level Authorization (Prevent BOLA/IDOR)</h2>
+            <p><strong>Deep Dive:</strong> Broken Object Level Authorization (BOLA), also known as IDOR, is the <strong>#1 API vulnerability in the world</strong>. It happens when your API checks <em>if</em> a user is logged in, but fails to check <em>if that specific user owns the data they are requesting</em>.</p>
+
+            <div class="scenario-box">
+                <strong>Real-Time Scenario:</strong> Consider a <strong>Banking API</strong>. User Alice logs in and her app requests her account details via <code>GET /api/accounts/1001</code>. A hacker sees this URL pattern, logs into their own account (so they have a valid JWT), and changes the URL to <code>GET /api/accounts/1002</code>. If the API only checks "Is this user authenticated?", it will gladly return User Bob's bank details to the hacker.
+            </div>
+
+            <h3>Spring Boot Implementation:</h3>
+            <p>Never rely purely on URL paths. Use Method Security with Spring Expression Language (SpEL) to ensure the ID in the URL matches the ID of the logged-in user.</p>
+            <pre><code><span class="comment">// 1. Enable Method Security</span>
+<span class="annotation">@Configuration</span>
+<span class="annotation">@EnableMethodSecurity</span>
+<span class="keyword">public class</span> <span class="class-name">MethodSecurityConfig</span> { }
+
+<span class="comment">// 2. Controller Implementation</span>
+<span class="annotation">@RestController</span>
+<span class="annotation">@RequestMapping</span>(<span class="string">"/api/accounts"</span>)
+<span class="keyword">public class</span> <span class="class-name">AccountController</span> {
+
+    <span class="comment">// 3. The magic happens here. We call a custom security bean to check ownership.</span>
+    <span class="annotation">@GetMapping</span>(<span class="string">"/{accountId}"</span>)
+    <span class="annotation">@PreAuthorize</span>(<span class="string">"@securityChecker.isAccountOwner(authentication, #accountId)"</span>)
+    <span class="keyword">public</span> <span class="class-name">ResponseEntity&lt;AccountDTO&gt;</span> getAccountDetails(<span class="annotation">@PathVariable</span> <span class="class-name">Long</span> accountId) {
+        <span class="keyword">return</span> <span class="class-name">ResponseEntity</span>.ok(accountService.getAccount(accountId));
+    }
+}
+
+<span class="comment">// 4. Custom Security Component</span>
+<span class="annotation">@Component</span>(<span class="string">"securityChecker"</span>)
+<span class="keyword">public class</span> <span class="class-name">SecurityChecker</span> {
+    
+    <span class="keyword">public boolean</span> isAccountOwner(<span class="class-name">Authentication</span> authentication, <span class="class-name">Long</span> requestedAccountId) {
+        <span class="comment">// Extract the user ID from the JWT token</span>
+        <span class="class-name">Jwt</span> jwt = (<span class="class-name">Jwt</span>) authentication.getPrincipal();
+        <span class="class-name">Long</span> loggedInUserId = jwt.getClaim(<span class="string">"userId"</span>);
+        
+        <span class="comment">// Check the database: Does this account actually belong to this user?</span>
+        <span class="keyword">return</span> databaseService.verifyOwnership(loggedInUserId, requestedAccountId);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Practice 3 -->
+        <div class="section">
+            <h2>3. Strict Input Validation & Mass Assignment Protection</h2>
+            <p><strong>Deep Dive:</strong> APIs should never blindly trust data sent by the client. <strong>Mass Assignment</strong> occurs when an API binds a JSON payload directly to a database Entity. Attackers can inject fields into the JSON that the developer didn't intend to be updated. The fix is to always use Data Transfer Objects (DTOs) and apply strict <code>jakarta.validation</code> annotations.</p>
+
+            <div class="scenario-box">
+                <strong>Real-Time Scenario:</strong> In an <strong>E-commerce app</strong>, a regular user updates their profile using <code>PUT /api/users/me</code> with <code>{"firstName": "John"}</code>. A hacker intercepts this and sends <code>{"firstName": "Hacker", "role": "ADMIN", "walletBalance": 99999}</code>. If the API maps this directly to the User JPA entity and saves it, the hacker just gave themselves admin rights and free money.
+            </div>
+
+            <h3>Spring Boot Implementation:</h3>
+            <pre><code><span class="comment">// 1. Create a DTO that ONLY contains allowed fields. </span>
+<span class="comment">// No 'role' or 'walletBalance' fields exist here.</span>
+<span class="keyword">public class</span> <span class="class-name">ProfileUpdateDTO</span> {
+    
+    <span class="annotation">@NotBlank</span>(message = <span class="string">"First name is required"</span>)
+    <span class="annotation">@Size</span>(min = 2, max = 50)
+    <span class="comment">// Regex prevents malicious script injection (XSS)</span>
+    <span class="annotation">@Pattern</span>(regexp = <span class="string">"^[a-zA-Z]+$"</span>, message = <span class="string">"Only letters allowed"</span>)
+    <span class="keyword">private</span> <span class="class-name">String</span> firstName;
+
+    <span class="comment">// getters and setters...</span>
+}
+
+<span class="comment">// 2. Controller forces validation</span>
+<span class="annotation">@RestController</span>
+<span class="annotation">@RequestMapping</span>(<span class="string">"/api/users"</span>)
+<span class="keyword">public class</span> <span class="class-name">UserController</span> {
+
+    <span class="annotation">@PutMapping</span>(<span class="string">"/me"</span>)
+    <span class="comment">// The @Valid annotation triggers the rules defined in the DTO</span>
+    <span class="keyword">public</span> <span class="class-name">ResponseEntity&lt;String&gt;</span> updateProfile(<span class="annotation">@Valid</span> <span class="annotation">@RequestBody</span> <span class="class-name">ProfileUpdateDTO</span> dto) {
+        
+        <span class="comment">// Safe: We only extract exactly what we allowed in the DTO</span>
+        userService.updateFirstName(dto.getFirstName());
+        
+        <span class="keyword">return</span> <span class="class-name">ResponseEntity</span>.ok(<span class="string">"Profile updated safely"</span>);
+    }
+}</code></pre>
+        </div>
+
+        <!-- Practice 4 -->
+        <div class="section">
+            <h2>4. Implement Rate Limiting</h2>
+            <p><strong>Deep Dive:</strong> Your API needs a shield against brute-force attacks, credential stuffing (hackers using leaked passwords from other sites), and basic DDoS attacks. Rate limiting restricts how many requests a single IP or API Key can make within a specific timeframe using algorithms like the "Token Bucket."</p>
+
+            <div class="scenario-box">
+                <strong>Real-Time Scenario:</strong> During a <strong>Ticketmaster ticket drop</strong>, thousands of malicious bots try to hit the <code>/api/checkout</code> endpoint simultaneously to scalp tickets. Without rate limiting, the database crashes. With rate limiting (e.g., 2 requests per second per IP), the bots are instantly rejected with an HTTP <code>429 Too Many Requests</code> status, keeping the servers online for real users.
+            </div>
+
+            <h3>Spring Boot Implementation:</h3>
+            <p>You can use the open-source <code>Bucket4j</code> library implemented as a Servlet Filter.</p>
+            <pre><code><span class="annotation">@Component</span>
+<span class="keyword">public class</span> <span class="class-name">RateLimitingFilter</span> <span class="keyword">extends</span> <span class="class-name">OncePerRequestFilter</span> {
+
+    <span class="comment">// Allow 10 requests per minute</span>
+    <span class="keyword">private final</span> <span class="class-name">Bucket</span> bucket = <span class="class-name">Bucket</span>.builder()
+            .addLimit(<span class="class-name">Bandwidth</span>.classic(10, <span class="class-name">Refill</span>.intervally(10, <span class="class-name">Duration</span>.ofMinutes(1))))
+            .build();
+
+    <span class="annotation">@Override</span>
+    <span class="keyword">protected void</span> doFilterInternal(<span class="class-name">HttpServletRequest</span> request, 
+                                    <span class="class-name">HttpServletResponse</span> response, 
+                                    <span class="class-name">FilterChain</span> filterChain) <span class="keyword">throws</span> <span class="class-name">ServletException</span>, <span class="class-name">IOException</span> {
+        
+        <span class="comment">// Apply limit only to sensitive endpoints like login</span>
+        <span class="keyword">if</span> (request.getRequestURI().startsWith(<span class="string">"/api/auth/login"</span>)) {
+            <span class="keyword">if</span> (bucket.tryConsume(1)) {
+                filterChain.doFilter(request, response); <span class="comment">// Token consumed, allow request</span>
+            } <span class="keyword">else</span> {
+                <span class="comment">// Bucket is empty, reject request</span>
+                response.setStatus(<span class="class-name">HttpStatus</span>.TOO_MANY_REQUESTS.value());
+                response.getWriter().write(<span class="string">"Too many attempts. Please wait 1 minute."</span>);
+                <span class="keyword">return</span>;
+            }
+        } <span class="keyword">else</span> {
+            filterChain.doFilter(request, response);
+        }
+    }
+}</code></pre>
+        </div>
+
+        <!-- Practice 5 -->
+        <div class="section">
+            <h2>5. Secure the Transport Layer and Headers</h2>
+            <p><strong>Deep Dive:</strong> Even if your API logic is flawless, data in transit is vulnerable. You must force HTTPS (TLS 1.2 or 1.3) so data cannot be intercepted. Furthermore, APIs accessed by browsers must return hardened HTTP Security Headers to prevent the browser from executing malicious scripts (XSS) or being tricked into rendering the API inside an invisible iframe (Clickjacking).</p>
+
+            <div class="scenario-box">
+                <strong>Real-Time Scenario:</strong> A user logs into their <strong>Crypto Portfolio API</strong> while on public airport Wi-Fi. If the API allows unencrypted HTTP connections, a hacker sitting across the terminal can use packet sniffing tools to grab the user's JWT token right out of the air. Enforcing Strict-Transport-Security (HSTS) guarantees the connection is locked down.
+            </div>
+
+            <h3>Spring Boot Implementation:</h3>
+            <p>You can enforce this globally in your <code>SecurityFilterChain</code>.</p>
+            <pre><code><span class="annotation">@Bean</span>
+<span class="keyword">public</span> <span class="class-name">SecurityFilterChain</span> secureHeadersChain(<span class="class-name">HttpSecurity</span> http) <span class="keyword">throws</span> Exception {
+    http
+        <span class="comment">// 1. Force all requests to use HTTPS</span>
+        .requiresChannel(channel -> channel.anyRequest().requiresSecure())
+        
+        <span class="comment">// 2. Inject Security Headers</span>
+        .headers(headers -> headers
+            <span class="comment">// Force browsers to remember this site is HTTPS-only for 1 year (HSTS)</span>
+            .httpStrictTransportSecurity(hsts -> hsts
+                .includeSubDomains(<span class="keyword">true</span>)
+                .maxAgeInSeconds(31536000) 
+            )
+            <span class="comment">// Prevent Clickjacking</span>
+            .frameOptions(frame -> frame.deny())
+            <span class="comment">// Prevent browsers from guessing the file type</span>
+            .contentTypeOptions(<span class="class-name">Customizer</span>.withDefaults())
+            <span class="comment">// Strict Content Security Policy</span>
+            .contentSecurityPolicy(csp -> csp
+                .policyDirectives(<span class="string">"default-src 'none'; frame-ancestors 'none'"</span>)
+            )
+        );
+        
+    <span class="keyword">return</span> http.build();
+}</code></pre>
+        </div>
+
+    </div>
+</body>
+</html>
