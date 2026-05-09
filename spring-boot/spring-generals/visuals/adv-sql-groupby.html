@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced SQL GROUP BY Scenarios</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #1a365d;
+            border-bottom: 3px solid #3182ce;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.05em;
+        }
+        .intro-box {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+        .scenario-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .sql-code {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+        .keyword { color: #f6ad55; font-weight: bold; }
+        .string { color: #9ae6b4; }
+        .function { color: #63b3ed; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 10px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #edf2f7;
+            color: #2d3748;
+            font-weight: bold;
+        }
+        tr:nth-child(even) { background-color: #f7fafc; }
+        .null-val { color: #e53e3e; font-style: italic; font-weight: bold; }
+        .highlight-row { background-color: #feebc8 !important; font-weight: bold; }
+        .grand-total { background-color: #c6f6d5 !important; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Advanced SQL GROUP BY: Rollup, Cube & Grouping Sets</h1>
+
+    <div class="intro-box">
+        <strong>The Scenario:</strong> Imagine you are a Data Analyst for a retail company. You have a table called <code>Sales_Data</code> that records sales across different <strong>Regions</strong> and <strong>Categories</strong>. <br><br>
+        Standard <code>GROUP BY</code> only gives you the final aggregates. But your manager wants to see <strong>Subtotals</strong> and <strong>Grand Totals</strong> in a single query result. Here is our starting data:
+    </div>
+
+    <h3>Base Table: <code>Sales_Data</code></h3>
+    <table>
+        <tr><th>Region</th><th>Category</th><th>Sales_Amount</th></tr>
+        <tr><td>North</td><td>Electronics</td><td>1000</td></tr>
+        <tr><td>North</td><td>Clothing</td><td>500</td></tr>
+        <tr><td>South</td><td>Electronics</td><td>800</td></tr>
+        <tr><td>South</td><td>Clothing</td><td>600</td></tr>
+    </table>
+
+    <div class="scenario-card">
+        <h2>1. ROLLUP(): The "Hierarchical Subtotal" Maker</h2>
+        <p><strong>Simple Terms:</strong> <code>ROLLUP</code> is perfect for financial reports. It creates subtotals moving from right to left across your group columns, plus a final Grand Total at the very bottom. If you ROLLUP (Region, Category), it gives you: <em>Detail Level + Region Subtotals + Grand Total</em>.</p>
+        
+        <div class="sql-code">
+<span class="keyword">SELECT</span> Region, Category, <span class="function">SUM</span>(Sales_Amount) <span class="keyword">AS</span> Total_Sales<br>
+<span class="keyword">FROM</span> Sales_Data<br>
+<span class="keyword">GROUP BY ROLLUP</span>(Region, Category);
+        </div>
+
+        <table>
+            <tr><th>Region</th><th>Category</th><th>Total_Sales</th><th>Explanation</th></tr>
+            <tr><td>North</td><td>Electronics</td><td>1000</td><td>Standard detail row</td></tr>
+            <tr><td>North</td><td>Clothing</td><td>500</td><td>Standard detail row</td></tr>
+            <tr class="highlight-row"><td>North</td><td class="null-val">NULL</td><td>1500</td><td>👉 Subtotal for North Region</td></tr>
+            <tr><td>South</td><td>Electronics</td><td>800</td><td>Standard detail row</td></tr>
+            <tr><td>South</td><td>Clothing</td><td>600</td><td>Standard detail row</td></tr>
+            <tr class="highlight-row"><td>South</td><td class="null-val">NULL</td><td>1400</td><td>👉 Subtotal for South Region</td></tr>
+            <tr class="grand-total"><td class="null-val">NULL</td><td class="null-val">NULL</td><td>2900</td><td>👉 GRAND TOTAL</td></tr>
+        </table>
+    </div>
+
+    <div class="scenario-card">
+        <h2>2. CUBE(): The "All Possible Combinations" Maker</h2>
+        <p><strong>Simple Terms:</strong> <code>CUBE</code> does everything ROLLUP does, but it also generates subtotals for <strong>every possible combination</strong> of the columns. Not only do you get Region subtotals, but you also get Category subtotals! It’s like generating a pivot table cross-tabulation in one query.</p>
+        
+        <div class="sql-code">
+<span class="keyword">SELECT</span> Region, Category, <span class="function">SUM</span>(Sales_Amount) <span class="keyword">AS</span> Total_Sales<br>
+<span class="keyword">FROM</span> Sales_Data<br>
+<span class="keyword">GROUP BY CUBE</span>(Region, Category);
+        </div>
+
+        <table>
+            <tr><th>Region</th><th>Category</th><th>Total_Sales</th><th>Explanation</th></tr>
+            <tr><td>North</td><td>Electronics</td><td>1000</td><td>Detail row</td></tr>
+            <tr><td>North</td><td>Clothing</td><td>500</td><td>Detail row</td></tr>
+            <tr class="highlight-row"><td>North</td><td class="null-val">NULL</td><td>1500</td><td>Subtotal for North Region</td></tr>
+            <tr><td>South</td><td>Electronics</td><td>800</td><td>Detail row</td></tr>
+            <tr><td>South</td><td>Clothing</td><td>600</td><td>Detail row</td></tr>
+            <tr class="highlight-row"><td>South</td><td class="null-val">NULL</td><td>1400</td><td>Subtotal for South Region</td></tr>
+            <tr class="highlight-row"><td class="null-val">NULL</td><td>Electronics</td><td>1800</td><td>👉 <strong>EXTRA:</strong> Subtotal for Electronics Category</td></tr>
+            <tr class="highlight-row"><td class="null-val">NULL</td><td>Clothing</td><td>1100</td><td>👉 <strong>EXTRA:</strong> Subtotal for Clothing Category</td></tr>
+            <tr class="grand-total"><td class="null-val">NULL</td><td class="null-val">NULL</td><td>2900</td><td>GRAND TOTAL</td></tr>
+        </table>
+    </div>
+
+    <div class="scenario-card">
+        <h2>3. GROUPING SETS(): The "A La Carte" Menu</h2>
+        <p><strong>Simple Terms:</strong> What if you <em>only</em> want the Region subtotals and the Category subtotals, but you don't care about the detail rows or the Grand Total? <code>CUBE</code> generates too much data. <code>GROUPING SETS</code> lets you explicitly pick exactly which groupings you want to calculate.</p>
+        
+        <div class="sql-code">
+<span class="keyword">SELECT</span> Region, Category, <span class="function">SUM</span>(Sales_Amount) <span class="keyword">AS</span> Total_Sales<br>
+<span class="keyword">FROM</span> Sales_Data<br>
+<span class="keyword">GROUP BY GROUPING SETS</span> ( (Region), (Category) );
+        </div>
+
+        <table>
+            <tr><th>Region</th><th>Category</th><th>Total_Sales</th><th>Explanation</th></tr>
+            <tr class="highlight-row"><td>North</td><td class="null-val">NULL</td><td>1500</td><td>Grouped strictly by Region</td></tr>
+            <tr class="highlight-row"><td>South</td><td class="null-val">NULL</td><td>1400</td><td>Grouped strictly by Region</td></tr>
+            <tr class="highlight-row"><td class="null-val">NULL</td><td>Electronics</td><td>1800</td><td>Grouped strictly by Category</td></tr>
+            <tr class="highlight-row"><td class="null-val">NULL</td><td>Clothing</td><td>1100</td><td>Grouped strictly by Category</td></tr>
+        </table>
+        <p><em>Notice there are no detail rows (Region + Category combined) and no Grand Total, because we didn't ask for them in the sets!</em></p>
+    </div>
+
+    <div class="scenario-card">
+        <h2>4. The GROUPING() Function: Fixing the "NULL" Confusion</h2>
+        <p><strong>Simple Terms:</strong> When using ROLLUP or CUBE, the subtotals show up with a <code>NULL</code> value in the columns. But what if your raw data actually contains a real <code>NULL</code> region? How do you tell the difference between an empty Region and a "Total" row? <br><br>The <code>GROUPING()</code> function returns a <code>1</code> if the NULL was generated by ROLLUP/CUBE as a subtotal, and a <code>0</code> if it's actual raw data.</p>
+        
+        <div class="sql-code">
+<span class="keyword">SELECT</span> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">CASE WHEN</span> <span class="function">GROUPING</span>(Region) = 1 <span class="keyword">THEN</span> <span class="string">'ALL REGIONS'</span> <span class="keyword">ELSE</span> Region <span class="keyword">END AS</span> Region,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">CASE WHEN</span> <span class="function">GROUPING</span>(Category) = 1 <span class="keyword">THEN</span> <span class="string">'ALL CATEGORIES'</span> <span class="keyword">ELSE</span> Category <span class="keyword">END AS</span> Category,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">SUM</span>(Sales_Amount) <span class="keyword">AS</span> Total_Sales<br>
+<span class="keyword">FROM</span> Sales_Data<br>
+<span class="keyword">GROUP BY ROLLUP</span>(Region, Category);
+        </div>
+
+        <table>
+            <tr><th>Region</th><th>Category</th><th>Total_Sales</th><th>Explanation</th></tr>
+            <tr><td>North</td><td>Electronics</td><td>1000</td><td>Standard</td></tr>
+            <tr><td>North</td><td>Clothing</td><td>500</td><td>Standard</td></tr>
+            <tr class="highlight-row"><td>North</td><td><strong>ALL CATEGORIES</strong></td><td>1500</td><td>We replaced the ugly NULL with text!</td></tr>
+            <tr><td>South</td><td>Electronics</td><td>800</td><td>Standard</td></tr>
+            <tr><td>South</td><td>Clothing</td><td>600</td><td>Standard</td></tr>
+            <tr class="highlight-row"><td>South</td><td><strong>ALL CATEGORIES</strong></td><td>1400</td><td>We replaced the ugly NULL with text!</td></tr>
+            <tr class="grand-total"><td><strong>ALL REGIONS</strong></td><td><strong>ALL CATEGORIES</strong></td><td>2900</td><td>Clean, presentation-ready Grand Total</td></tr>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
