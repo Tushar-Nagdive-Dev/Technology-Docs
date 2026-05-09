@@ -17,3 +17,8 @@
 [![VIEW Topic](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/spring-boot/spring-generals/visuals/top-spring-boot-mistakes.html)
 
 ---
+
+### 5. Advanced SQL GROUP BY Queries
+[![VIEW Topic](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/spring-boot/spring-generals/visuals/adv-sql-groupby.html)
+
+---
