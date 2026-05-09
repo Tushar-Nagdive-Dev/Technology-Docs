@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labeled vs Unlabeled Break Statements</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --accent-unlabeled: #3182ce; /* Blue */
+            --accent-labeled: #d69e2e; /* Gold/Yellow */
+            --code-bg: #1a202c;
+            --code-text: #e2e8f0;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a202c;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-top: 5px solid transparent;
+        }
+
+        .card.unlabeled { border-top-color: var(--accent-unlabeled); }
+        .card.labeled { border-top-color: var(--accent-labeled); }
+
+        .card h2 { margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .unlabeled h2 { color: var(--accent-unlabeled); }
+        .labeled h2 { color: var(--accent-labeled); }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', Consolas, monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .kw { color: #f6ad55; font-weight: bold; } /* Keyword */
+        .str { color: #9ae6b4; } /* String */
+        .cm { color: #a0aec0; font-style: italic; } /* Comment */
+        .lb { color: #f687b3; font-weight: bold; } /* Label */
+
+        .execution-flow {
+            margin-top: 15px;
+            padding: 15px;
+            background: #ebf8ff;
+            border-left: 4px solid var(--accent-unlabeled);
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .labeled .execution-flow {
+            background: #fffff0;
+            border-left-color: var(--accent-labeled);
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th { background: #edf2f7; color: #4a5568; font-weight: bold; }
+        tr:last-child td { border-bottom: none; }
+        
+        .minute-details {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(254, 178, 178, 0.2);
+        }
+        
+        .minute-details h3 { color: #c53030; margin-top: 0; }
+        .minute-details ul { padding-left: 20px; }
+        .minute-details li { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>The Break Statement Deep Dive</h1>
+    <p class="subtitle">Understanding Control Flow: Unlabeled vs. Labeled execution jumping</p>
+
+    <div class="grid">
+        <!-- Unlabeled Break -->
+        <div class="card unlabeled">
+            <h2>1. The Unlabeled Break</h2>
+            <p><strong>Definition:</strong> The standard <code>break;</code> statement terminates the <strong>innermost</strong> enclosing loop (<code>for</code>, <code>while</code>, <code>do-while</code>) or <code>switch</code> statement it is placed inside.</p>
+            <p><strong>Use Case:</strong> When you want to stop the current loop iteration process entirely, but you don't care about any outer loops that might be wrapping it.</p>
+            
+            <div class="code-block">
+<span class="kw">for</span> (<span class="kw">int</span> i = 1; i <= 3; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = 1; j <= 3; j++) {
+        <span class="kw">if</span> (i == 2 && j == 2) {
+            <span class="kw">break</span>; <span class="cm">// Terminate inner loop only</span>
+        }
+        System.out.println(i + <span class="str">","</span> + j);
+    }
+    <span class="cm">// Unlabeled break jumps execution here!</span>
+    System.out.println(<span class="str">"Outer loop continues"</span>);
+}
+            </div>
+            
+            <div class="execution-flow">
+                <strong>Execution Flow:</strong><br>
+                1,1 &rarr; 1,2 &rarr; 1,3 &rarr; Outer continues<br>
+                2,1 &rarr; <strong>(BREAK!)</strong> &rarr; Outer continues<br>
+                3,1 &rarr; 3,2 &rarr; 3,3 &rarr; Outer continues
+            </div>
+        </div>
+
+        <!-- Labeled Break -->
+        <div class="card labeled">
+            <h2>2. The Labeled Break</h2>
+            <p><strong>Definition:</strong> A <code>break labelName;</code> statement terminates the loop (or block) that is <strong>explicitly identified by that label</strong>, skipping any loops in between.</p>
+            <p><strong>Use Case:</strong> Searching through a multi-dimensional array or matrix. If you find the target deep inside 3 nested loops, an unlabeled break only escapes the 3rd loop. A labeled break escapes all 3 instantly.</p>
+            
+            <div class="code-block">
+<span class="lb">outerLoop:</span> <span class="cm">// This is the label</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = 1; i <= 3; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = 1; j <= 3; j++) {
+        <span class="kw">if</span> (i == 2 && j == 2) {
+            <span class="kw">break</span> <span class="lb">outerLoop</span>; <span class="cm">// Terminate outer loop!</span>
+        }
+        System.out.println(i + <span class="str">","</span> + j);
+    }
+}
+<span class="cm">// Labeled break jumps execution ALL the way here!</span>
+System.out.println(<span class="str">"Completely finished."</span>);
+            </div>
+
+            <div class="execution-flow">
+                <strong>Execution Flow:</strong><br>
+                1,1 &rarr; 1,2 &rarr; 1,3<br>
+                2,1 &rarr; <strong>(LABELED BREAK!)</strong><br>
+                Completely finished. <em>(Loops 2 and 3 are aborted entirely)</em>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <h2>Direct Comparison</h2>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Unlabeled Break (<code>break;</code>)</th>
+            <th>Labeled Break (<code>break label;</code>)</th>
+        </tr>
+        <tr>
+            <td><strong>Target Scope</strong></td>
+            <td>Strictly the <strong>innermost</strong> enclosing loop or switch.</td>
+            <td>The specific loop/block <strong>prefixed by the label</strong>.</td>
+        </tr>
+        <tr>
+            <td><strong>Nested Escaping</strong></td>
+            <td>Cannot escape multiple nested loops at once.</td>
+            <td>Can escape 2, 3, or 'N' nested loops instantly.</td>
+        </tr>
+        <tr>
+            <td><strong>Syntax Dependency</strong></td>
+            <td>Standalone statement.</td>
+            <td>Requires a matching identifier label ending with a colon (<code>:</code>) before a block.</td>
+        </tr>
+    </table>
+
+    <!-- The Minute Details -->
+    <div class="minute-details">
+        <h3>🔍 The "Minute Details" (Deep Technical Mechanics)</h3>
+        <ul>
+            <li><strong>It is NOT a <code>goto</code> statement:</strong> Languages like Java strictly forbid <code>goto</code> to prevent "spaghetti code." A labeled break can <strong>only</strong> jump execution to the <em>end</em> of an enclosing block. You cannot use it to jump backwards, and you cannot jump into a different method or a sibling block.</li>
+            <li><strong>Breaking regular blocks:</strong> While primarily used for loops, you can actually label a plain code block <code>{ }</code> and break out of it! <br>
+                <code>myBlock: { <br>&nbsp;&nbsp;if(error) break myBlock; <br>&nbsp;&nbsp;System.out.print("This is skipped on error"); <br>} </code>
+            </li>
+            <li><strong>Label Scope constraint:</strong> A label is only visible to the block of code immediately following it. If you try to call <code>break outer;</code> from a method that isn't inside the <code>outer:</code> block, the compiler will throw an error.</li>
+            <li><strong>Shadowing is not allowed:</strong> You cannot use the same label name twice inside the same nested scope (e.g., an outer loop and inner loop cannot both be named <code>myLabel:</code>).</li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>
