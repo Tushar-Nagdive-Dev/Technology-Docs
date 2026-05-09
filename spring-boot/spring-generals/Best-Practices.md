@@ -22,3 +22,8 @@
 [![VIEW Topic](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/spring-boot/spring-generals/visuals/adv-sql-groupby.html)
 
 ---
+
+### 6. How to change embedded server in spring boot
+[![VIEW Topic](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/spring-boot/spring-generals/visuals/change-embedded-servers.html)
+
+---
