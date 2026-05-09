@@ -112,3 +112,6 @@ If you were building a "Maya’s Mart" app, your response for `GET /items?size=2
 
 * If you are building a **back-office tool** where people need to jump to "Page 15," stick with **Offset**.
 * If you are building a **high-traffic mobile app** with infinite scroll, go with **Cursor**.
+
+---
+[![VIEW Topic](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/System-Design/visual-content/restful-pagination-strategies.html)

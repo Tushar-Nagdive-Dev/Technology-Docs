@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide: Pagination Strategies</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 { color: var(--primary); font-size: 2.5rem; margin-bottom: 10px; }
+        .strategy-section {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+        }
+        /* Data Flow Visuals */
+        .data-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .node {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            text-align: center;
+            width: 120px;
+            font-weight: bold;
+            z-index: 2;
+        }
+        .arrow {
+            flex-grow: 1;
+            height: 2px;
+            background: var(--primary);
+            position: relative;
+            margin: 0 10px;
+        }
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -5px;
+            border: 6px solid transparent;
+            border-left-color: var(--primary);
+        }
+        .flow-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            color: var(--secondary);
+            white-space: nowrap;
+        }
+
+        /* Database Simulation Visual */
+        .db-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            margin: 15px 0;
+        }
+        .db-cell {
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .db-cell.active { background: var(--success); color: white; }
+        .db-cell.skipped { background: #fed7d7; color: var(--danger); text-decoration: line-through; }
+        
+        .code-box {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+        .tag-row { display: flex; gap: 10px; margin-top: 15px; }
+        .tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .tag-pro { background: #dcfce7; color: #166534; }
+        .tag-con { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Pagination Visualized</h1>
+        <p>A deep dive into how data travels from your database to your users.</p>
+    </header>
+
+    <!-- 1. OFFSET-BASED -->
+    <div class="strategy-section">
+        <h2>1. Offset-based (The "Skip" Method)</h2>
+        <p>The client asks for a specific "page" by telling the server how many items to skip.</p>
+        
+        <div class="data-flow">
+            <div class="node">Client</div>
+            <div class="arrow"><span class="flow-label">GET /items?offset=20&limit=10</span></div>
+            <div class="node">Server</div>
+            <div class="arrow"><span class="flow-label">SELECT...OFFSET 20</span></div>
+            <div class="node">Database</div>
+        </div>
+
+        <p><strong>Database View (Page 3):</strong> The DB must scan the "Red" items just to throw them away!</p>
+        <div class="db-grid">
+            <div class="db-cell skipped">1-10</div>
+            <div class="db-cell skipped">11-20</div>
+            <div class="db-cell active">21</div>
+            <div class="db-cell active">22</div>
+            <div class="db-cell active">23</div>
+            <div class="db-cell active">...</div>
+            <div class="db-cell active">30</div>
+            <div class="db-cell">31</div>
+            <div class="db-cell">32</div>
+            <div class="db-cell">...</div>
+        </div>
+
+        <div class="tag-row">
+            <span class="tag tag-pro">Allows Random Jumps</span>
+            <span class="tag tag-con">Slows down on large datasets</span>
+            <span class="tag tag-con">Risk of duplicate items</span>
+        </div>
+    </div>
+
+    <!-- 2. KEYSET PAGINATION -->
+    <div class="strategy-section">
+        <h2>2. Keyset (The "Tiebreaker" Method)</h2>
+        <p>Instead of skipping, the client says "Give me the next batch starting <strong>after</strong> this ID."</p>
+        
+        <div class="data-flow">
+            <div class="node">Client</div>
+            <div class="arrow"><span class="flow-label">GET /items?after_id=450</span></div>
+            <div class="node">Server</div>
+            <div class="arrow"><span class="flow-label">WHERE id > 450</span></div>
+            <div class="node">Database</div>
+        </div>
+
+        <p><strong>Database View:</strong> The DB uses an <strong>Index</strong> to jump straight to the correct row. No skipping required!</p>
+        <div class="db-grid">
+            <div class="db-cell">...</div>
+            <div class="db-cell">449</div>
+            <div class="db-cell">450</div>
+            <div class="db-cell active">451</div>
+            <div class="db-cell active">452</div>
+            <div class="db-cell active">453</div>
+            <div class="db-cell">454</div>
+            <div class="db-cell">455</div>
+            <div class="db-cell">...</div>
+            <div class="db-cell">...</div>
+        </div>
+
+        <div class="tag-row">
+            <span class="tag tag-pro">Fast (O(1) search)</span>
+            <span class="tag tag-pro">No duplicate items</span>
+            <span class="tag tag-con">Can't jump to "Page 100"</span>
+        </div>
+    </div>
+
+    <!-- 3. CURSOR-BASED -->
+    <div class="strategy-section">
+        <h2>3. Cursor-Based (The "Token" Method)</h2>
+        <p>The server sends an <strong>opaque string</strong> (the cursor). The client doesn't know what's in it; they just send it back to get the next set.</p>
+        
+        <div class="data-flow">
+            <div class="node">Client</div>
+            <div class="arrow"><span class="flow-label">GET ?cursor=Y3Vyc29yXzEw</span></div>
+            <div class="node">Server</div>
+            <div class="arrow"><span class="flow-label">Decodes Token -> ID: 450</span></div>
+            <div class="node">Database</div>
+        </div>
+
+        <div class="code-box">
+            // Server Response Example<br>
+            {<br>
+            &nbsp;&nbsp;"data": [...],<br>
+            &nbsp;&nbsp;"next_cursor": "Zm9vYmFyXzk5" <span style="color: #94a3b8;">// Encoded ID + Timestamp</span><br>
+            }
+        </div>
+
+        <div class="tag-row">
+            <span class="tag tag-pro">Best for Infinite Scroll</span>
+            <span class="tag tag-pro">Hides DB Implementation</span>
+            <span class="tag tag-con">Hardest to Implement</span>
+        </div>
+    </div>
+
+    <div style="text-align: center; color: var(--secondary); font-size: 0.9rem; margin-top: 50px;">
+        <p>Designed by Maya • Your Personal Assistant</p>
+    </div>
+</div>
+
+</body>
+</html>
