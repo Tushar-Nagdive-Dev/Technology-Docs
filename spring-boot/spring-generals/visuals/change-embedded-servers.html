@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot Embedded Servers Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #2980b9;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .badge {
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            font-size: 0.9em;
+        }
+        p, li {
+            font-size: 1.05em;
+        }
+        .card {
+            background: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        code {
+            background-color: #f4f6f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c0392b;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 15px 0;
+        }
+        .comment { color: #a0aec0; font-style: italic; }
+        .tag { color: #63b3ed; }
+        .text { color: #f6ad55; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Spring Boot: Embedded Servers Guide</h1>
+
+    <!-- Part 1 -->
+    <h2><span class="badge">1</span> Available Servers & Advantages</h2>
+    <p>Spring Boot supports three main embedded servers for standard web applications (Servlet stack), plus one for reactive applications.</p>
+    
+    <div class="card">
+        <h3>1. Apache Tomcat (The Default)</h3>
+        <p><strong>What it is:</strong> The undisputed heavyweight champion of Java web servers. It is the default server that comes automatically when you add <code>spring-boot-starter-web</code>.</p>
+        <p><strong>Advantages:</strong> Massive community support, heavily battle-tested in enterprise environments, standard thread-per-request model, and incredibly stable.</p>
+    </div>
+
+    <div class="card">
+        <h3>2. Eclipse Jetty</h3>
+        <p><strong>What it is:</strong> A highly scalable, memory-efficient alternative to Tomcat.</p>
+        <p><strong>Advantages:</strong> Very lightweight footprint, excellent for handling thousands of concurrent connections using minimal memory, fast startup time. Often favored in cloud environments.</p>
+    </div>
+
+    <div class="card">
+        <h3>3. Undertow (by Red Hat / JBoss)</h3>
+        <p><strong>What it is:</strong> A highly flexible, high-performance web server written in Java.</p>
+        <p><strong>Advantages:</strong> Lightning-fast throughput and blocking/non-blocking I/O support. It is known for having the best raw performance and lowest latency among the big three for standard REST APIs.</p>
+    </div>
+
+    <div class="card">
+        <h3>4. Netty (For WebFlux)</h3>
+        <p><strong>What it is:</strong> An asynchronous, event-driven network application framework.</p>
+        <p><strong>Advantages:</strong> Not a standard "Servlet" container like the others. It is the default for Spring WebFlux (Reactive programming) designed to handle massive concurrency without blocking threads.</p>
+    </div>
+
+    <!-- Part 2 -->
+    <h2><span class="badge">2</span> When to Use Which Server?</h2>
+    <ul>
+        <li><strong>Use Tomcat if:</strong> You want a "plug-and-play" experience with zero configuration, maximum compatibility with legacy libraries, and the easiest time finding Stack Overflow answers when things go wrong. <em>(Standard choice for 80% of apps).</em></li>
+        <li><strong>Use Jetty if:</strong> You are deploying microservices to memory-constrained environments (like cheap AWS/Azure instances or Kubernetes pods) where saving 50MB of RAM per instance matters. Also great for IoT devices.</li>
+        <li><strong>Use Undertow if:</strong> You need absolute maximum throughput and speed for heavy I/O operations. If you are building a high-traffic API gateway or processing massive volumes of requests, Undertow's architecture shines.</li>
+        <li><strong>Use Netty if:</strong> You are building a purely Reactive application using <code>spring-boot-starter-webflux</code>.</li>
+    </ul>
+
+    <!-- Part 3 -->
+    <h2><span class="badge">3</span> Comparison Summary</h2>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Tomcat (Default)</th>
+            <th>Jetty</th>
+            <th>Undertow</th>
+        </tr>
+        <tr>
+            <td><strong>Memory Footprint</strong></td>
+            <td>Moderate (~150-250 MB)</td>
+            <td>Low (~50-150 MB)</td>
+            <td>Low to Moderate</td>
+        </tr>
+        <tr>
+            <td><strong>Startup Time</strong></td>
+            <td>Standard (2-4 seconds)</td>
+            <td>Fast (1-3 seconds)</td>
+            <td>Very Fast (1-2 seconds)</td>
+        </tr>
+        <tr>
+            <td><strong>Throughput (Speed)</strong></td>
+            <td>Great</td>
+            <td>Excellent</td>
+            <td><strong>Best in Class</strong></td>
+        </tr>
+        <tr>
+            <td><strong>Community Support</strong></td>
+            <td><strong>Massive</strong></td>
+            <td>Moderate</td>
+            <td>Moderate</td>
+        </tr>
+        <tr>
+            <td><strong>Best Use Case</strong></td>
+            <td>Standard Enterprise Monoliths & APIs</td>
+            <td>Cloud Microservices & IoT</td>
+            <td>High-load/High-throughput APIs</td>
+        </tr>
+    </table>
+
+    <!-- Part 4 -->
+    <h2><span class="badge">4</span> Process & Code to Change the Server</h2>
+    <p><strong>The Process in Simple Terms:</strong></p>
+    <ol>
+        <li>Spring Boot auto-configures Tomcat because it is bundled inside the <code>spring-boot-starter-web</code> dependency.</li>
+        <li>To change it, you must tell your build tool (Maven or Gradle) to <strong>exclude</strong> Tomcat from the <code>starter-web</code> package.</li>
+        <li>Then, you explicitly <strong>include</strong> the starter for the server you want (e.g., <code>spring-boot-starter-undertow</code>).</li>
+    </ol>
+
+    <h3>Example: Changing from Tomcat to Undertow (Maven)</h3>
+    <p>Open your <code>pom.xml</code> file and update your web dependency:</p>
+    <div class="code-block">
+<span class="tag">&lt;dependency&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span><span class="text">org.springframework.boot</span><span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span><span class="text">spring-boot-starter-web</span><span class="tag">&lt;/artifactId&gt;</span>
+    <span class="comment">&lt;!-- 1. Exclude Tomcat --&gt;</span>
+    <span class="tag">&lt;exclusions&gt;</span>
+        <span class="tag">&lt;exclusion&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span><span class="text">org.springframework.boot</span><span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span><span class="text">spring-boot-starter-tomcat</span><span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/exclusion&gt;</span>
+    <span class="tag">&lt;/exclusions&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span>
+
+<span class="comment">&lt;!-- 2. Include Undertow (or Jetty) --&gt;</span>
+<span class="tag">&lt;dependency&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span><span class="text">org.springframework.boot</span><span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span><span class="text">spring-boot-starter-undertow</span><span class="tag">&lt;/artifactId&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span></div>
+
+    <h3>Example: Changing from Tomcat to Jetty (Gradle)</h3>
+    <p>Open your <code>build.gradle</code> file and update your dependencies block:</p>
+    <div class="code-block">
+<span class="text">dependencies {</span>
+    <span class="comment">// 1. Include web starter, but exclude Tomcat</span>
+    <span class="text">implementation("org.springframework.boot:spring-boot-starter-web") {</span>
+        <span class="text">exclude module: "spring-boot-starter-tomcat"</span>
+    <span class="text">}</span>
+    
+    <span class="comment">// 2. Include Jetty</span>
+    <span class="text">implementation("org.springframework.boot:spring-boot-starter-jetty")</span>
+<span class="text">}</span></div>
+
+    <p><em>Note: For Spring Boot 3+ (which uses Jakarta EE), this exact same process applies. Just restart your application, and you will see the new server name pop up in your console logs!</em></p>
+
+</div>
+
+</body>
+</html>
