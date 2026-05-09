@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot: JSON to Java Internals</title>
+    <style>
+        :root {
+            --primary: #6366f1; /* Indigo */
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6; /* Violet */
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .flow-step {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary);
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary-dark);
+            margin-top: 0;
+            padding-left: 20px;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+
+        .keyword { color: #569cd6; }
+        .type { color: #4ec9b0; }
+        .string { color: #ce9178; }
+        .annotation { color: #dcdcaa; }
+
+        .minute-details {
+            background: #e0e7ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .minute-details h3 {
+            color: #3730a3;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tech-word {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #b91c1c;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>The Deserialization Journey</h1>
+        <p>How Spring Boot turns JSON into Java Objects</p>
+    </header>
+
+    <div class="flow-step">
+        <div class="step-number">1</div>
+        <h2>The Request Arrives (DispatcherServlet)</h2>
+        <p>When a client sends a <code>POST</code> request with a JSON body, it first hits the <span class="tech-word">DispatcherServlet</span> (the Front Controller). The servlet looks at the URL and determines which Controller method should handle this request. It delegates the execution to the <span class="tech-word">RequestMappingHandlerAdapter</span>.</p>
+    </div>
+
+    <div class="flow-step">
+        <div class="step-number">2</div>
+        <h2>Spotting the @RequestBody Annotation</h2>
+        <p>The Handler Adapter inspects your controller method's signature. It sees the <span class="tech-word">@RequestBody</span> annotation next to your parameter (e.g., <code>UserDTO user</code>).</p>
+        <p>This annotation acts as a flag. It tells Spring: <em>"Do not try to map this from URL parameters or form data. The data is entirely inside the raw HTTP Request Body."</em></p>
+<div class="code-block">
+<span class="annotation">@PostMapping</span>(<span class="string">"/users"</span>)
+<span class="keyword">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">String</span>&gt; createUser(<span class="annotation">@RequestBody</span> <span class="type">UserDTO</span> user) {
+    <span class="comment">// How did 'user' get here?</span>
+}
+</div>
+    </div>
+
+    <div class="flow-step">
+        <div class="step-number">3</div>
+        <h2>The HttpMessageConverter Loop</h2>
+        <p>Spring Boot does not parse JSON itself. It relies on an interface called <span class="tech-word">HttpMessageConverter</span>. When you include <code>spring-boot-starter-web</code>, Spring automatically registers several of these converters in the background (for JSON, XML, String, Byte Arrays, etc.).</p>
+        <p>Spring iterates through its list of registered converters and asks two questions:</p>
+        <ul>
+            <li>Does this converter support the <code>Content-Type</code> of the request? (The client sent <code>application/json</code>).</li>
+            <li>Can this converter read the target Java class? (<code>UserDTO.class</code>).</li>
+        </ul>
+        <p>The <span class="tech-word">MappingJackson2HttpMessageConverter</span> steps up and says, <em>"I can do both!"</em></p>
+    </div>
+
+    <div class="flow-step">
+        <div class="step-number">4</div>
+        <h2>Jackson's ObjectMapper Takes Over</h2>
+        <p>The <code>MappingJackson2HttpMessageConverter</code> is essentially a wrapper around the famous <strong>Jackson library</strong>. It passes the raw <code>InputStream</code> of the HTTP Request to Jackson's core class: the <span class="tech-word">ObjectMapper</span>.</p>
+        <p>The <code>ObjectMapper</code> is the true workhorse. It reads the JSON string and begins the process of converting it to your <code>UserDTO</code>.</p>
+    </div>
+
+    <div class="flow-step">
+        <div class="step-number">5</div>
+        <h2>Java Reflection & Instantiation (The Deep Magic)</h2>
+        <p>Here is exactly how Jackson builds your object piece by piece:</p>
+        <ol>
+            <li><strong>Instantiation:</strong> Jackson uses <strong>Java Reflection</strong> to look at <code>UserDTO.class</code>. By default, it looks for a <strong>No-Arguments Constructor</strong>. It calls this constructor to create an empty, shell object in memory.</li>
+            <li><strong>Field Matching:</strong> It reads the first JSON key (e.g., <code>"firstName": "John"</code>). It uses Reflection to look for a corresponding field or a Setter method in the Java class (e.g., <code>setFirstName("John")</code>).</li>
+            <li><strong>Type Conversion:</strong> If the JSON value is a string <code>"25"</code>, but the Java field is an <code>Integer age</code>, Jackson automatically converts the string to an Integer.</li>
+            <li><strong>Population:</strong> It injects the values into the empty object, fully hydrating it.</li>
+        </ol>
+        <p>Once Jackson finishes, it hands the fully populated <code>UserDTO</code> back to Spring, which then passes it as the argument into your Controller method.</p>
+    </div>
+
+    <!-- The Minute Details Section -->
+    <div class="minute-details">
+        <h3>🔍 The "Minute Details" (What Seniors Know)</h3>
+        
+        <p><strong>1. What if there is no default constructor?</strong><br>
+        If your Java class only has an all-arguments constructor (like a Java <code>Record</code> or when using Lombok's <code>@AllArgsConstructor</code> without <code>@NoArgsConstructor</code>), Jackson will throw an exception. <em>Fix:</em> You must configure Jackson to use the ParameterNames module, or add <code>@JsonCreator</code> to the constructor, or simply provide a no-args constructor.</p>
+
+        <p><strong>2. Getters/Setters vs. Field Access:</strong><br>
+        Jackson prefers using public Setters to populate data. However, if you don't have Setters (for immutability), Jackson can use Field-level reflection to inject values directly into <code>private</code> fields if configured to do so, though it is slightly slower.</p>
+
+        <p><strong>3. Naming Strategy Mismatches:</strong><br>
+        If your JSON sends <code>first_name</code> but your Java variable is <code>firstName</code>, Jackson will ignore it and leave the field <code>null</code>. <br>
+        <em>Fix:</em> You add <code>@JsonProperty("first_name")</code> to the Java field, or configure a global <code>PropertyNamingStrategy.SNAKE_CASE</code> in your <code>application.yml</code>.</p>
+
+        <p><strong>4. Unknown Properties:</strong><br>
+        If the JSON contains a field (e.g., <code>"middleName": "Lee"</code>) that does NOT exist in your Java class, Jackson will throw an <code>UnrecognizedPropertyException</code> by default. <br>
+        <em>Fix:</em> Add <code>@JsonIgnoreProperties(ignoreUnknown = true)</code> to the top of your class.</p>
+
+        <p><strong>5. When does Validation (@Valid) happen?</strong><br>
+        If you have <code>@Valid @RequestBody UserDTO user</code>, the validation happens <strong>AFTER</strong> Jackson successfully builds the object, but <strong>BEFORE</strong> your controller method executes. If the object fails validation, Spring throws a <code>MethodArgumentNotValidException</code> and your method never even runs.</p>
+    </div>
+
+</div>
+
+</body>
+</html>
