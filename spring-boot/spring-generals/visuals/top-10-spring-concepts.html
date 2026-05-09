@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top 10 Spring Boot Concepts for Microservices</title>
+    <title>100 Spring Boot POC Ideas & Approaches</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -28,14 +28,14 @@
 
         header {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 3rem 2rem;
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border-bottom: 2px solid var(--accent);
         }
 
         header h1 {
             margin: 0;
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             color: var(--text-main);
         }
 
@@ -43,100 +43,92 @@
             color: var(--spring-green);
         }
 
-        header p {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 1rem auto 0;
-        }
-
         .container {
             max-width: 1200px;
-            margin: 3rem auto;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
+            margin: 2rem auto;
+            padding: 0 1rem;
         }
 
-        .card {
+        details {
             background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
+            overflow: hidden;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px var(--accent-glow);
-            border-color: rgba(56, 189, 248, 0.3);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 1rem;
-        }
-
-        .number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--accent);
-            opacity: 0.8;
-        }
-
-        .card-title {
+        summary {
             font-size: 1.4rem;
             font-weight: 600;
-            margin: 0;
-            color: var(--text-main);
-        }
-
-        .tech-stack {
-            font-size: 0.85rem;
-            color: var(--spring-green);
-            font-family: monospace;
-            margin-top: 0.2rem;
-            display: block;
-        }
-
-        .explanation {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            flex-grow: 1;
-        }
-
-        .poc-box {
-            margin-top: 1.5rem;
-            background-color: var(--poc-bg);
-            border-left: 4px solid var(--poc-border);
-            padding: 1rem 1.2rem;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .poc-box h4 {
-            margin: 0 0 0.5rem 0;
-            color: var(--accent);
-            font-size: 1rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            list-style: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            color: var(--accent);
+            transition: background 0.2s ease;
         }
 
-        .poc-box p {
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .ideas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background-color: rgba(15, 23, 42, 0.5);
+        }
+
+        .idea-card {
+            background-color: var(--poc-bg);
+            border-left: 4px solid var(--poc-border);
+            padding: 1.2rem;
+            border-radius: 4px;
+        }
+
+        .idea-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-main);
+            font-size: 1.1rem;
+        }
+
+        .idea-card p {
             margin: 0;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .idea-card strong {
+            color: var(--spring-green);
+        }
+
+        code {
+            background-color: rgba(0,0,0,0.3);
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            font-family: monospace;
             color: #bae6fd;
         }
 
         @media (max-width: 768px) {
-            .container {
+            .ideas-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -145,191 +137,481 @@
 <body>
 
     <header>
-        <h1>Top 10 <span>Spring Boot</span> Concepts</h1>
-        <p>A deep dive into the foundational patterns and technologies required to build production-grade, resilient microservices.</p>
+        <h1>100 <span>Spring Boot</span> POC Ideas</h1>
+        <p>Expand any section below to see 10 unique implementation ideas and approaches for each concept.</p>
     </header>
 
     <div class="container">
 
-        <!-- 1. Fault Tolerance -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">01</div>
-                <div>
-                    <h3 class="card-title">Fault Tolerance</h3>
-                    <span class="tech-stack">[Resilience4j]</span>
+        <!-- Concept 1: Fault Tolerance -->
+        <details>
+            <summary>1. Fault Tolerance (Resilience4j)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. Payment Gateway Fallback</h4>
+                    <p><strong>Approach:</strong> Use <code>@CircuitBreaker</code>. If Stripe API is down, fallback method saves order as "PENDING" in DB to retry later.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Flaky Microservice Retry</h4>
+                    <p><strong>Approach:</strong> Use <code>@Retry</code> with Exponential Backoff for 503 errors on an internal service call, ignoring 400 bad requests.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Public API Rate Limiting</h4>
+                    <p><strong>Approach:</strong> Use <code>@RateLimiter</code> to restrict free-tier users to 10 requests/minute, throwing a custom 429 Exception.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. Heavy DB Query Timeboxing</h4>
+                    <p><strong>Approach:</strong> Use <code>@TimeLimiter</code> on a heavy analytics <code>CompletableFuture</code> query. Return cached data if it takes > 2s.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. Email Sender Isolation</h4>
+                    <p><strong>Approach:</strong> Use <code>@Bulkhead</code> (ThreadPool) to ensure email sending maxes out at 5 threads, preventing web-server thread starvation.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. Cascading Failure Prevention</h4>
+                    <p><strong>Approach:</strong> Combine Circuit Breaker and Rate Limiter. If target service is slow, rate limit outbound calls to prevent overwhelming it further.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. Graceful Degradation UI</h4>
+                    <p><strong>Approach:</strong> If "Recommendation Engine" call fails, fallback returns an empty list `[]` instead of 500, allowing the main UI to render.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Redis Cache Fallback</h4>
+                    <p><strong>Approach:</strong> Try fetching from primary PostgreSQL. If DB is unreachable, Circuit Breaker fallback reads stale (but usable) data from Redis.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. Dynamic Config Update</h4>
+                    <p><strong>Approach:</strong> Bind Resilience4j configs to Spring Cloud Config so you can adjust retry limits dynamically without restarting.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Bulk Upload Jitter Retry</h4>
+                    <p><strong>Approach:</strong> When uploading 1000s of files to S3, use <code>@Retry</code> with Jitter (randomized backoff) to prevent the "thundering herd" problem.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>In distributed systems, failures are inevitable. If Service A calls Service B, and Service B is down, Service A shouldn't crash or hang indefinitely. Fault tolerance patterns like Circuit Breakers detect failures and stop requests from going to the dead service. Rate limiting protects your APIs from being overwhelmed, and Retries handle temporary network blips.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Build a <strong>Weather Aggregator Service</strong> that calls a flaky 3rd-party weather API. Implement a Resilience4j Circuit Breaker. If the 3rd-party API fails 5 times, "open" the circuit and return a fallback default response (e.g., "Weather currently unavailable") to keep your app alive.</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 2. Distributed Tracing -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">02</div>
-                <div>
-                    <h3 class="card-title">Distributed Tracing</h3>
-                    <span class="tech-stack">[Micrometer Tracing & Zipkin]</span>
+        <!-- Concept 2: Distributed Tracing -->
+        <details>
+            <summary>2. Distributed Tracing (Micrometer Tracing & Zipkin)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. 3-Tier E-commerce Trace</h4>
+                    <p><strong>Approach:</strong> Implement Micrometer Tracing in UI -> Cart -> Payment services to view the full request lifecycle in Zipkin UI.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Async Messaging Tracing</h4>
+                    <p><strong>Approach:</strong> Inject trace context into Kafka headers so a trace doesn't break when switching from REST to async event processing.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Log Correlation ID</h4>
+                    <p><strong>Approach:</strong> Configure SLF4J/Logback to automatically inject <code>traceId</code> and <code>spanId</code> into log lines for easy grep/filtering in ELK.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. Database Query Span</h4>
+                    <p><strong>Approach:</strong> Use <code>datasource-micrometer</code> to wrap SQL queries in Spans, identifying exactly which DB query is slowing down the HTTP request.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. Multi-Threaded Tracing</h4>
+                    <p><strong>Approach:</strong> Use <code>ContextSnapshotFactory</code> to pass trace context from main HTTP thread to an <code>@Async</code> background worker thread.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. 3rd-Party API Latency Check</h4>
+                    <p><strong>Approach:</strong> Trace outgoing `RestTemplate` or `WebClient` calls to prove to vendors that their API is causing the application slowdown.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. Baggage Propagation</h4>
+                    <p><strong>Approach:</strong> Add a `user-tier=premium` tag to the Trace Baggage at the Gateway, so all downstream microservices can access this context without DB lookups.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Scheduled Task Tracing</h4>
+                    <p><strong>Approach:</strong> Wrap <code>@Scheduled</code> cron jobs in a new Span to track execution time and dependencies over night batches.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. Sampling Strategy Tuning</h4>
+                    <p><strong>Approach:</strong> Configure a `ProbabilityBasedSampler` to only send 10% of GET requests to Zipkin, but 100% of POST/payment requests to save storage.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Exception Trace Tagging</h4>
+                    <p><strong>Approach:</strong> Catch custom business exceptions and attach them as tags to the current Span to easily filter for failed traces in Zipkin.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p><em>Note: Spring Cloud Sleuth is deprecated in SB3, replaced by Micrometer Tracing.</em> When a user clicks a button, that request might travel through 5 different microservices. If an error occurs, finding out *where* it broke is a nightmare. Distributed tracing injects a unique <code>traceId</code> into the HTTP headers, allowing you to visualize the entire journey and latency of a single request across your entire architecture.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Create three microservices: <strong>Order -> Payment -> Inventory</strong>. Add Micrometer Tracing to all three. Make an order request, then open the Zipkin UI to view a waterfall chart showing exactly how many milliseconds the request spent inside each microservice.</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 3. Reactive Programming -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">03</div>
-                <div>
-                    <h3 class="card-title">Reactive Programming</h3>
-                    <span class="tech-stack">[Project Reactor & WebFlux]</span>
+        <!-- Concept 3: Reactive Programming -->
+        <details>
+            <summary>3. Reactive Programming (WebFlux & Reactor)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. Live Stock Ticker</h4>
+                    <p><strong>Approach:</strong> Use <code>Flux.interval()</code> to push random price updates every second via Server-Sent Events (SSE) (<code>text/event-stream</code>).</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Reactive CRUD API</h4>
+                    <p><strong>Approach:</strong> Replace Spring Data JPA with Spring Data R2DBC (Reactive Relational Database Connectivity) for fully non-blocking Postgres queries.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Parallel API Aggregation</h4>
+                    <p><strong>Approach:</strong> Use <code>Mono.zip()</code> to call 3 distinct external APIs (Weather, Traffic, News) concurrently and merge the results into one response payload.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. Large File Streaming</h4>
+                    <p><strong>Approach:</strong> Use <code>DataBuffer</code> to stream a 5GB video file chunk-by-chunk to the client without loading it into JVM memory.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. Backpressure Handling</h4>
+                    <p><strong>Approach:</strong> Consume a fast Kafka topic. Use <code>limitRate()</code> and <code>onBackpressureDrop()</code> to prevent the Spring Boot app from crashing under heavy load.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. Reactive Redis Pub/Sub</h4>
+                    <p><strong>Approach:</strong> Use <code>ReactiveRedisTemplate</code> to build a chat room where messages are pushed to connected clients non-stop.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. Fallback on Empty</h4>
+                    <p><strong>Approach:</strong> Use <code>switchIfEmpty()</code> to fetch from a database if a reactive cache lookup returns an empty Mono.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Resilience with Reactor</h4>
+                    <p><strong>Approach:</strong> Implement <code>retryWhen()</code> directly on a WebClient Mono call to handle transient network issues without external libraries.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. WebSocket Dashboard</h4>
+                    <p><strong>Approach:</strong> Implement <code>WebSocketHandler</code> to maintain bidirectional non-blocking streams for an admin analytics dashboard.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Rate Limited Stream</h4>
+                    <p><strong>Approach:</strong> Use <code>delayElements()</code> to slow down a massive DB export to exactly 50 records per second to avoid overwhelming a downstream processor.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>Traditional Spring MVC uses a "Thread-per-request" model, which blocks threads while waiting for database or network calls. Reactive programming uses an Event-Loop and asynchronous data streams (Mono/Flux). This allows a tiny number of threads to handle thousands of concurrent requests, making it incredibly scalable for I/O heavy applications.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Build a <strong>Live Stock Price Ticker</strong> using Spring WebFlux. Instead of a standard REST JSON response, return a <code>Flux&lt;StockPrice&gt;</code> that emits a new random stock price every 1 second. Consume it in the browser using Server-Sent Events (SSE).</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 4. Metrics & Monitoring -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">04</div>
-                <div>
-                    <h3 class="card-title">Metrics & Monitoring</h3>
-                    <span class="tech-stack">[Micrometer, Prometheus, Grafana]</span>
+        <!-- Concept 4: Metrics & Monitoring -->
+        <details>
+            <summary>4. Metrics & Monitoring (Micrometer & Prometheus)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. Custom Business Counter</h4>
+                    <p><strong>Approach:</strong> Inject <code>MeterRegistry</code> to increment a custom metric <code>orders_placed_total</code> every time a checkout succeeds.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Method Execution Timer</h4>
+                    <p><strong>Approach:</strong> Use <code>@Timed</code> on a specific controller method to track max, min, and average response times in Prometheus.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Active Users Gauge</h4>
+                    <p><strong>Approach:</strong> Create a <code>Gauge</code> to track the size of a concurrent `ConcurrentHashMap` storing currently active WebSocket sessions.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. JVM Memory Dashboard</h4>
+                    <p><strong>Approach:</strong> Expose standard JVM metrics. Build a Grafana dashboard monitoring Heap Size and Garbage Collection pauses.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. HikariCP Pool Monitoring</h4>
+                    <p><strong>Approach:</strong> Enable Hikari metrics to track active vs. idle database connections, alerting if pool exhaustion is imminent.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. HTTP Error Rate Alert</h4>
+                    <p><strong>Approach:</strong> Query Prometheus for <code>http_server_requests_seconds_count{status="500"}</code> and trigger an Alertmanager Slack notification if it spikes.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. Cache Hit/Miss Ratio</h4>
+                    <p><strong>Approach:</strong> Enable Spring Cache metrics to track <code>cache_gets_total</code> with tags for hits and misses to tune eviction policies.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Thread Pool Saturation</h4>
+                    <p><strong>Approach:</strong> Monitor Tomcat/Undertow thread pools to see if the application needs to scale horizontally based on thread exhaustion.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. Custom Health Indicator</h4>
+                    <p><strong>Approach:</strong> Implement <code>HealthIndicator</code> to check a 3rd party FTP server. If down, <code>/actuator/health</code> returns DOWN, triggering K8s restart.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Endpoint Security</h4>
+                    <p><strong>Approach:</strong> Use Spring Security to secure <code>/actuator/prometheus</code> with Basic Auth so internal metrics are not exposed to the internet.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>You cannot improve what you cannot measure. Micrometer acts as a facade (like SLF4J for metrics), automatically instrumenting your Spring Boot app to track HTTP request durations, JVM memory usage, connection pools, and errors. These metrics are exposed to a time-series database (Prometheus) and visualized on dashboards (Grafana).</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Expose the <code>/actuator/prometheus</code> endpoint in a Spring Boot app. Run Prometheus and Grafana locally via Docker. Create a custom Grafana dashboard that turns red if your application's HTTP 500 error rate goes above 5%.</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 5. Event Streaming -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">05</div>
-                <div>
-                    <h3 class="card-title">Event Streaming</h3>
-                    <span class="tech-stack">[Apache Kafka & Spring Kafka]</span>
+        <!-- Concept 5: Event Streaming -->
+        <details>
+            <summary>5. Event Streaming (Kafka)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. Order Placement Fan-out</h4>
+                    <p><strong>Approach:</strong> <code>KafkaTemplate.send()</code> an event. Have NotificationService, InventoryService, and ShippingService all consume the same event independently.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Dead Letter Queue (DLQ)</h4>
+                    <p><strong>Approach:</strong> Configure <code>SeekToCurrentErrorHandler</code>. If processing a message throws an exception 3 times, auto-route it to a <code>DLQ-topic</code> for manual inspection.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Event Sourcing (CQRS)</h4>
+                    <p><strong>Approach:</strong> Only write state changes (Events) to Kafka. A separate service consumes these to build a materialized read-only View in MongoDB.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. Exactly-Once Processing</h4>
+                    <p><strong>Approach:</strong> Enable Kafka Transactions (<code>spring.kafka.producer.transaction-id-prefix</code>) to ensure DB writes and Kafka offsets commit atomically.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. Log Audit Trail</h4>
+                    <p><strong>Approach:</strong> Send all user login/logout/update actions to an <code>audit_log</code> topic. Consume it in batches to insert into a Data Warehouse.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. KStreams Word Count</h4>
+                    <p><strong>Approach:</strong> Use Spring Cloud Stream / Kafka Streams API to perform real-time windowed aggregation of hashtags trending in a feed.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. Retry Topic Pattern</h4>
+                    <p><strong>Approach:</strong> Implement Non-Blocking Retries. On failure, push to <code>topic-retry-1m</code>, then <code>topic-retry-5m</code> to delay processing without blocking the consumer thread.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Partition Keying for Order</h4>
+                    <p><strong>Approach:</strong> Send messages with a <code>userId</code> as the Kafka key. This guarantees all actions by a single user are processed sequentially by the same partition.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. Batch Consumption</h4>
+                    <p><strong>Approach:</strong> Set <code>batch-listener=true</code>. Consume 500 messages at once and execute a single <code>jdbcTemplate.batchUpdate()</code> for massive DB performance gains.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Schema Validation</h4>
+                    <p><strong>Approach:</strong> Integrate Confluent Schema Registry. Use Avro serialization so producer/consumer contracts are strictly typed and versioned.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>Synchronous REST calls tightly couple microservices. Event-driven architecture decouples them. When an action occurs, a service publishes an "Event" to a Kafka Topic. Other services "Subscribe" to this topic and process the event at their own pace. If a consumer goes down, Kafka holds the message until it comes back online, ensuring zero data loss.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Build an <strong>E-Commerce Checkout</strong>. When a user buys an item, the Checkout Service pushes an <code>OrderPlacedEvent</code> to a Kafka topic and immediately returns "Success" to the user. An Email Service and Shipping Service independently consume this event in the background.</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 6. Observability -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">06</div>
-                <div>
-                    <h3 class="card-title">Observability</h3>
-                    <span class="tech-stack">[OpenTelemetry]</span>
+        <!-- Concept 6: Observability -->
+        <details>
+            <summary>6. Observability (OpenTelemetry)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. Auto-Instrumentation</h4>
+                    <p><strong>Approach:</strong> Run a Spring Boot jar with the <code>opentelemetry-javaagent.jar</code> attached. Export traces/metrics to Jaeger without writing any code.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Unified OTLP Export</h4>
+                    <p><strong>Approach:</strong> Configure Spring Boot to export Logs, Metrics, and Traces to a single OpenTelemetry Collector node over gRPC (OTLP format).</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Custom Semantic Conventions</h4>
+                    <p><strong>Approach:</strong> Use the OTel API to manually add business-specific attributes (e.g., <code>tenant.id</code>, <code>payment.currency</code>) to auto-generated Spans.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. Trace-to-Log Linkage</h4>
+                    <p><strong>Approach:</strong> Ensure MDC (Mapped Diagnostic Context) is populated by OTel so every Logback log line can be clicked in Kibana to view its exact Trace.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. Polyglot System Observability</h4>
+                    <p><strong>Approach:</strong> Create a Spring Boot service that calls a Python service. Use W3C Trace Context headers to visualize the trace across languages.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. Database Query Masking</h4>
+                    <p><strong>Approach:</strong> Configure the OTel agent to scrub PII data (like passwords or emails) from SQL query strings before exporting spans.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. Exemplars in Metrics</h4>
+                    <p><strong>Approach:</strong> Enable Exemplars. When viewing a Prometheus histogram of slow requests, click an exemplar dot to jump straight to the specific Trace in Jaeger.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Tail-Based Sampling</h4>
+                    <p><strong>Approach:</strong> Use OTel Collector to only retain traces where an HTTP 500 occurred or latency exceeded 3 seconds, discarding successful fast traces.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. External API Dependency Map</h4>
+                    <p><strong>Approach:</strong> Use OTel trace data to auto-generate a Service Graph showing exactly which internal services depend on Twilio, Stripe, or AWS S3.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Cloud Vendor Agnosticism</h4>
+                    <p><strong>Approach:</strong> Write app logic once. Change the OTel Collector YAML to switch exporting data from AWS X-Ray to Datadog without touching Java code.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>Observability is the superset of Monitoring. It combines Logs, Metrics, and Traces into a single, unified narrative. OpenTelemetry (OTel) is the modern CNCF standard for generating and exporting this telemetry data. Instead of using vendor-specific agents (like Datadog or New Relic), OTel standardizes data collection, allowing you to swap out backend monitoring tools without changing application code.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Instrument a Spring Boot CRUD application with the OpenTelemetry Java Agent. Configure the agent to export Traces to a local Jaeger instance and Metrics to Prometheus simultaneously, proving vendor-agnostic telemetry collection.</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 7. Caching & Locking -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">07</div>
-                <div>
-                    <h3 class="card-title">Caching & Locking</h3>
-                    <span class="tech-stack">[Redis & Spring Data Redis]</span>
+        <!-- Concept 7: Caching & Locking -->
+        <details>
+            <summary>7. Caching & Locking (Redis)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. Expensive Query Cache</h4>
+                    <p><strong>Approach:</strong> Add <code>@Cacheable("topProducts")</code>. Data is serialized to JSON in Redis. Subsequent calls bypass DB completely.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Cache Eviction on Update</h4>
+                    <p><strong>Approach:</strong> Use <code>@CacheEvict</code> on PUT/DELETE methods to purge the Redis key, preventing stale data from being served.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Distributed Cron Job (ShedLock)</h4>
+                    <p><strong>Approach:</strong> Use ShedLock with Redis. Ensure a <code>@Scheduled</code> invoice generation job runs on only 1 instance of a 5-instance microservice cluster.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. Inventory Reservation Lock</h4>
+                    <p><strong>Approach:</strong> Use Redisson to acquire a <code>RLock</code> on "Product_123". Prevent race conditions when two users buy the last item at the exact same millisecond.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. Stateful Session Management</h4>
+                    <p><strong>Approach:</strong> Use Spring Session with Redis. Allow users to stay logged in even if the specific server they originally connected to crashes.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. Real-Time Leaderboard</h4>
+                    <p><strong>Approach:</strong> Use <code>RedisTemplate</code> ZSETs (Sorted Sets) to maintain and query a real-time gaming leaderboard sorted by score in O(log(N)) time.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. Rate Limiting Counter</h4>
+                    <p><strong>Approach:</strong> Use Redis <code>INCR</code> and <code>EXPIRE</code> to manually build a fast, distributed API rate limiter based on client IP addresses.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. JWT Token Blacklist</h4>
+                    <p><strong>Approach:</strong> On logout, store the JWT's signature in Redis with an expiry matching the token. API Gateway checks Redis to reject blacklisted tokens.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. Geographical Queries</h4>
+                    <p><strong>Approach:</strong> Store store locations in Redis using GEOADD. Query for "stores within 5km of user's lat/long" using GEORADIUS.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Shopping Cart State</h4>
+                    <p><strong>Approach:</strong> Store temporary shopping cart data as Redis Hashes (HSET) rather than burdening the relational database with incomplete checkouts.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>Caching stores frequently requested, rarely changing data in memory (Redis) to bypass slow database queries. Distributed Locking solves a different problem: if you have 5 instances of a microservice, and a cron job triggers at midnight to "generate daily reports", you need a distributed lock to ensure only 1 instance actually runs the job, while the other 4 sit idle.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Build a <strong>Product Catalog API</strong>. Use <code>@Cacheable</code> so the first request hits the DB, but subsequent requests fetch instantly from Redis. Then, implement a <code>@Scheduled</code> task with ShedLock (backed by Redis) to simulate a batch job that strictly runs only once across multiple instances.</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 8. Configuration Management -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">08</div>
-                <div>
-                    <h3 class="card-title">Configuration Management</h3>
-                    <span class="tech-stack">[Spring Cloud Config]</span>
+        <!-- Concept 8: Configuration Management -->
+        <details>
+            <summary>8. Configuration Management (Spring Cloud Config)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. Git-Backed Config Server</h4>
+                    <p><strong>Approach:</strong> Setup a Config Server that points to a GitHub repo. Microservices fetch their <code>application.yml</code> from here on startup.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Dynamic Feature Flags</h4>
+                    <p><strong>Approach:</strong> Add <code>@RefreshScope</code> to a bean using a config property. Change the property in Git, hit <code>/actuator/refresh</code>, and toggle UI features without downtime.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Environment Specific Profiles</h4>
+                    <p><strong>Approach:</strong> Maintain <code>app-dev.yml</code>, <code>app-qa.yml</code>, <code>app-prod.yml</code> in Git. Services pull the correct file based on their active Spring profile.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. Asymmetric Encryption</h4>
+                    <p><strong>Approach:</strong> Store encrypted values <code>{cipher}AQDE...</code> in Git. The Config Server decrypts them before serving to authorized clients.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. Webhook Auto-Refresh</h4>
+                    <p><strong>Approach:</strong> Configure a GitHub Webhook to ping Spring Cloud Bus (via RabbitMQ/Kafka) to automatically refresh all microservices instantly on code push.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. Database-Backed Config</h4>
+                    <p><strong>Approach:</strong> Use the JDBC backend for Config Server instead of Git to allow admin UI panels to update application configurations via SQL inserts.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. Multi-Tenant Configurations</h4>
+                    <p><strong>Approach:</strong> Serve different configuration sets based on custom labels or application names (e.g., configuring different themes for different client builds).</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Config Server HA</h4>
+                    <p><strong>Approach:</strong> Run multiple instances of Config Server behind a load balancer and enable local filesystem fallback in case GitHub goes down.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. Vault Integration</h4>
+                    <p><strong>Approach:</strong> Combine Config Server with HashiCorp Vault. Serve plain text configs from Git and secure passwords injected dynamically from Vault.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Strict Client Authentication</h4>
+                    <p><strong>Approach:</strong> Secure the Config Server with OAuth2 or mutual TLS (mTLS) to ensure rogue services cannot download sensitive architecture configurations.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>Hardcoding configurations (like DB URLs or feature flags) inside <code>application.yml</code> means you must rebuild and redeploy your app to change a single value. Spring Cloud Config moves these configurations into a centralized Git repository. Services fetch their config on startup and can refresh them dynamically at runtime.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Create a Spring Cloud Config Server that reads from a public GitHub repo. Create a Client App that fetches a <code>discount.rate</code> property. Change the value in GitHub, send a POST request to <code>/actuator/refresh</code> on the client, and watch the app apply the new discount rate without restarting.</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 9. Containerization -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">09</div>
-                <div>
-                    <h3 class="card-title">Containerization</h3>
-                    <span class="tech-stack">[Docker & Buildpacks]</span>
+        <!-- Concept 9: Containerization -->
+        <details>
+            <summary>9. Containerization (Docker)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. Cloud Native Buildpacks</h4>
+                    <p><strong>Approach:</strong> Run <code>mvn spring-boot:build-image</code>. Spring automatically detects Java, applies best practices, and generates a layered Docker image with no Dockerfile.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Multi-Stage Dockerfile</h4>
+                    <p><strong>Approach:</strong> Stage 1: Maven builds the Jar. Stage 2: JRE copies only the Jar. Result: A tiny image without Maven/JDK bloat.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Docker Compose Dev Env</h4>
+                    <p><strong>Approach:</strong> Create a <code>docker-compose.yml</code> to boot Spring Boot, Postgres, and Redis simultaneously for immediate onboarding of new developers.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. Layered Jars</h4>
+                    <p><strong>Approach:</strong> Enable layered jars in Spring Boot. Docker builds will cache dependencies (which rarely change) separately from application code (changes often) for fast builds.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. Distroless Base Images</h4>
+                    <p><strong>Approach:</strong> Base your image on Google's <code>distroless/java17</code>. It contains no shell (no bash, no ls), massively reducing the security attack surface.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. Container Health Checks</h4>
+                    <p><strong>Approach:</strong> Add <code>HEALTHCHECK CMD curl -f http://localhost:8080/actuator/health</code> so Docker/K8s knows exactly when the app is ready for traffic.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. JVM Memory Awareness</h4>
+                    <p><strong>Approach:</strong> Add <code>-XX:MaxRAMPercentage=75.0</code> to JAVA_OPTS so the JVM dynamically sizes its heap based on the Docker container's memory limit.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Non-Root User Execution</h4>
+                    <p><strong>Approach:</strong> Create a `spring` user in the Dockerfile and use <code>USER spring</code> to run the app, preventing privilege escalation if the container is breached.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. Read-Only File System</h4>
+                    <p><strong>Approach:</strong> Mount the container filesystem as read-only. Mount an ephemeral volume at <code>/tmp</code> for Tomcat's scratch space for hardened security.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Graceful Shutdown</h4>
+                    <p><strong>Approach:</strong> Set <code>server.shutdown=graceful</code>. When Docker sends SIGTERM, Spring stops accepting new requests but finishes processing active ones.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>Containerization solves the "It works on my machine" problem. By packaging the Java runtime, OS libraries, and your Spring Boot JAR into a single immutable Docker image, you guarantee it will run identically on a developer's laptop, a QA server, and a Kubernetes production cluster.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Don't write a Dockerfile! Use Spring Boot's built-in Cloud Native Buildpacks by running <code>./gradlew bootBuildImage</code> to generate a highly optimized Docker image. Write a <code>docker-compose.yml</code> file to spin up your application alongside a PostgreSQL database container with one command.</p>
-            </div>
-        </div>
+        </details>
 
-        <!-- 10. Secret Management -->
-        <div class="card">
-            <div class="card-header">
-                <div class="number">10</div>
-                <div>
-                    <h3 class="card-title">Secret Management</h3>
-                    <span class="tech-stack">[HashiCorp Vault]</span>
+        <!-- Concept 10: Secret Management -->
+        <details>
+            <summary>10. Secret Management (HashiCorp Vault)</summary>
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <h4>1. DB Credential Injection</h4>
+                    <p><strong>Approach:</strong> Use <code>spring-cloud-starter-vault-config</code>. Delete DB passwords from YAML; Spring fetches them dynamically from Vault into memory at startup.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>2. Dynamic Database Secrets</h4>
+                    <p><strong>Approach:</strong> Configure Vault to generate a unique DB username/password valid for only 1 hour per microservice, auto-rotating them seamlessly.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>3. Encryption as a Service</h4>
+                    <p><strong>Approach:</strong> Use Vault's Transit Engine. Spring sends PII (like SSN) to Vault, receives ciphertext, and saves that to DB. The app never holds encryption keys.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>4. AppRole Authentication</h4>
+                    <p><strong>Approach:</strong> Instead of static tokens, configure Spring Boot to use RoleID and SecretID to authenticate with Vault, adhering to machine-to-machine best practices.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>5. K8s Service Account Auth</h4>
+                    <p><strong>Approach:</strong> When running in Kubernetes, configure Spring Vault to use the pod's JWT Service Account token to log into Vault securely.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>6. Key Revocation Response</h4>
+                    <p><strong>Approach:</strong> If an employee leaves, revoke the Vault token. Spring Boot Context will refresh, shutting down DB connections using the compromised credentials.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>7. TLS Certificate Management</h4>
+                    <p><strong>Approach:</strong> Use Vault's PKI engine. Spring Boot requests a short-lived TLS certificate on startup to secure internal gRPC traffic between services.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>8. Lease Renewal Tracking</h4>
+                    <p><strong>Approach:</strong> Implement a listener to track Vault leases. Ensure Spring Boot automatically requests lease renewals for long-running database credentials before expiry.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>9. Multi-Environment Namespaces</h4>
+                    <p><strong>Approach:</strong> Use Vault Namespaces to strictly separate Dev, QA, and Prod secrets on a single cluster, routing Spring profiles to the correct namespace.</p>
+                </div>
+                <div class="idea-card">
+                    <h4>10. Spring Cloud Config + Vault</h4>
+                    <p><strong>Approach:</strong> Integrate Vault into Spring Cloud Config Server. The Config Server handles all interactions with Vault and passes composite configurations down to clients safely.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <p>Storing database passwords, API keys, and cloud credentials in plain text inside your source code is a massive security risk. Secret management tools act as an encrypted vault. Your application authenticates with the Vault at startup, securely requests the secrets it needs in memory, and never writes them to disk or logs.</p>
-            </div>
-            <div class="poc-box">
-                <h4>🚀 POC Idea</h4>
-                <p>Spin up a local HashiCorp Vault instance via Docker. Store a sensitive database password inside it. Configure a Spring Boot application using <code>spring-cloud-starter-vault-config</code> to retrieve that password during the bootstrap phase and successfully connect to a database.</p>
-            </div>
-        </div>
+        </details>
 
     </div>
 </body>
