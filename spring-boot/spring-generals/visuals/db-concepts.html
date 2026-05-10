@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Concepts Every Backend Engineer Should Know — 3-Phase Deep Dive</title>
+    <style>
+        :root {
+            --bg: #f7f8fc;
+            --surface: #ffffff;
+            --surface-alt: #f0f2f8;
+            --text: #1a1d2e;
+            --text-secondary: #4a4f6a;
+            --primary: #6366f1;
+            --primary-light: #eef0ff;
+            --accent: #f97316;
+            --accent-light: #fff3e8;
+            --success: #10b981;
+            --success-light: #e6faf3;
+            --warning: #f59e0b;
+            --warning-light: #fffbed;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --info: #06b6d4;
+            --info-light: #ecfeff;
+            --border: #e2e6f0;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── HEADER ──────────────────────────── */
+        header {
+            background: linear-gradient(135deg, #1e2340 0%, #2a3160 35%, #1a1f3a 100%);
+            color: #ffffff;
+            padding: 3rem 2rem 2.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 25% 20%, rgba(99, 102, 241, 0.28) 0%, transparent 55%),
+                radial-gradient(ellipse at 70% 75%, rgba(6, 182, 212, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        header h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            position: relative;
+            z-index: 1;
+        }
+        header p {
+            margin-top: 0.6rem;
+            font-size: 1.15rem;
+            color: #c5cbe8;
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin-inline: auto;
+        }
+        .phase-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-top: 1.3rem;
+            position: relative;
+            z-index: 1;
+        }
+        .phase-badge {
+            padding: 0.4rem 1.1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(4px);
+        }
+        .phase-badge.p1 {
+            color: #c7d2fe;
+            border-color: rgba(165, 180, 252, 0.5);
+        }
+        .phase-badge.p2 {
+            color: #fde68a;
+            border-color: rgba(252, 211, 77, 0.5);
+        }
+        .phase-badge.p3 {
+            color: #99f6e4;
+            border-color: rgba(94, 234, 212, 0.5);
+        }
+
+        /* ── NAVIGATION ──────────────────────── */
+        nav.sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 0.5rem 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            justify-content: center;
+            align-items: center;
+        }
+        nav.sticky-nav a {
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 0.38rem 0.8rem;
+            border-radius: 100px;
+            transition: var(--transition);
+            white-space: nowrap;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        nav.sticky-nav a:hover,
+        nav.sticky-nav a:focus {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+            outline: none;
+        }
+        nav.sticky-nav a.active-nav {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* ── MAIN ────────────────────────────── */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+        .phase-section {
+            margin-bottom: 2.5rem;
+        }
+        .phase-title {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .phase-title .phase-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #fff;
+        }
+        .phase-icon.p1 {
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+        }
+        .phase-icon.p2 {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+        .phase-icon.p3 {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+
+        /* ── CONCEPT CARD ────────────────────── */
+        .concept-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: var(--transition);
+            scroll-margin-top: 80px;
+        }
+        .concept-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .concept-card__header {
+            padding: 1.4rem 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 1px solid transparent;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+        .concept-card__header:hover {
+            background: var(--surface-alt);
+        }
+        .concept-card__num {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .num-p1 {
+            background: var(--primary);
+        }
+        .num-p2 {
+            background: var(--warning);
+            color: #1a1d2e;
+        }
+        .num-p3 {
+            background: var(--success);
+        }
+        .concept-card__title-area {
+            flex: 1;
+            min-width: 180px;
+        }
+        .concept-card__title-area h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+        .concept-card__title-area .tagline {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+        .concept-card__toggle {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .concept-card__body {
+            display: none;
+            padding: 0 1.8rem 1.8rem;
+            animation: fadeSlide 0.35s ease;
+        }
+        .concept-card.open .concept-card__body {
+            display: block;
+        }
+        .concept-card.open .concept-card__header {
+            border-bottom-color: var(--border);
+        }
+        .concept-card.open .concept-card__toggle {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── INNER CONTENT ───────────────────── */
+        .inner-block {
+            margin-top: 1.3rem;
+        }
+        .inner-block h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .inner-block h4 .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .inner-block p,
+        .inner-block li {
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            font-size: 0.93rem;
+        }
+        .inner-block ul {
+            padding-left: 1.3rem;
+            margin-bottom: 0.7rem;
+        }
+        .inner-block ul li {
+            margin-bottom: 0.3rem;
+        }
+        .inner-block ul li::marker {
+            color: var(--primary);
+        }
+
+        /* ── TIPS & TRICKS ───────────────────── */
+        .tips-box {
+            background: var(--warning-light);
+            border-left: 5px solid var(--warning);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.3rem;
+            margin-top: 1rem;
+        }
+        .tips-box h5 {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+        .tips-box p,
+        .tips-box li {
+            color: #78350f;
+            font-size: 0.87rem;
+            margin-bottom: 0.2rem;
+        }
+        .tricks-box {
+            background: var(--success-light);
+            border-left: 5px solid var(--success);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.3rem;
+            margin-top: 0.7rem;
+        }
+        .tricks-box h5 {
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+        .tricks-box p,
+        .tricks-box li {
+            color: #064e3b;
+            font-size: 0.87rem;
+        }
+
+        /* ── DIAGRAM ─────────────────────────── */
+        .mini-diagram {
+            background: var(--surface-alt);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            border: 1px dashed var(--border);
+            overflow-x: auto;
+        }
+        .mini-node {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+        .mini-node.hl {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .mini-arrow {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        /* ── CODE ────────────────────────────── */
+        .code-block {
+            background: #1e2235;
+            color: #e2e8f0;
+            border-radius: var(--radius-sm);
+            padding: 0.9rem 1.2rem;
+            margin-top: 0.8rem;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            line-height: 1.65;
+            overflow-x: auto;
+        }
+        .code-block .kw {
+            color: #c792ea;
+        }
+        .code-block .str {
+            color: #c3e88d;
+        }
+        .code-block .cm {
+            color: #636d83;
+        }
+        .code-block .fn {
+            color: #82aaff;
+        }
+        .code-block .num {
+            color: #f78c6c;
+        }
+
+        /* ── TABLE ───────────────────────────── */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+        }
+        .info-table th {
+            background: var(--surface-alt);
+            padding: 0.6rem 0.9rem;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border);
+            color: var(--text);
+        }
+        .info-table td {
+            padding: 0.55rem 0.9rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .info-table tr:hover td {
+            background: #fafbff;
+        }
+
+        /* ── FOOTER ──────────────────────────── */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        /* ── BACK TO TOP ─────────────────────── */
+        #back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            box-shadow: var(--shadow-md);
+            z-index: 99;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #back-to-top.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #back-to-top:hover {
+            background: #4f52d4;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.7rem;
+            }
+            .concept-card__header {
+                padding: 1rem 1.2rem;
+            }
+            .concept-card__body {
+                padding: 0 1.2rem 1.4rem;
+            }
+            .mini-diagram {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .mini-arrow {
+                transform: rotate(90deg);
+            }
+            nav.sticky-nav a {
+                font-size: 0.7rem;
+                padding: 0.28rem 0.55rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════ HEADER ═══════════ -->
+    <header>
+        <h1>🗄️ Database Concepts Every Backend Engineer Should Know</h1>
+        <p>A 3-phase deep dive: from foundational ACID & indexes to advanced replication, locking, and CQRS — all explained simply with interactive cards, diagrams, and hard-won tips.</p>
+        <div class="phase-badges">
+            <span class="phase-badge p1">🌱 Phase 1 — Foundations</span>
+            <span class="phase-badge p2">⚡ Phase 2 — Performance & Scaling</span>
+            <span class="phase-badge p3">🚀 Phase 3 — Advanced Reliability</span>
+        </div>
+    </header>
+
+    <!-- ═══════════ STICKY NAV ═══════════ -->
+    <nav class="sticky-nav" id="sticky-nav" aria-label="Concept quick navigation">
+        <a href="#acid">1. ACID</a>
+        <a href="#indexes">2. Indexes</a>
+        <a href="#pk-fk">3. PK vs FK</a>
+        <a href="#normalization">4. Normalization</a>
+        <a href="#joins">5. SQL Joins</a>
+        <a href="#explain">6. EXPLAIN</a>
+        <a href="#pooling">7. Connection Pooling</a>
+        <a href="#isolation">8. Isolation</a>
+        <a href="#denormalization">9. Denormalization</a>
+        <a href="#partitioning">10. Partitioning/Sharding</a>
+        <a href="#replication">11. Replication</a>
+        <a href="#cap">12. CAP Theorem</a>
+        <a href="#wal">13. WAL</a>
+        <a href="#locking">14. Locking</a>
+        <a href="#cqrs-db">15. CQRS</a>
+    </nav>
+
+    <!-- ═══════════ MAIN ═══════════ -->
+    <main id="main-content">
+
+    <!-- ═══════════ PHASE 1 ═══════════ -->
+    <section class="phase-section" aria-labelledby="phase1-heading">
+        <div class="phase-title" id="phase1-heading">
+            <span class="phase-icon p1">🌱</span> Phase 1 — Foundations
+        </div>
+
+        <!-- 1. ACID -->
+        <article class="concept-card open" id="acid" aria-labelledby="h-acid">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="true">
+                <span class="concept-card__num num-p1">1</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-acid">ACID Properties</h3>
+                    <p class="tagline">The gold standard for reliable transactions</p>
+                </div>
+                <span class="concept-card__toggle">▼ Collapse</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#6366f1;"></span> What is it?</h4>
+                    <p><strong>ACID</strong> guarantees that database transactions are processed reliably. It stands for <strong>Atomicity</strong> (all or nothing), <strong>Consistency</strong> (valid state before &amp; after), <strong>Isolation</strong> (concurrent transactions don't interfere), and <strong>Durability</strong> (committed data survives crashes). Think of it as a contract: the database promises your money transfer won't vanish halfway.</p>
+                </div>
+                <div class="mini-diagram" aria-label="ACID properties visualization">
+                    <span class="mini-node hl">💣 Atomicity</span><span class="mini-arrow">+</span>
+                    <span class="mini-node hl">✅ Consistency</span><span class="mini-arrow">+</span>
+                    <span class="mini-node hl">🔒 Isolation</span><span class="mini-arrow">+</span>
+                    <span class="mini-node hl">💾 Durability</span>
+                </div>
+                <table class="info-table" aria-label="ACID breakdown table">
+                    <thead><tr><th>Property</th><th>Meaning</th><th>Real-World Analogy</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Atomicity</strong></td><td>All steps succeed or all roll back</td><td>Wedding vows — you can't be "half married"</td></tr>
+                        <tr><td><strong>Consistency</strong></td><td>Data respects all rules & constraints</td><td>Chess — every move must leave a legal board</td></tr>
+                        <tr><td><strong>Isolation</strong></td><td>Transactions don't see each other's dirty work</td><td>Private dressing room — no peeking</td></tr>
+                        <tr><td><strong>Durability</strong></td><td>Once committed, it's permanent</td><td>Tattoo — it's not going away</td></tr>
+                    </tbody>
+                </table>
+                <div class="tips-box">
+                    <h5>💡 Pro Tip</h5>
+                    <p>Most Postgres and MySQL tables use ACID by default (InnoDB engine). If you're using <strong>MyISAM</strong> in MySQL, you lose ACID — switch to InnoDB immediately for production.</p>
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: Partial Rollback with Savepoints</h5>
+                    <p>Use <code>SAVEPOINT sp1;</code> inside a transaction. If a later step fails, roll back to the savepoint — not the entire transaction. Great for batch processing with error recovery.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 2. Indexes -->
+        <article class="concept-card" id="indexes" aria-labelledby="h-indexes">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p1">2</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-indexes">Indexes</h3>
+                    <p class="tagline">Speed up reads, slow down writes — the classic trade-off</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#6366f1;"></span> What is it?</h4>
+                    <p>An <strong>index</strong> is a separate data structure (often a B+Tree) that maps column values to row locations. Like a book's index, it lets the database find rows without scanning every page. But every <code>INSERT/UPDATE/DELETE</code> must also update the index, which adds write overhead.</p>
+                </div>
+                <div class="mini-diagram" aria-label="B-Tree index visualization">
+                    <span class="mini-node">🔍 Query: WHERE email='x'</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node hl">📇 B+Tree Index</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node">📍 Row Pointer</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node">📄 Data Page</span>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Use <strong>composite indexes</strong> for multi-column WHERE clauses — column order matters! (most selective first).</li>
+                        <li>Monitor <strong>index bloat</strong> — unused indexes waste write performance and disk space. Use <code>pg_stat_user_indexes</code> in Postgres.</li>
+                        <li><strong>Partial indexes</strong> (e.g., <code>WHERE active=true</code>) are smaller and faster when filtering on a common condition.</li>
+                    </ul>
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: Covering Index</h5>
+                    <p>Include all queried columns in the index (using <code>INCLUDE</code> clause in Postgres 11+). The database can answer the query from the index alone — no trip to the data page. Ultra-fast reads.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 3. Primary Key vs Foreign Key -->
+        <article class="concept-card" id="pk-fk" aria-labelledby="h-pkfk">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p1">3</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-pkfk">Primary Key vs Foreign Key</h3>
+                    <p class="tagline">Relationships 101 — the backbone of relational databases</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#6366f1;"></span> The Simple Distinction</h4>
+                    <p>A <strong>Primary Key (PK)</strong> is a column (or set) that uniquely identifies each row in a table. A <strong>Foreign Key (FK)</strong> is a column in one table that references the Primary Key of another table — creating a link between them. PK enforces entity integrity; FK enforces referential integrity.</p>
+                </div>
+                <div class="mini-diagram" aria-label="PK-FK relationship diagram">
+                    <span class="mini-node hl">👤 users<br><code>id (PK)</code></span>
+                    <span class="mini-arrow">← FK</span>
+                    <span class="mini-node">📦 orders<br><code>user_id (FK)</code></span>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Always use <strong>surrogate keys</strong> (auto-increment int or UUID) as PKs — never business data like email, which can change.</li>
+                        <li>Define FKs with <strong>ON DELETE</strong> behavior explicitly: <code>CASCADE</code>, <code>SET NULL</code>, or <code>RESTRICT</code>. Don't rely on defaults.</li>
+                    </ul>
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: Composite Foreign Keys</h5>
+                    <p>You can declare a FK on <code>(user_id, tenant_id)</code> that references a composite PK — this enforces multi-tenancy at the database level, preventing cross-tenant data leaks.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 4. Normalization -->
+        <article class="concept-card" id="normalization" aria-labelledby="h-norm">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p1">4</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-norm">Normalization (All Forms)</h3>
+                    <p class="tagline">Eliminate redundancy — 1NF through BCNF and beyond</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#6366f1;"></span> The Normal Forms (Simplified)</h4>
+                    <table class="info-table" aria-label="Normal forms breakdown">
+                        <thead><tr><th>Form</th><th>Rule (in plain English)</th><th>Problem It Solves</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>1NF</strong></td><td>Each cell holds a single value; no repeating groups</td><td>Atomicity of data</td></tr>
+                            <tr><td><strong>2NF</strong></td><td>No partial dependency — non-key columns depend on the <em>whole</em> PK</td><td>Removes subset redundancy</td></tr>
+                            <tr><td><strong>3NF</strong></td><td>No transitive dependency — non-key columns depend only on the PK, not on other non-key columns</td><td>Eliminates derived data</td></tr>
+                            <tr><td><strong>BCNF</strong></td><td>Every determinant is a candidate key (stricter 3NF)</td><td>Handles edge cases 3NF misses</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top:0.6rem;">In practice, <strong>3NF is the sweet spot</strong> for OLTP applications — it balances data integrity with query complexity. 4NF and 5NF are rarely needed outside academic contexts.</p>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tip</h5>
+                    <p>Normalize until it hurts, then denormalize until it works. Start with 3NF and only relax when you have proven performance bottlenecks.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 5. SQL Joins -->
+        <article class="concept-card" id="joins" aria-labelledby="h-joins">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p1">5</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-joins">SQL Joins: INNER, LEFT, RIGHT, FULL</h3>
+                    <p class="tagline">Merging tables — know exactly what stays and what gets dropped</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#6366f1;"></span> Visualizing Joins</h4>
+                    <p>Imagine two circles (tables A and B) overlapping. Each join type picks different regions of the Venn diagram:</p>
+                    <table class="info-table" aria-label="Join types comparison">
+                        <thead><tr><th>Join Type</th><th>Returns</th><th>When to Use</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>INNER JOIN</strong></td><td>Only rows with matches in <em>both</em> tables</td><td>Confirmed relationships (orders + users)</td></tr>
+                            <tr><td><strong>LEFT JOIN</strong></td><td>All rows from left table + matches from right; NULL if no match</td><td>"All users, with orders if any"</td></tr>
+                            <tr><td><strong>RIGHT JOIN</strong></td><td>All rows from right table + matches from left</td><td>Rare — rewrite as LEFT JOIN for clarity</td></tr>
+                            <tr><td><strong>FULL OUTER JOIN</strong></td><td>All rows from both tables; NULL where no match</td><td>Finding mismatches / data reconciliation</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="code-block">
+<span class="cm">-- Classic LEFT JOIN example: all users & their latest order</span><br>
+<span class="kw">SELECT</span> u.name, o.total<br>
+<span class="kw">FROM</span> users u<br>
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id<br>
+<span class="kw">WHERE</span> o.created_at > <span class="str">'2026-01-01'</span> <span class="kw">OR</span> o.id <span class="kw">IS NULL</span>;
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: Anti-Join with LEFT JOIN</h5>
+                    <p>Find rows in A <em>not</em> in B: <code>LEFT JOIN B ON ... WHERE B.id IS NULL</code>. Often faster than <code>NOT IN</code> or <code>NOT EXISTS</code> on large datasets — but always compare query plans.</p>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- ═══════════ PHASE 2 ═══════════ -->
+    <section class="phase-section" aria-labelledby="phase2-heading">
+        <div class="phase-title" id="phase2-heading">
+            <span class="phase-icon p2">⚡</span> Phase 2 — Performance & Scaling
+        </div>
+
+        <!-- 6. EXPLAIN ANALYZE -->
+        <article class="concept-card" id="explain" aria-labelledby="h-explain">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p2">6</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-explain">Query Execution Plan (EXPLAIN ANALYZE)</h3>
+                    <p class="tagline">Your best friend for debugging slow queries</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#f59e0b;"></span> What is it?</h4>
+                    <p><strong>EXPLAIN</strong> shows the <em>plan</em> the database will use. <strong>EXPLAIN ANALYZE</strong> actually runs the query and reports real timings, row counts, and loop iterations. It reveals whether the database is using an index, scanning the whole table (Seq Scan), or doing a nested loop vs. hash join.</p>
+                </div>
+                <div class="code-block">
+<span class="cm">-- Always run this before deploying a new query</span><br>
+<span class="kw">EXPLAIN ANALYZE</span><br>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders<br>
+<span class="kw">WHERE</span> user_id = <span class="num">42</span> <span class="kw">AND</span> status = <span class="str">'pending'</span>;
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Look for <strong>Seq Scan</strong> on large tables — it's a red flag. Add an index or rewrite the query.</li>
+                        <li>Compare <strong>estimated rows</strong> vs <strong>actual rows</strong> — a big mismatch means stale statistics; run <code>ANALYZE</code>.</li>
+                        <li>In Postgres, use <code>EXPLAIN (ANALYZE, BUFFERS)</code> to see cache hit ratios.</li>
+                    </ul>
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: Visualize with Online Tools</h5>
+                    <p>Paste your EXPLAIN output into <strong>explain.depesz.com</strong> or <strong>explain.dalibo.com</strong> — they highlight slow nodes in color, making bottlenecks instantly visible.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 7. Connection Pooling -->
+        <article class="concept-card" id="pooling" aria-labelledby="h-pooling">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p2">7</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-pooling">Connection Pooling</h3>
+                    <p class="tagline">New connections kill performance — reuse them</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#f59e0b;"></span> Why It Matters</h4>
+                    <p>Opening a database connection requires TCP handshake, SSL negotiation, and authentication — easily <strong>10-50ms per connection</strong>. A connection pool keeps a set of persistent connections ready, lending them to requests and returning them when done. Without pooling, 1000 concurrent requests could overwhelm the database or exhaust memory.</p>
+                </div>
+                <div class="mini-diagram" aria-label="Connection pooling diagram">
+                    <span class="mini-node">🌐 App Server</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node hl">🏊 Pool (20 conns)</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node">🗄️ Database</span>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Use <strong>PgBouncer</strong> (Postgres) or <strong>HikariCP</strong> (Java) — they're battle-tested and highly configurable.</li>
+                        <li>Set <strong>max pool size</strong> to <code>(core_count * 2) + effective_spindle_count</code> as a starting rule of thumb.</li>
+                        <li>Always configure <strong>connection timeouts</strong> and <strong>idle timeout</strong> to prevent stale connections.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <!-- 8. Transaction Isolation -->
+        <article class="concept-card" id="isolation" aria-labelledby="h-isolation">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p2">8</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-isolation">Transaction Isolation Levels</h3>
+                    <p class="tagline">Read Committed vs Serializable — how clean is your data?</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#f59e0b;"></span> The Four Levels</h4>
+                    <table class="info-table" aria-label="Isolation levels comparison">
+                        <thead><tr><th>Level</th><th>Dirty Read</th><th>Non-Repeatable Read</th><th>Phantom Read</th><th>Performance</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Read Uncommitted</strong></td><td>✅ Yes</td><td>✅</td><td>✅</td><td>Fastest</td></tr>
+                            <tr><td><strong>Read Committed</strong> ⭐</td><td>❌ No</td><td>✅</td><td>✅</td><td>Good (default in PG)</td></tr>
+                            <tr><td><strong>Repeatable Read</strong></td><td>❌</td><td>❌</td><td>✅</td><td>Slower</td></tr>
+                            <tr><td><strong>Serializable</strong></td><td>❌</td><td>❌</td><td>❌</td><td>Slowest (safest)</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top:0.5rem;"><strong>Read Committed</strong> is the practical default — it prevents dirty reads but allows non-repeatable reads. Use <strong>Serializable</strong> for financial transactions where absolute correctness trumps speed.</p>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tip</h5>
+                    <p>In Postgres, <strong>Repeatable Read</strong> actually prevents phantom reads too (unlike the SQL standard). If you're coming from MySQL, this is a key difference.</p>
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: Optimistic Concurrency Control</h5>
+                    <p>Add a <code>version</code> column to your table. On UPDATE: <code>SET version = version + 1 WHERE version = :oldVersion</code>. If zero rows updated, retry. This avoids locks entirely for low-contention tables.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 9. Denormalization -->
+        <article class="concept-card" id="denormalization" aria-labelledby="h-denorm">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p2">9</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-denorm">Denormalization</h3>
+                    <p class="tagline">When breaking normalization rules actually helps</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#f59e0b;"></span> What is it?</h4>
+                    <p><strong>Denormalization</strong> intentionally adds redundant data to reduce the number of JOINs needed for queries. For example, storing <code>user_name</code> directly in the <code>orders</code> table avoids a JOIN to <code>users</code> on every order listing. The trade-off: write anomalies and extra storage for faster reads.</p>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Denormalize only <strong>after</strong> you've measured a bottleneck — premature denormalization is tech debt.</li>
+                        <li>Keep a <strong>single source of truth</strong> — update denormalized data via triggers, application code, or materialized views.</li>
+                        <li>Common denormalization targets: <strong>counts</strong> (cached aggregate), <strong>names</strong> (avoiding JOIN), and <strong>JSON columns</strong> (flexible schema).</li>
+                    </ul>
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: Materialized Views for Denormalization</h5>
+                    <p>Use Postgres <strong>materialized views</strong> to store pre-joined, pre-aggregated results. Refresh them with <code>REFRESH MATERIALIZED VIEW CONCURRENTLY</code> to avoid locking reads during refresh.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 10. Partitioning vs Sharding -->
+        <article class="concept-card" id="partitioning" aria-labelledby="h-part">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p2">10</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-part">Partitioning vs Sharding</h3>
+                    <p class="tagline">Horizontal scaling strategies — split data smartly</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#f59e0b;"></span> The Key Difference</h4>
+                    <p><strong>Partitioning</strong> splits a table into smaller pieces <em>within the same database server</em>. <strong>Sharding</strong> distributes data <em>across multiple database servers</em> (horizontal scaling). Partitioning is a single-server optimization; sharding is a distributed system strategy.</p>
+                    <table class="info-table" aria-label="Partitioning vs Sharding comparison">
+                        <thead><tr><th>Aspect</th><th>Partitioning</th><th>Sharding</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Location</strong></td><td>Same DB server</td><td>Multiple DB servers</td></tr>
+                            <tr><td><strong>Complexity</strong></td><td>Low — DB handles routing</td><td>High — app or proxy handles routing</td></tr>
+                            <tr><td><strong>Cross-partition queries</strong></td><td>Supported natively</td><td>Very difficult / needs app logic</td></tr>
+                            <tr><td><strong>Use case</strong></td><td>Time-series data, log archiving</td><td>Massive scale (millions of users)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Start with <strong>partitioning</strong> (Postgres declarative partitioning). Only reach for sharding when a single server can't handle the load.</li>
+                        <li>Choose <strong>partition key</strong> carefully — if most queries filter by <code>tenant_id</code>, partition by that.</li>
+                        <li>Sharding by <strong>consistent hashing</strong> minimizes data movement when adding/removing nodes.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- ═══════════ PHASE 3 ═══════════ -->
+    <section class="phase-section" aria-labelledby="phase3-heading">
+        <div class="phase-title" id="phase3-heading">
+            <span class="phase-icon p3">🚀</span> Phase 3 — Advanced Reliability
+        </div>
+
+        <!-- 11. Replication -->
+        <article class="concept-card" id="replication" aria-labelledby="h-repl">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p3">11</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-repl">Replication</h3>
+                    <p class="tagline">Keep copies in sync — high availability and read scaling</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#10b981;"></span> What is it?</h4>
+                    <p><strong>Replication</strong> copies data from a <strong>primary</strong> (leader) to one or more <strong>replicas</strong> (followers). Modes: <strong>synchronous</strong> (replica confirms before commit — zero data loss, slower) and <strong>asynchronous</strong> (fire-and-forget — faster, risk of lag). Replicas serve read queries, offloading the primary.</p>
+                </div>
+                <div class="mini-diagram" aria-label="Replication topology diagram">
+                    <span class="mini-node hl">🖥️ Primary (Writes)</span>
+                    <span class="mini-arrow">→ replicate →</span>
+                    <span class="mini-node">📋 Replica 1</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node">📋 Replica 2</span>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Monitor <strong>replication lag</strong> — if a replica falls behind, users may see stale data. Alert when lag exceeds your SLA.</li>
+                        <li>Use <strong>semi-synchronous replication</strong> for balance: wait for at least one replica to acknowledge, but don't block on all.</li>
+                        <li>In Postgres, <strong>logical replication</strong> lets you replicate only specific tables — great for microservices sharing a DB.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <!-- 12. CAP Theorem -->
+        <article class="concept-card" id="cap" aria-labelledby="h-cap">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p3">12</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-cap">CAP Theorem</h3>
+                    <p class="tagline">You can only pick two — Consistency, Availability, Partition Tolerance</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#10b981;"></span> The Inescapable Trade-off</h4>
+                    <p>In a distributed system, when a <strong>network partition</strong> occurs (servers can't talk to each other), you must choose between <strong>Consistency</strong> (all nodes see the same data at the same time) and <strong>Availability</strong> (every request receives a response). <strong>Partition Tolerance</strong> is non-negotiable — networks fail. So the real choice is: <strong>CP</strong> (consistent but may reject requests) or <strong>AP</strong> (always available but may return stale data).</p>
+                </div>
+                <div class="mini-diagram" aria-label="CAP triangle visualization">
+                    <span class="mini-node hl">🔒 Consistency</span>
+                    <span class="mini-arrow">/</span>
+                    <span class="mini-node">📡 Partition Tolerance</span>
+                    <span class="mini-arrow">\</span>
+                    <span class="mini-node">✅ Availability</span>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li><strong>CP systems:</strong> Zookeeper, etcd, HBase. <strong>AP systems:</strong> Cassandra, DynamoDB, CouchDB.</li>
+                        <li>Most relational databases in single-node mode are <strong>CA</strong> — but add replication and they shift toward CP or AP.</li>
+                        <li>The <strong>PACELC theorem</strong> extends CAP: "if Partition, then Availability or Consistency; Else, Latency or Consistency."</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <!-- 13. Write-Ahead Logging -->
+        <article class="concept-card" id="wal" aria-labelledby="h-wal">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p3">13</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-wal">Write-Ahead Logging (WAL)</h3>
+                    <p class="tagline">The secret behind durability and crash recovery</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#10b981;"></span> What is it?</h4>
+                    <p><strong>WAL</strong> is a sequential log file where the database writes every change <em>before</em> modifying the actual data files. If the server crashes, the database replays the WAL to recover committed transactions and discard incomplete ones. This is how databases guarantee <strong>Durability</strong> in ACID — and it's also the foundation of replication and point-in-time recovery (PITR).</p>
+                </div>
+                <div class="mini-diagram" aria-label="WAL flow diagram">
+                    <span class="mini-node">✍️ Write</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node hl">📝 WAL (sequential append)</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node">💾 Data Files (lazy write)</span>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Put the WAL on a <strong>separate, fast disk</strong> (NVMe) — sequential writes benefit from low latency.</li>
+                        <li>Configure <strong>WAL segment size</strong> and <strong>checkpoint intervals</strong> carefully — frequent checkpoints reduce recovery time but increase I/O.</li>
+                        <li>Use <strong>WAL archiving</strong> for continuous backup: ship WAL files to S3 for point-in-time recovery up to the second.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <!-- 14. Database Locking -->
+        <article class="concept-card" id="locking" aria-labelledby="h-locking">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p3">14</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-locking">Database Locking</h3>
+                    <p class="tagline">The invisible gatekeeper — concurrency control under the hood</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#10b981;"></span> Types of Locks</h4>
+                    <table class="info-table" aria-label="Lock types breakdown">
+                        <thead><tr><th>Lock Type</th><th>Granularity</th><th>Conflict Behavior</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Shared Lock (S)</strong></td><td>Row / Table</td><td>Allows other S locks; blocks X locks</td></tr>
+                            <tr><td><strong>Exclusive Lock (X)</strong></td><td>Row / Table</td><td>Blocks all other locks</td></tr>
+                            <tr><td><strong>Row-Level Lock</strong></td><td>Single row</td><td>High concurrency — Postgres default for DML</td></tr>
+                            <tr><td><strong>Table-Level Lock</strong></td><td>Entire table</td><td>Low concurrency — DDL, bulk operations</td></tr>
+                            <tr><td><strong>Deadlock</strong></td><td>N/A</td><td>Two transactions waiting on each other → one gets killed</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li><strong>Always access tables in the same order</strong> across transactions to prevent deadlocks.</li>
+                        <li>Use <code>SELECT ... FOR UPDATE</code> to lock rows for a subsequent update — prevents lost updates in high-concurrency scenarios.</li>
+                        <li>Monitor lock contention with <code>pg_stat_activity</code> (Postgres) or <code>SHOW ENGINE INNODB STATUS</code> (MySQL).</li>
+                    </ul>
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: Advisory Locks for Application Coordination</h5>
+                    <p>Postgres <strong>advisory locks</strong> (<code>pg_advisory_lock</code>) let you use the database as a distributed mutex. Perfect for ensuring only one worker processes a given batch — without locking any real data.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 15. CQRS (Database context) -->
+        <article class="concept-card" id="cqrs-db" aria-labelledby="h-cqrs-db">
+            <div class="concept-card__header" tabindex="0" role="button" aria-expanded="false">
+                <span class="concept-card__num num-p3">15</span>
+                <div class="concept-card__title-area">
+                    <h3 id="h-cqrs-db">CQRS: Separate Read & Write Models</h3>
+                    <p class="tagline">Query one database, command another — optimize both</p>
+                </div>
+                <span class="concept-card__toggle">▶ Expand</span>
+            </div>
+            <div class="concept-card__body">
+                <div class="inner-block">
+                    <h4><span class="dot" style="background:#10b981;"></span> What is CQRS in Databases?</h4>
+                    <p><strong>Command Query Responsibility Segregation</strong> splits the data layer into a <strong>write model</strong> (optimized for transactional integrity, normalized) and a <strong>read model</strong> (optimized for queries, denormalized, often in a different database — e.g., Elasticsearch or a read replica). This decouples the performance characteristics of reads and writes.</p>
+                </div>
+                <div class="mini-diagram" aria-label="CQRS database architecture diagram">
+                    <span class="mini-node">✍️ Command (Write)</span>
+                    <span class="mini-arrow">→</span>
+                    <span class="mini-node hl">🗄️ Primary DB (normalized)</span>
+                    <span class="mini-arrow">→ event →</span>
+                    <span class="mini-node">📖 Read DB (denormalized)</span>
+                    <span class="mini-arrow">←</span>
+                    <span class="mini-node">👀 Query (Read)</span>
+                </div>
+                <div class="tips-box">
+                    <h5>💡 Pro Tips</h5>
+                    <ul>
+                        <li>Sync the read model <strong>asynchronously</strong> via change data capture (CDC) or event-driven messaging — expect eventual consistency.</li>
+                        <li>The read model can be a <strong>completely different technology</strong>: Elasticsearch for full-text search, Redis for leaderboards, or a simple Postgres replica with different indexes.</li>
+                        <li>Not every feature needs CQRS — apply it only where read/write patterns diverge significantly.</li>
+                    </ul>
+                </div>
+                <div class="tricks-box">
+                    <h5>🎯 Trick: CQRS Lite with Database Views</h5>
+                    <p>Start simple: create <strong>database views</strong> or <strong>materialized views</strong> tailored for specific queries. This gives you logical separation without the operational overhead of dual databases — upgrade to full CQRS only when necessary.</p>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    </main>
+
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <footer>
+        <p>🗄️ Database Concepts Deep Dive — From ACID to CQRS, master the foundations that power every backend system.</p>
+        <p style="margin-top:0.3rem;">💡 Tip: Press <strong>O</strong> to open all cards, <strong>C</strong> to close all. Click any card header to expand/collapse.</p>
+    </footer>
+
+    <!-- ═══════════ BACK TO TOP ═══════════ -->
+    <button id="back-to-top" title="Back to top" aria-label="Back to top">↑</button>
+
+    <!-- ═══════════ SCRIPTS ═══════════ -->
+    <script>
+        (function() {
+            const cards = document.querySelectorAll('.concept-card');
+            const navLinks = document.querySelectorAll('nav.sticky-nav a');
+            const backToTopBtn = document.getElementById('back-to-top');
+            const allCardIds = Array.from(cards).map(c => c.id);
+
+            // ── Toggle individual card ──────────
+            cards.forEach(card => {
+                const header = card.querySelector('.concept-card__header');
+                const toggleBtn = card.querySelector('.concept-card__toggle');
+
+                function updateToggleUI() {
+                    const isOpen = card.classList.contains('open');
+                    if (toggleBtn) {
+                        toggleBtn.textContent = isOpen ? '▼ Collapse' : '▶ Expand';
+                    }
+                    if (header) {
+                        header.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    }
+                }
+
+                function toggleCard(e) {
+                    if (window.getSelection().toString().length > 0) return;
+                    card.classList.toggle('open');
+                    updateToggleUI();
+                    if (card.classList.contains('open')) {
+                        setTimeout(() => {
+                            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 120);
+                    }
+                }
+
+                if (header) {
+                    header.addEventListener('click', toggleCard);
+                    header.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleCard(e);
+                        }
+                    });
+                }
+                updateToggleUI();
+            });
+
+            // ── Set all cards open/closed ────────
+            function setAllCards(open) {
+                cards.forEach(c => {
+                    if (open) {
+                        c.classList.add('open');
+                    } else {
+                        c.classList.remove('open');
+                    }
+                    const tb = c.querySelector('.concept-card__toggle');
+                    if (tb) tb.textContent = open ? '▼ Collapse' : '▶ Expand';
+                    const hd = c.querySelector('.concept-card__header');
+                    if (hd) hd.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+            }
+
+            // ── Keyboard shortcuts ───────────────
+            document.addEventListener('keydown', (e) => {
+                const tag = document.activeElement?.tagName;
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+                if (e.key === 'o' || e.key === 'O') { e.preventDefault();
+                    setAllCards(true); }
+                if (e.key === 'c' || e.key === 'C') { e.preventDefault();
+                    setAllCards(false); }
+            });
+
+            // ── Sticky nav active state ──────────
+            function updateActiveNav() {
+                let currentId = null;
+                const scrollPos = window.scrollY + 120;
+                for (const id of allCardIds) {
+                    const el = document.getElementById(id);
+                    if (el && el.offsetTop <= scrollPos) {
+                        currentId = id;
+                    }
+                }
+                navLinks.forEach(link => {
+                    const href = link.getAttribute('href').replace('#', '');
+                    link.classList.toggle('active-nav', href === currentId);
+                });
+            }
+            window.addEventListener('scroll', updateActiveNav, { passive: true });
+            updateActiveNav();
+
+            // ── Nav click: open & scroll ─────────
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').replace('#', '');
+                    const targetCard = document.getElementById(targetId);
+                    if (targetCard) {
+                        if (!targetCard.classList.contains('open')) {
+                            targetCard.classList.add('open');
+                            const tb = targetCard.querySelector('.concept-card__toggle');
+                            if (tb) tb.textContent = '▼ Collapse';
+                            const hd = targetCard.querySelector('.concept-card__header');
+                            if (hd) hd.setAttribute('aria-expanded', 'true');
+                        }
+                        targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        setTimeout(updateActiveNav, 400);
+                    }
+                });
+            });
+
+            // ── Back to top ──────────────────────
+            function toggleBackToTop() {
+                if (window.scrollY > 600) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            }
+            window.addEventListener('scroll', toggleBackToTop, { passive: true });
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            toggleBackToTop();
+
+            console.log('🗄️ Database Concepts Deep Dive ready!');
+            console.log('   💡 Press "O" to open all, "C" to close all cards.');
+            console.log('   🔍 Click any card header to expand/collapse.');
+            console.log('   📌 Use the sticky nav to jump to any concept.');
+        })();
+    </script>
+</body>
+</html>
