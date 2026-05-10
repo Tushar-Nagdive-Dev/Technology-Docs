@@ -286,11 +286,15 @@
 
 <div class="code-block">
 <span class="kw">import</span> java.util.ArrayList;
+<br>
 <span class="kw">import</span> java.util.List;
 
 <span class="typ">List</span>&lt;<span class="typ">String</span>&gt; catalog = <span class="kw">new</span> <span class="typ">ArrayList</span>&lt;&gt;(<span class="typ">500</span>); <span class="cm">// Pre-sized!</span>
+<br>
 catalog.<span class="fn">add</span>(<span class="str">"Laptop"</span>);
+<br>
 catalog.<span class="fn">add</span>(<span class="str">"Mouse"</span>);
+<br>
 <span class="typ">String</span> item = catalog.<span class="fn">get</span>(<span class="typ">0</span>); <span class="cm">// Lightning fast O(1) read</span>
 </div>
         </div>
