@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Spring Boot Pitfalls</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 320px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background: #1e293b;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .nav-icon {
+            font-size: 1.2em;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 5px;
+            width: 25px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .pane {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pane-header {
+            margin-bottom: 30px;
+        }
+
+        .pane-title {
+            font-size: 2.2rem;
+            margin: 0 0 10px 0;
+            color: #ffffff;
+        }
+
+        .problem-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-left: 5px solid var(--danger);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .problem-box h3 {
+            color: var(--danger);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .code-block {
+            background: #000000;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            border: 1px solid #333;
+            margin: 15px 0;
+        }
+
+        .kw { color: #569cd6; } /* Keyword */
+        .ano { color: #dcdcaa; } /* Annotation */
+        .str { color: #ce9178; } /* String */
+        .cm { color: #6a9955; font-style: italic; } /* Comment */
+
+        /* Interactive Reveal Button */
+        .reveal-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin: 0 auto 30px auto;
+        }
+
+        .reveal-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        /* Solution Box (Hidden by default) */
+        .solution-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-left: 5px solid var(--success);
+            padding: 25px;
+            border-radius: 8px;
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease-out;
+        }
+
+        .solution-box.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .solution-box h3 {
+            color: var(--success);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .minute-details {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #cbd5e1;
+            border-left: 3px solid #f59e0b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>⚙️ Spring Boot Pitfalls</h1>
+        </div>
+        <div class="nav-item active" onclick="switchPane('circular')">
+            <span class="nav-icon">🔄</span> Circular Dependency
+        </div>
+        <div class="nav-item" onclick="switchPane('nplus1')">
+            <span class="nav-icon">💥</span> N+1 Query Problem
+        </div>
+        <div class="nav-item" onclick="switchPane('self-invoke')">
+            <span class="nav-icon">👻</span> Proxy Self-Invocation
+        </div>
+        <div class="nav-item" onclick="switchPane('stateful')">
+            <span class="nav-icon">🧬</span> Stateful Singletons
+        </div>
+        <div class="nav-item" onclick="switchPane('lombok')">
+            <span class="nav-icon">🌶️</span> Lombok @Data on Entities
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+
+        <!-- 1. Circular Dependency -->
+        <div id="circular" class="pane active">
+            <div class="pane-header">
+                <h2 class="pane-title">The Circular Dependency</h2>
+            </div>
+            
+            <div class="problem-box">
+                <h3>🚨 The Trap</h3>
+                <p>Service A injects Service B. But Service B injects Service A. When Spring Boot starts, it tries to create A, realizes it needs B, tries to create B, realizes it needs A... and crashes with a <code>BeanCurrentlyInCreationException</code>.</p>
+<div class="code-block">
+<span class="ano">@Service</span>
+<span class="kw">public class</span> OrderService {
+    <span class="ano">@Autowired</span> <span class="kw">private</span> PaymentService paymentService;
+}
+
+<span class="ano">@Service</span>
+<span class="kw">public class</span> PaymentService {
+    <span class="ano">@Autowired</span> <span class="kw">private</span> OrderService orderService;
+}
+</div>
+            </div>
+
+            <button class="reveal-btn" onclick="revealSolution('circular-sol', this)">
+                👁️ Reveal The Fix
+            </button>
+
+            <div id="circular-sol" class="solution-box">
+                <h3>✅ The Solution</h3>
+                <p><strong>Quick Fix:</strong> Use <code>@Lazy</code> on one of the dependencies. This tells Spring to inject a proxy initially, and only create the real bean when a method is actually called.</p>
+                <p><strong>Architectural Fix (Best Practice):</strong> A circular dependency means your design is flawed. You should extract the shared logic into a <strong>third service</strong> (e.g., <code>NotificationService</code>) that both A and B can inject, or use <strong>Spring Application Events</strong> to decouple them entirely.</p>
+            </div>
+        </div>
+
+        <!-- 2. N+1 Query Problem -->
+        <div id="nplus1" class="pane">
+            <div class="pane-header">
+                <h2 class="pane-title">The N+1 Query Problem</h2>
+            </div>
+            
+            <div class="problem-box">
+                <h3>🚨 The Trap</h3>
+                <p>You fetch a list of 100 <code>Author</code> entities from the database (1 query). Then, in your code, you loop through them and call <code>author.getBooks()</code> to serialize them to JSON. Because the relationship is Lazy-loaded, Hibernate fires a separate query to fetch books for <strong>every single author</strong> (100 queries).</p>
+                <p>Result: 101 database queries just to load a single webpage. The app silently grinds to a halt in production.</p>
+            </div>
+
+            <button class="reveal-btn" onclick="revealSolution('nplus1-sol', this)">
+                👁️ Reveal The Fix
+            </button>
+
+            <div id="nplus1-sol" class="solution-box">
+                <h3>✅ The Solution</h3>
+                <p>Do not rely on lazy loading in loops. Tell the database to grab everything at once using a <code>JOIN FETCH</code> or an <code>@EntityGraph</code>.</p>
+<div class="code-block">
+<span class="cm">// Solution 1: JPQL JOIN FETCH</span>
+<span class="ano">@Query</span>(<span class="str">"SELECT a FROM Author a JOIN FETCH a.books"</span>)
+List&lt;Author&gt; findAllWithBooks();
+
+<span class="cm">// Solution 2: EntityGraph (Cleaner)</span>
+<span class="ano">@EntityGraph</span>(attributePaths = {<span class="str">"books"</span>})
+List&lt;Author&gt; findAll();
+</div>
+                <div class="minute-details">
+                    <strong>Pro Tip:</strong> Add <code>spring.jpa.properties.hibernate.generate_statistics=true</code> to your properties file during development. It will print exactly how many queries were fired for every API request!
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Proxy Self-Invocation -->
+        <div id="self-invoke" class="pane">
+            <div class="pane-header">
+                <h2 class="pane-title">Proxy Self-Invocation (The Ghost Annotation)</h2>
+            </div>
+            
+            <div class="problem-box">
+                <h3>🚨 The Trap</h3>
+                <p>Spring manages things like <code>@Transactional</code>, <code>@Async</code>, and <code>@Cacheable</code> by wrapping your classes in a "Proxy" (a middleman). If another class calls your method, it hits the proxy first, which starts the transaction. <br><br>BUT, if a method calls <em>another method inside the same class</em>, it bypasses the proxy entirely.</p>
+<div class="code-block">
+<span class="ano">@Service</span>
+<span class="kw">public class</span> UserService {
+
+    <span class="kw">public void</span> registerUser() {
+        <span class="cm">// Calling a method in the SAME class...</span>
+        saveToDatabase(); 
+    }
+
+    <span class="ano">@Transactional</span> <span class="cm">// ❌ THIS IS IGNORED!</span>
+    <span class="kw">public void</span> saveToDatabase() {
+        <span class="cm">// DB logic here</span>
+    }
+}
+</div>
+            </div>
+
+            <button class="reveal-btn" onclick="revealSolution('self-invoke-sol', this)">
+                👁️ Reveal The Fix
+            </button>
+
+            <div id="self-invoke-sol" class="solution-box">
+                <h3>✅ The Solution</h3>
+                <p><strong>Option 1 (Best):</strong> Move the <code>@Transactional</code> method to a different Service class, and inject that service into the current one.</p>
+                <p><strong>Option 2:</strong> Autowire the service into itself! (Self-injection). This forces the call to go through the proxy.</p>
+<div class="code-block">
+<span class="ano">@Service</span>
+<span class="kw">public class</span> UserService {
+    
+    <span class="cm">// Injecting myself to access my own proxy!</span>
+    <span class="ano">@Autowired</span> <span class="ano">@Lazy</span> <span class="kw">private</span> UserService self;
+
+    <span class="kw">public void</span> registerUser() {
+        self.saveToDatabase(); <span class="cm">// ✅ TRANSACTION WORKS</span>
+    }
+}
+</div>
+            </div>
+        </div>
+
+        <!-- 4. Stateful Singletons -->
+        <div id="stateful" class="pane">
+            <div class="pane-header">
+                <h2 class="pane-title">Stateful Singletons (Data Bleeding)</h2>
+            </div>
+            
+            <div class="problem-box">
+                <h3>🚨 The Trap</h3>
+                <p>By default, Spring Beans (Controllers, Services) are <strong>Singletons</strong>. There is only ONE instance of the class shared across all users. If you declare a class-level variable (state) and modify it during a request, User B might see User A's data!</p>
+<div class="code-block">
+<span class="ano">@RestController</span>
+<span class="kw">public class</span> PaymentController {
+    
+    <span class="kw">private</span> String currentUserId; <span class="cm">// ❌ FATAL MISTAKE!</span>
+
+    <span class="ano">@PostMapping</span>(<span class="str">"/pay"</span>)
+    <span class="kw">public void</span> processPayment(String userId) {
+        <span class="kw">this</span>.currentUserId = userId; 
+        <span class="cm">// Thread sleeps, another user calls /pay, currentUserId changes!</span>
+        chargeCard(<span class="kw">this</span>.currentUserId); <span class="cm">// Charges the wrong person!</span>
+    }
+}
+</div>
+            </div>
+
+            <button class="reveal-btn" onclick="revealSolution('stateful-sol', this)">
+                👁️ Reveal The Fix
+            </button>
+
+            <div id="stateful-sol" class="solution-box">
+                <h3>✅ The Solution</h3>
+                <p><strong>Rule of thumb:</strong> Never use mutable instance variables in Spring Beans. Keep them 100% stateless.</p>
+                <p>Pass data through method parameters (local variables), because local variables are stored on the thread stack and are naturally thread-safe.</p>
+<div class="code-block">
+<span class="ano">@PostMapping</span>(<span class="str">"/pay"</span>)
+<span class="kw">public void</span> processPayment(String userId) {
+    <span class="cm">// ✅ local variable, safe for concurrent threads</span>
+    String safeUserId = userId; 
+    chargeCard(safeUserId); 
+}
+</div>
+            </div>
+        </div>
+
+        <!-- 5. Lombok @Data on Entities -->
+        <div id="lombok" class="pane">
+            <div class="pane-header">
+                <h2 class="pane-title">Lombok @Data on JPA Entities</h2>
+            </div>
+            
+            <div class="problem-box">
+                <h3>🚨 The Trap</h3>
+                <p>Putting Lombok's <code>@Data</code> annotation on a JPA Entity seems like a great way to save typing. However, <code>@Data</code> automatically generates a <code>toString()</code>, <code>equals()</code>, and <code>hashCode()</code> method that includes <strong>all fields</strong>.</p>
+                <p>If you have a Bidirectional relationship (User has Orders, Order has User), calling <code>toString()</code> will cause an infinite loop (StackOverflowError). Furthermore, relying on generated <code>equals()</code> for JPA entities breaks Set collections and detachment logic.</p>
+            </div>
+
+            <button class="reveal-btn" onclick="revealSolution('lombok-sol', this)">
+                👁️ Reveal The Fix
+            </button>
+
+            <div id="lombok-sol" class="solution-box">
+                <h3>✅ The Solution</h3>
+                <p>Never use <code>@Data</code> on JPA Entities. Be explicit instead.</p>
+                <p>Use <code>@Getter</code> and <code>@Setter</code>. If you absolutely need a <code>toString()</code>, use <code>@ToString(exclude = "orders")</code> to prevent infinite recursion.</p>
+<div class="code-block">
+<span class="cm">// ❌ BAD</span>
+<span class="ano">@Entity</span>
+<span class="ano">@Data</span>
+<span class="kw">public class</span> User { ... }
+
+<span class="cm">// ✅ GOOD</span>
+<span class="ano">@Entity</span>
+<span class="ano">@Getter</span>
+<span class="ano">@Setter</span>
+<span class="ano">@NoArgsConstructor</span>
+<span class="kw">public class</span> User { ... }
+</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript for Interactivity -->
+    <script>
+        function switchPane(paneId) {
+            // Update Sidebar UI
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Hide all panes
+            document.querySelectorAll('.pane').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show target pane
+            document.getElementById(paneId).classList.add('active');
+
+            // Reset solutions when switching tabs
+            document.querySelectorAll('.solution-box').forEach(el => el.classList.remove('visible'));
+            document.querySelectorAll('.reveal-btn').forEach(btn => btn.style.display = 'flex');
+        }
+
+        function revealSolution(solutionId, btnElement) {
+            const solutionBox = document.getElementById(solutionId);
+            solutionBox.classList.add('visible');
+            
+            // Hide the reveal button smoothly
+            btnElement.style.opacity = '0';
+            setTimeout(() => {
+                btnElement.style.display = 'none';
+            }, 200);
+        }
+    </script>
+</body>
+</html>
