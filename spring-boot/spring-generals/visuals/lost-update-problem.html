@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Lost Update Problem Simulator</title>
+    <title>The Lost Update Problem Simulator (Strict Semantic HTML)</title>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -34,7 +35,9 @@
             margin-bottom: 2rem;
         }
 
-        h1 { color: #0f172a; }
+        h1 {
+            color: #0f172a;
+        }
 
         main {
             display: grid;
@@ -45,7 +48,7 @@
         }
 
         /* Semantic Section Styling */
-        section {
+        section#simulator {
             background: var(--surface);
             border-radius: 12px;
             padding: 24px;
@@ -53,32 +56,40 @@
             border: 1px solid var(--border);
         }
 
-        .dashboard {
+        section.dashboard {
             display: flex;
             justify-content: space-around;
             text-align: center;
             background: #f1f5f9;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin: 0 0 20px 0;
         }
 
-        .stat-box {
+        figure.stat-box {
             background: white;
             padding: 15px 30px;
             border-radius: 8px;
             border: 2px solid var(--primary);
-            font-weight: bold;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
         }
 
-        .stat-value {
+        figcaption {
+            font-weight: bold;
+            color: #475569;
+        }
+
+        output {
             font-size: 2rem;
             color: var(--primary);
             font-family: monospace;
-            display: block;
+            font-weight: bold;
+            margin-top: 5px;
         }
 
-        .controls {
+        nav.controls {
             display: flex;
             gap: 15px;
             justify-content: center;
@@ -98,11 +109,24 @@
             transition: all 0.2s;
         }
 
-        button:hover { background-color: #2563eb; transform: translateY(-2px); }
-        button:disabled { background-color: #cbd5e1; cursor: not-allowed; transform: none; }
-        
-        .btn-danger { background-color: var(--danger); }
-        .btn-danger:hover { background-color: #dc2626; }
+        button:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.btn-danger {
+            background-color: var(--danger);
+        }
+
+        button.btn-danger:hover {
+            background-color: #dc2626;
+        }
 
         /* Timeline / Logging Area */
         article {
@@ -114,16 +138,15 @@
             padding: 20px;
             border-radius: 8px;
             min-height: 300px;
-            font-family: monospace;
         }
 
-        .thread-col {
+        section.thread-col {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .thread-header {
+        header.thread-header {
             text-align: center;
             font-weight: bold;
             font-size: 1.2rem;
@@ -132,29 +155,55 @@
             margin-bottom: 10px;
         }
 
-        .thread-a { color: #60a5fa; }
-        .thread-b { color: #f472b6; }
+        header.thread-a {
+            color: #60a5fa;
+        }
 
-        .log-entry {
+        header.thread-b {
+            color: #f472b6;
+        }
+
+        /* <samp> is strictly semantic for computer output */
+        samp.log-entry {
+            display: block;
             background: rgba(255, 255, 255, 0.1);
             padding: 10px;
             border-radius: 4px;
             opacity: 0;
             animation: slideIn 0.3s forwards;
             font-size: 0.9rem;
+            font-family: monospace;
         }
 
-        .log-success { border-left: 4px solid var(--success); }
-        .log-error { border-left: 4px solid var(--danger); }
-        .log-wait { border-left: 4px solid var(--warning); }
-        .log-read { border-left: 4px solid var(--primary); }
+        samp.log-success {
+            border-left: 4px solid var(--success);
+        }
+
+        samp.log-error {
+            border-left: 4px solid var(--danger);
+        }
+
+        samp.log-wait {
+            border-left: 4px solid var(--warning);
+        }
+
+        samp.log-read {
+            border-left: 4px solid var(--primary);
+        }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
-        .explanation {
+        aside.explanation {
             margin-top: 20px;
             padding: 15px;
             background: #eff6ff;
@@ -163,8 +212,13 @@
             display: none;
         }
 
+        /* Utility class to hide elements semantically instead of inline CSS */
+        [hidden] {
+            display: none !important;
+        }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -173,21 +227,23 @@
     </header>
 
     <main>
-        <section>
-            <div class="dashboard">
-                <div class="stat-box">
-                    <span class="stat-label">Database Inventory</span>
-                    <span class="stat-value" id="db-inventory">1</span>
-                </div>
-                <div class="stat-box" id="db-version-box" style="display: none;">
-                    <span class="stat-label">Database Version</span>
-                    <span class="stat-value" id="db-version">1</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-label">Tickets Sold</span>
-                    <span class="stat-value" id="tickets-sold">0</span>
-                </div>
-            </div>
+        <section id="simulator">
+            <section class="dashboard">
+                <figure class="stat-box">
+                    <figcaption>Database Inventory</figcaption>
+                    <output id="db-inventory">1</output>
+                </figure>
+
+                <figure class="stat-box" id="db-version-box" hidden>
+                    <figcaption>Database Version</figcaption>
+                    <output id="db-version">1</output>
+                </figure>
+
+                <figure class="stat-box">
+                    <figcaption>Tickets Sold</figcaption>
+                    <output id="tickets-sold">0</output>
+                </figure>
+            </section>
 
             <nav class="controls">
                 <button id="btn-race" class="btn-danger" onclick="runSimulation('race')">1. Simulate Race Condition (No Locks)</button>
@@ -197,12 +253,12 @@
             </nav>
 
             <article id="simulation-view">
-                <div class="thread-col" id="col-a">
-                    <div class="thread-header thread-a">User A (Thread 1)</div>
-                </div>
-                <div class="thread-col" id="col-b">
-                    <div class="thread-header thread-b">User B (Thread 2)</div>
-                </div>
+                <section class="thread-col" id="col-a">
+                    <header class="thread-header thread-a">User A (Thread 1)</header>
+                </section>
+                <section class="thread-col" id="col-b">
+                    <header class="thread-header thread-b">User B (Thread 2)</header>
+                </section>
             </article>
 
             <aside id="explanation-box" class="explanation"></aside>
@@ -228,95 +284,93 @@
             inventory = 1;
             sold = 0;
             version = 1;
-            dbInvEl.innerText = inventory;
-            soldEl.innerText = sold;
-            versionEl.innerText = version;
-            versionBox.style.display = 'none';
+            dbInvEl.value = inventory;
+            soldEl.value = sold;
+            versionEl.value = version;
+
+            // Semantically hide elements
+            versionBox.setAttribute('hidden', '');
             expBox.style.display = 'none';
             dbInvEl.style.color = 'var(--primary)';
-            
+
             // Clear logs but keep headers
-            colA.innerHTML = '<div class="thread-header thread-a">User A (Thread 1)</div>';
-            colB.innerHTML = '<div class="thread-header thread-b">User B (Thread 2)</div>';
-            
+            colA.innerHTML = '<header class="thread-header thread-a">User A (Thread 1)</header>';
+            colB.innerHTML = '<header class="thread-header thread-b">User B (Thread 2)</header>';
+
             toggleButtons(false);
         }
 
         function toggleButtons(disabled) {
-            document.querySelectorAll('.controls button').forEach(b => {
-                if(b.innerText !== 'Reset Database') b.disabled = disabled;
+            document.querySelectorAll('nav.controls button').forEach(b => {
+                if (b.innerText !== 'Reset Database') b.disabled = disabled;
             });
         }
 
         function logEvent(col, text, type, delay) {
             return new Promise(resolve => {
                 setTimeout(() => {
-                    const div = document.createElement('div');
-                    div.className = `log-entry ${type}`;
-                    div.innerHTML = text;
-                    col.appendChild(div);
+                    // Strictly using the semantic <samp> tag for program output logs
+                    const samp = document.createElement('samp');
+                    samp.className = `log-entry ${type}`;
+                    samp.innerHTML = text;
+                    col.appendChild(samp);
                     resolve();
                 }, delay);
             });
         }
 
         function updateUI(inv, s, ver = null) {
-            dbInvEl.innerText = inv;
-            soldEl.innerText = s;
-            if(ver !== null) versionEl.innerText = ver;
-            if(inv < 0) dbInvEl.style.color = 'var(--danger)'; // Highlight negative inventory
+            dbInvEl.value = inv;
+            soldEl.value = s;
+            if (ver !== null) versionEl.value = ver;
+            if (inv < 0) dbInvEl.style.color = 'var(--danger)';
         }
 
         async function runSimulation(type) {
             resetDB();
             toggleButtons(true);
 
-            if(type === 'optimistic') {
-                versionBox.style.display = 'block';
+            if (type === 'optimistic') {
+                versionBox.removeAttribute('hidden');
             }
 
-            if(type === 'race') {
-                // The Lost Update Sequence
-                await logEvent(colA, "T=0: SELECT inventory FROM tickets;<br><i>Result: 1</i>", "log-read", 500);
-                await logEvent(colB, "T=1: SELECT inventory FROM tickets;<br><i>Result: 1</i>", "log-read", 800);
-                
+            if (type === 'race') {
+                await logEvent(colA, "T=0: SELECT inventory FROM tickets;<br><em>Result: 1</em>", "log-read", 500);
+                await logEvent(colB, "T=1: SELECT inventory FROM tickets;<br><em>Result: 1</em>", "log-read", 800);
+
                 await logEvent(colA, "T=2: Calculates locally: 1 - 1 = 0", "", 800);
                 await logEvent(colB, "T=3: Calculates locally: 1 - 1 = 0", "", 400);
 
-                await logEvent(colA, "T=4: UPDATE tickets SET inventory = 0;<br><b>COMMIT SUCCESS</b>", "log-success", 800);
+                await logEvent(colA, "T=4: UPDATE tickets SET inventory = 0;<br><strong>COMMIT SUCCESS</strong>", "log-success", 800);
                 updateUI(0, 1);
-                
-                await logEvent(colB, "T=5: UPDATE tickets SET inventory = 0;<br><b>COMMIT SUCCESS</b>", "log-success", 800);
+
+                await logEvent(colB, "T=5: UPDATE tickets SET inventory = 0;<br><strong>COMMIT SUCCESS</strong>", "log-success", 800);
                 updateUI(0, 2);
 
-                showExplanation("🚨 <b>LOST UPDATE OCCURRED!</b> Both users successfully bought the ticket because they both calculated their updates based on the outdated value of '1'. You sold 2 tickets, but you only had 1. Your database is now corrupted relative to real-world constraints.");
-            } 
-            else if (type === 'pessimistic') {
-                // Pessimistic Lock (SELECT FOR UPDATE)
-                await logEvent(colA, "T=0: SELECT * FROM tickets <b>FOR UPDATE</b>;<br><i>Result: 1 (ROW LOCKED)</i>", "log-read", 500);
-                
-                await logEvent(colB, "T=1: SELECT * FROM tickets FOR UPDATE;<br><i>Status: ⚠️ BLOCKED. Waiting for User A to release lock...</i>", "log-wait", 800);
-                
-                await logEvent(colA, "T=2: UPDATE tickets SET inventory = 0;<br><b>COMMIT SUCCESS (Lock Released)</b>", "log-success", 1200);
+                showExplanation("🚨 <strong>LOST UPDATE OCCURRED!</strong> Both users successfully bought the ticket because they both calculated their updates based on the outdated value of '1'. You sold 2 tickets, but you only had 1.");
+            } else if (type === 'pessimistic') {
+                await logEvent(colA, "T=0: SELECT * FROM tickets <strong>FOR UPDATE</strong>;<br><em>Result: 1 (ROW LOCKED)</em>", "log-read", 500);
+
+                await logEvent(colB, "T=1: SELECT * FROM tickets FOR UPDATE;<br><em>Status: ⚠️ BLOCKED. Waiting for User A...</em>", "log-wait", 800);
+
+                await logEvent(colA, "T=2: UPDATE tickets SET inventory = 0;<br><strong>COMMIT SUCCESS (Lock Released)</strong>", "log-success", 1200);
                 updateUI(0, 1);
 
-                await logEvent(colB, "T=3: Lock acquired! Reading DB...<br><i>Result: 0</i>", "log-read", 500);
-                await logEvent(colB, "T=4: Checks inventory... It is 0.<br><b>ABORT TRANSACTION</b> (Item Sold Out)", "log-error", 800);
+                await logEvent(colB, "T=3: Lock acquired! Reading DB...<br><em>Result: 0</em>", "log-read", 500);
+                await logEvent(colB, "T=4: Checks inventory... It is 0.<br><strong>ABORT TRANSACTION</strong>", "log-error", 800);
 
-                showExplanation("✅ <b>PESSIMISTIC LOCKING:</b> By using <code>SELECT FOR UPDATE</code>, the database physically locked the row. User B was forced to wait until User A finished. When User B finally got to read the row, the inventory was correctly shown as 0. Safe, but locks can slow down the system under heavy traffic.");
-            }
-            else if (type === 'optimistic') {
-                // Optimistic Lock (@Version)
-                await logEvent(colA, "T=0: SELECT inventory, <b>version</b> FROM tickets;<br><i>Result: Inv=1, Ver=1</i>", "log-read", 500);
-                await logEvent(colB, "T=1: SELECT inventory, <b>version</b> FROM tickets;<br><i>Result: Inv=1, Ver=1</i>", "log-read", 800);
-                
-                await logEvent(colA, "T=2: UPDATE tickets SET inv=0, ver=2 <b>WHERE ver=1</b>;<br><i>Rows affected: 1.</i> <b>COMMIT SUCCESS</b>", "log-success", 1000);
+                showExplanation("✅ <strong>PESSIMISTIC LOCKING:</strong> By using <code>SELECT FOR UPDATE</code>, the database physically locked the row. User B was forced to wait. Safe, but locks can slow down the system.");
+            } else if (type === 'optimistic') {
+                await logEvent(colA, "T=0: SELECT inventory, <strong>version</strong> FROM tickets;<br><em>Result: Inv=1, Ver=1</em>", "log-read", 500);
+                await logEvent(colB, "T=1: SELECT inventory, <strong>version</strong> FROM tickets;<br><em>Result: Inv=1, Ver=1</em>", "log-read", 800);
+
+                await logEvent(colA, "T=2: UPDATE tickets SET inv=0, ver=2 <strong>WHERE ver=1</strong>;<br><em>Rows affected: 1.</em> <strong>COMMIT SUCCESS</strong>", "log-success", 1000);
                 updateUI(0, 1, 2);
 
-                await logEvent(colB, "T=3: UPDATE tickets SET inv=0, ver=2 <b>WHERE ver=1</b>;<br><i>Rows affected: 0.</i>", "log-wait", 1000);
-                await logEvent(colB, "T=4: DB Version is now 2. Update failed!<br><b>THROWS OptimisticLockException</b>", "log-error", 600);
+                await logEvent(colB, "T=3: UPDATE tickets SET inv=0, ver=2 <strong>WHERE ver=1</strong>;<br><em>Rows affected: 0.</em>", "log-wait", 1000);
+                await logEvent(colB, "T=4: DB Version is now 2. Update failed!<br><strong>THROWS OptimisticLockException</strong>", "log-error", 600);
 
-                showExplanation("✅ <b>OPTIMISTIC LOCKING:</b> No database locks were held! Instead, we check the <code>version</code> column during the UPDATE. Because User A changed the version to 2, User B's <code>WHERE version=1</code> clause affected 0 rows. The framework detects this and throws an error. Excellent for high-read, low-write performance.");
+                showExplanation("✅ <strong>OPTIMISTIC LOCKING:</strong> No database locks were held! The framework checks the <code>version</code> column. Because User A changed the version to 2, User B's update failed automatically.");
             }
         }
 
@@ -327,4 +381,5 @@
         }
     </script>
 </body>
+
 </html>
