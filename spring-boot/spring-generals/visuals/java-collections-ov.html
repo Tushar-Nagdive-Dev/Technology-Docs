@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Collections: Interactive Guide</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: #334155;
+            --code-bg: #000000;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* Layout */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-items {
+            padding: 10px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-left: 4px solid transparent;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            background-color: rgba(59, 130, 246, 0.15);
+            border-left-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-category {
+            padding: 15px 20px 5px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* View Panels */
+        .view-panel {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { margin-top: 0; font-size: 2.2rem; }
+        h2 { color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+        /* Wizard Styles */
+        .wizard-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .wizard-question {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+        }
+
+        .wizard-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+        }
+
+        .btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-outline:hover { background: rgba(59, 130, 246, 0.1); }
+
+        .wizard-result {
+            display: none;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .wizard-result h3 { color: var(--success); margin-top: 0; font-size: 1.8rem; }
+
+        /* Collection Details Styles */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .card-success { border-top: 4px solid var(--success); }
+        .card-danger { border-top: 4px solid var(--danger); }
+
+        .card h3 { margin-top: 0; display: flex; align-items: center; gap: 8px; }
+
+        .pro-tip {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            border: 1px solid #222;
+        }
+        
+        .kw { color: #569cd6; } /* Keyword */
+        .typ { color: #4ec9b0; } /* Type */
+        .str { color: #ce9178; } /* String */
+        .cm { color: #6a9955; font-style: italic; } /* Comment */
+        .fn { color: #dcdcaa; } /* Function */
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="header">☕ Java Collections</div>
+        <div class="nav-items">
+            <div class="nav-item active" onclick="switchView('wizard')">🎯 Decision Wizard</div>
+            
+            <div class="nav-category">Lists (Ordered)</div>
+            <div class="nav-item" onclick="switchView('arraylist')">ArrayList</div>
+            <div class="nav-item" onclick="switchView('linkedlist')">LinkedList</div>
+            
+            <div class="nav-category">Sets (Unique)</div>
+            <div class="nav-item" onclick="switchView('hashset')">HashSet & LinkedHashSet</div>
+            <div class="nav-item" onclick="switchView('treeset')">TreeSet</div>
+            
+            <div class="nav-category">Maps (Key-Value)</div>
+            <div class="nav-item" onclick="switchView('hashmap')">HashMap & LinkedHashMap</div>
+            <div class="nav-item" onclick="switchView('treemap')">TreeMap</div>
+            
+            <div class="nav-category">Queues</div>
+            <div class="nav-item" onclick="switchView('queues')">PriorityQueue & Deque</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- WIZARD PANEL -->
+        <div id="wizard" class="view-panel active">
+            <h1>The Decision Wizard</h1>
+            <p>Answer a few questions to find the exact Java Collection you need.</p>
+            
+            <div class="wizard-container">
+                <div id="q-container">
+                    <div class="wizard-question" id="questionText">Do you need to store Key-Value pairs? (e.g., UserID -> UserObject)</div>
+                    <div class="wizard-buttons" id="btnContainer">
+                        <button class="btn" onclick="nextQ('maps')">Yes, Key-Value Pairs</button>
+                        <button class="btn btn-outline" onclick="nextQ('iterables')">No, just single elements</button>
+                    </div>
+                </div>
+
+                <div id="result-container" class="wizard-result">
+                    <h3 id="resultTitle">Use: HashMap</h3>
+                    <p id="resultDesc">O(1) lookup time. The absolute best choice for key-value pairings when order doesn't matter.</p>
+                    <button class="btn btn-outline" style="margin-top: 15px;" onclick="resetWizard()">Start Over</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARRAYLIST PANEL -->
+        <div id="arraylist" class="view-panel">
+            <h1>ArrayList</h1>
+            <p>The default, go-to collection. It uses a dynamic array under the hood.</p>
+            
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ When to use</h3>
+                    <ul>
+                        <li>Read-heavy applications.</li>
+                        <li>When you need fast random access by index <code>list.get(5)</code> (O(1) time).</li>
+                        <li>When you mostly add elements to the <i>end</i> of the list.</li>
+                    </ul>
+                    <strong>Real-time Example:</strong> An e-commerce product catalog page where users scroll and read items, but rarely insert items into the exact middle of the list.
+                </div>
+                <div class="card card-danger">
+                    <h3>❌ When NOT to use</h3>
+                    <ul>
+                        <li>When you are doing massive amounts of inserts/deletes in the <i>middle</i> of the list.</li>
+                        <li>Why? Because if you insert at index 0, ArrayList has to shift <i>every single subsequent element</i> one spot to the right (O(n) time).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pro-tip">
+                <strong>Pro Tip (Sizing):</strong> ArrayList starts with a capacity of 10. When it fills up, it creates a new array 1.5x larger and copies the old data over. If you know you are adding 10,000 items, do <code>new ArrayList<>(10000)</code>. You just saved the CPU from doing dozens of costly array copy operations!
+            </div>
+
+<div class="code-block">
+<span class="kw">import</span> java.util.ArrayList;
+<span class="kw">import</span> java.util.List;
+
+<span class="typ">List</span>&lt;<span class="typ">String</span>&gt; catalog = <span class="kw">new</span> <span class="typ">ArrayList</span>&lt;&gt;(<span class="typ">500</span>); <span class="cm">// Pre-sized!</span>
+catalog.<span class="fn">add</span>(<span class="str">"Laptop"</span>);
+catalog.<span class="fn">add</span>(<span class="str">"Mouse"</span>);
+<span class="typ">String</span> item = catalog.<span class="fn">get</span>(<span class="typ">0</span>); <span class="cm">// Lightning fast O(1) read</span>
+</div>
+        </div>
+
+        <!-- LINKEDLIST PANEL -->
+        <div id="linkedlist" class="view-panel">
+            <h1>LinkedList</h1>
+            <p>Uses a Doubly-Linked List under the hood. Elements (nodes) point to the previous and next elements.</p>
+            
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ When to use</h3>
+                    <ul>
+                        <li>Write-heavy applications.</li>
+                        <li>When you are constantly adding or removing elements from the beginning or middle of the collection.</li>
+                        <li>It just changes two pointers to insert an item (O(1) time, assuming you are already at the position via Iterator).</li>
+                    </ul>
+                    <strong>Real-time Example:</strong> A Music Player Queue. You frequently drag and drop songs to the top or middle of the "Up Next" list, or delete songs from the queue.
+                </div>
+                <div class="card card-danger">
+                    <h3>❌ When NOT to use</h3>
+                    <ul>
+                        <li>When you need random access!</li>
+                        <li>If you call <code>list.get(5000)</code>, LinkedList has to start at 0 and traverse link-by-link 5,000 times to find it (O(n) time).</li>
+                        <li>It consumes more memory than ArrayList (because it stores pointers).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- HASHSET PANEL -->
+        <div id="hashset" class="view-panel">
+            <h1>HashSet & LinkedHashSet</h1>
+            <p>Sets guarantee uniqueness. No duplicates allowed. Powered by a HashMap under the hood.</p>
+            
+            <h2>1. HashSet</h2>
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ When to use</h3>
+                    <p>When you just need a bucket of unique items and you absolutely do not care about the order they are in. Blazing fast O(1) add and contains.</p>
+                    <strong>Example:</strong> Storing the unique IP addresses of visitors who hit your website today.
+                </div>
+                <div class="card card-danger">
+                    <h3>❌ When NOT to use</h3>
+                    <p>When you need to iterate through the items in a specific order, or you need to sort them.</p>
+                </div>
+            </div>
+
+            <h2>2. LinkedHashSet</h2>
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ When to use</h3>
+                    <p>When you need uniqueness, BUT you want to preserve the <strong>Insertion Order</strong>. Slower than HashSet, but keeps order.</p>
+                    <strong>Example:</strong> A user selects categories for their blog post ("Tech", "Java", "Coding"). You want unique tags, but you want to display them in the exact order the user clicked them.
+                </div>
+            </div>
+
+            <div class="pro-tip">
+                <strong>Pro Tip (Equals & HashCode):</strong> If you put custom objects (like a <code>User</code> class) into a Set, you MUST override <code>equals()</code> and <code>hashCode()</code>. If you don't, Java looks at the memory address, and will allow two users with the exact same ID into the Set!
+            </div>
+        </div>
+
+        <!-- TREESET PANEL -->
+        <div id="treeset" class="view-panel">
+            <h1>TreeSet</h1>
+            <p>A Set that guarantees uniqueness AND is automatically sorted. Powered by a Red-Black Tree.</p>
+            
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ When to use</h3>
+                    <ul>
+                        <li>When you need a continuously sorted collection of unique items without manually calling <code>Collections.sort()</code>.</li>
+                        <li>Provides useful methods like <code>higher()</code>, <code>lower()</code>, <code>first()</code>, and <code>last()</code>.</li>
+                    </ul>
+                    <strong>Real-time Example:</strong> A live Gaming Leaderboard. As unique player scores update, the TreeSet automatically keeps them perfectly sorted from highest to lowest.
+                </div>
+                <div class="card card-danger">
+                    <h3>❌ When NOT to use</h3>
+                    <ul>
+                        <li>When speed is your #1 priority. Inserts and lookups are O(log n) because it has to traverse the tree structure. HashSet (O(1)) is much faster.</li>
+                    </ul>
+                </div>
+            </div>
+
+<div class="code-block">
+<span class="kw">import</span> java.util.TreeSet;
+
+<span class="cm">// Automatically sorts alphabetically</span>
+<span class="typ">TreeSet</span>&lt;<span class="typ">String</span>&gt; names = <span class="kw">new</span> <span class="typ">TreeSet</span>&lt;&gt;();
+names.<span class="fn">add</span>(<span class="str">"Zack"</span>);
+names.<span class="fn">add</span>(<span class="str">"Alice"</span>);
+names.<span class="fn">add</span>(<span class="str">"Bob"</span>);
+
+System.out.<span class="fn">println</span>(names); <span class="cm">// Outputs: [Alice, Bob, Zack]</span>
+</div>
+        </div>
+
+        <!-- HASHMAP PANEL -->
+        <div id="hashmap" class="view-panel">
+            <h1>HashMap & LinkedHashMap</h1>
+            <p>Stores data in Key-Value pairs. Keys must be unique. Values can be duplicates.</p>
+            
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ HashMap (The King)</h3>
+                    <p>The most used collection in Java. Extremely fast O(1) lookups by Key. Order is not guaranteed.</p>
+                    <strong>Example:</strong> Caching user profiles. Key = <code>"user_101"</code>, Value = <code>UserProfileObject</code>. You instantly fetch the profile without searching a list.
+                </div>
+                <div class="card card-success">
+                    <h3>✅ LinkedHashMap</h3>
+                    <p>Like HashMap, but maintains Insertion Order. Also has a special feature to maintain "Access Order".</p>
+                    <strong>Example:</strong> Building an LRU (Least Recently Used) Cache. It can automatically delete the oldest accessed keys to save memory!
+                </div>
+            </div>
+
+            <div class="pro-tip">
+                <strong>Pro Tip (Load Factor & Collisions):</strong> HashMap works by hashing keys into "buckets". By default, when the map is 75% full (Load Factor 0.75), it doubles its buckets to avoid "collisions" (two keys hashing to the same bucket). If a bucket gets too many collisions, Java 8 secretly upgrades that bucket from a Linked List to a Red-Black tree to maintain speed!
+            </div>
+        </div>
+
+        <!-- TREEMAP PANEL -->
+        <div id="treemap" class="view-panel">
+            <h1>TreeMap</h1>
+            <p>Key-Value pairs, but the keys are <strong>automatically sorted</strong>.</p>
+            
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ When to use</h3>
+                    <ul>
+                        <li>When you need a Map, but you also need to iterate over the keys in sorted order.</li>
+                        <li>When you need range queries on keys (e.g., "Give me all entries between Key A and Key Z").</li>
+                    </ul>
+                    <strong>Real-time Example:</strong> A Financial Ledger or Stock Ticker. Key = <code>Timestamp</code>, Value = <code>Transaction Details</code>. You can easily query <code>map.subMap(startTime, endTime)</code> to get all transactions in a specific hour.
+                </div>
+            </div>
+        </div>
+
+        <!-- QUEUES PANEL -->
+        <div id="queues" class="view-panel">
+            <h1>PriorityQueue & ArrayDeque</h1>
+            
+            <h2>1. PriorityQueue</h2>
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ When to use</h3>
+                    <p>When items need to be processed based on their <strong>Priority</strong>, not when they arrived. Elements are sorted as they enter.</p>
+                    <strong>Example:</strong> A Hospital Triage System. Patients arrive (added to queue). A patient with a heart attack is given higher priority and jumps to the front of the queue ahead of a patient with a cold.
+                </div>
+            </div>
+
+            <h2>2. ArrayDeque (Pronounced "Deck")</h2>
+            <div class="grid-2">
+                <div class="card card-success">
+                    <h3>✅ When to use</h3>
+                    <p>A Double-Ended Queue. You can add/remove from both the front AND the back instantly.</p>
+                    <strong>Example:</strong> Browser Back/Forward history. You push new pages to the top, pop them to go back.
+                </div>
+            </div>
+
+            <div class="pro-tip">
+                <strong>Pro Tip (The Death of Stack):</strong> Never use the legacy <code>Stack</code> class. It is synchronized and terribly slow. If you need LIFO (Last-In-First-Out) stack behavior, the official Java recommendation is to use <code>ArrayDeque</code> (e.g., <code>Deque&lt;String&gt; stack = new ArrayDeque&lt;&gt;(); stack.push(); stack.pop();</code>).
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Tab Switching Logic
+        function switchView(viewId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        // Decision Wizard Logic
+        const qContainer = document.getElementById('q-container');
+        const rContainer = document.getElementById('result-container');
+        const qText = document.getElementById('questionText');
+        const bContainer = document.getElementById('btnContainer');
+        const rTitle = document.getElementById('resultTitle');
+        const rDesc = document.getElementById('resultDesc');
+
+        function nextQ(answer) {
+            if (answer === 'maps') {
+                qText.innerText = "Do you need the keys to be sorted? (e.g., alphabetical, chronologically)";
+                bContainer.innerHTML = `
+                    <button class="btn" onclick="showResult('TreeMap', 'Automatically sorts keys (O(log n) time). Perfect for range queries.')">Yes, sort them</button>
+                    <button class="btn btn-outline" onclick="nextQ('maps-unsorted')">No, just fast lookups</button>
+                `;
+            } else if (answer === 'maps-unsorted') {
+                qText.innerText = "Do you need to remember the EXACT order items were inserted?";
+                bContainer.innerHTML = `
+                    <button class="btn" onclick="showResult('LinkedHashMap', 'Maintains insertion order. Great for LRU caches.')">Yes, insertion order matters</button>
+                    <button class="btn btn-outline" onclick="showResult('HashMap', 'O(1) lookup time. The undisputed king of key-value storage.')">No, order doesn't matter</button>
+                `;
+            } else if (answer === 'iterables') {
+                qText.innerText = "Are duplicates allowed in your collection?";
+                bContainer.innerHTML = `
+                    <button class="btn" onclick="nextQ('lists')">Yes, duplicates are fine</button>
+                    <button class="btn btn-outline" onclick="nextQ('sets')">No, all items must be UNIQUE</button>
+                `;
+            } else if (answer === 'sets') {
+                qText.innerText = "Do you need your unique items to be sorted automatically?";
+                bContainer.innerHTML = `
+                    <button class="btn" onclick="showResult('TreeSet', 'Automatically sorts unique items (O(log n)). Good for leaderboards.')">Yes, sort them</button>
+                    <button class="btn btn-outline" onclick="nextQ('sets-unsorted')">No</button>
+                `;
+            } else if (answer === 'sets-unsorted') {
+                qText.innerText = "Do you need to maintain insertion order?";
+                bContainer.innerHTML = `
+                    <button class="btn" onclick="showResult('LinkedHashSet', 'Preserves the order elements were added while maintaining uniqueness.')">Yes</button>
+                    <button class="btn btn-outline" onclick="showResult('HashSet', 'Blazing fast O(1) time. The default choice for unique elements.')">No, order doesn't matter</button>
+                `;
+            } else if (answer === 'lists') {
+                qText.innerText = "How are you using this list primarily?";
+                bContainer.innerHTML = `
+                    <button class="btn" onclick="showResult('ArrayList', 'Dynamic array. Best for random access (read-heavy) and adding to the end.')">Reading data mostly (Random Access)</button>
+                    <button class="btn btn-outline" onclick="showResult('LinkedList', 'Best for frequent insertions/deletions at the beginning or middle of the list.')">Adding/Removing in the middle</button>
+                    <button class="btn btn-outline" onclick="showResult('PriorityQueue', 'Processes items based on priority rules rather than insertion order.')">Queueing by Priority</button>
+                `;
+            }
+        }
+
+        function showResult(collection, desc) {
+            qContainer.style.display = 'none';
+            rContainer.style.display = 'block';
+            rTitle.innerText = `👉 Use: ${collection}`;
+            rDesc.innerText = desc;
+        }
+
+        function resetWizard() {
+            rContainer.style.display = 'none';
+            qContainer.style.display = 'block';
+            qText.innerText = "Do you need to store Key-Value pairs? (e.g., UserID -> UserObject)";
+            bContainer.innerHTML = `
+                <button class="btn" onclick="nextQ('maps')">Yes, Key-Value Pairs</button>
+                <button class="btn btn-outline" onclick="nextQ('iterables')">No, just single elements</button>
+            `;
+        }
+    </script>
+</body>
+</html>
