@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Arrays: Interactive Guide</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --box-bg: #ffffff;
+            --border: #e2e8f0;
+            --accent: #10b981;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        section {
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            margin-top: 0;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.5rem;
+        }
+        .concept-card {
+            background: var(--primary-light);
+            padding: 1rem;
+            border-left: 4px solid var(--primary);
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        /* Interactive visualizer styles */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        input {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 80px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .array-container {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+            min-height: 80px;
+            align-items: center;
+        }
+        .array-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+        .array-box {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--primary);
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .array-box.highlight {
+            background-color: var(--accent);
+            color: white;
+            transform: scale(1.1);
+        }
+        .array-index {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+        /* Interactive functions styles */
+        details {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        summary {
+            padding: 1rem;
+            background-color: var(--primary-light);
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .details-content {
+            padding: 1rem;
+            background: white;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Java Arrays: Interactive Guide</h1>
+        <p>Prepared by Maya - Making complex topics simple.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>What is an Array?</h2>
+            <p>Imagine a row of post office boxes. They are all attached to each other, they are the same size, and they each have a number on the door.</p>
+            <div class="concept-card">
+                <p><strong>The Golden Rules:</strong></p>
+                <ul>
+                    <li><strong>One Type Only:</strong> If the boxes are for letters (Strings), you can't put packages (Integers) in them.</li>
+                    <li><strong>Fixed Size:</strong> Once you build the row of boxes, you can't add more boxes later.</li>
+                    <li><strong>Start at Zero:</strong> The first box is numbered 0, not 1!</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>Interactive Array Builder</h2>
+            <p>Let's build an array of numbers (an <code>int[]</code>) right now and see how it works!</p>
+            
+            <article>
+                <div class="controls">
+                    <label for="array-size">Size of new array:</label>
+                    <input type="number" id="array-size" value="5" min="1" max="15">
+                    <button id="btn-create">new int[size]</button>
+                </div>
+                
+                <figure>
+                    <div class="array-container" id="visual-array">
+                        <!-- Array slots will appear here -->
+                        <p style="color: #94a3b8; font-style: italic;">Click the button to create your array.</p>
+                    </div>
+                    <figcaption>Memory representation of your array.</figcaption>
+                </figure>
+
+                <div class="controls" style="margin-top: 2rem;">
+                    <label for="index-input">Set Index:</label>
+                    <input type="number" id="index-input" value="0" min="0">
+                    <label for="value-input">to Value:</label>
+                    <input type="number" id="value-input" value="42">
+                    <button id="btn-update">Update Array</button>
+                </div>
+            </article>
+        </section>
+
+        <section>
+            <h2>Interactive Built-in Functions Explorer</h2>
+            <p>Click on the functions below to reveal what they do in simple terms.</p>
+
+            <details>
+                <summary>Arrays.toString() 👀</summary>
+                <div class="details-content">
+                    <p><strong>What it does:</strong> Lets you actually read what is inside the array.</p>
+                    <p><strong>Why you need it:</strong> If you try to print an array normally like <code>System.out.println(myArray)</code>, Java just prints a random memory address like <code>[I@1b28cdfa</code>. Using <code>Arrays.toString(myArray)</code> prints it beautifully like <code>[10, 20, 30]</code>.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Arrays.sort() 📈</summary>
+                <div class="details-content">
+                    <p><strong>What it does:</strong> Arranges everything in order automatically.</p>
+                    <p><strong>Why you need it:</strong> If your array is <code>[5, 1, 9, 2]</code>, running <code>Arrays.sort()</code> instantly changes it to <code>[1, 2, 5, 9]</code>. It works for alphabetical words too!</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Arrays.fill() 🎨</summary>
+                <div class="details-content">
+                    <p><strong>What it does:</strong> Fills every single slot with the exact same value.</p>
+                    <p><strong>Why you need it:</strong> If you have an empty array of 100 slots and want them all to be the number '7', you don't have to write it 100 times. Just use <code>Arrays.fill(myArray, 7)</code>.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>myArray.length 📏 (Property)</summary>
+                <div class="details-content">
+                    <p><strong>What it does:</strong> Tells you exactly how many slots are in the array.</p>
+                    <p><strong>Why you need it:</strong> It's crucial for loops! Notice there are no parentheses <code>()</code> at the end. It's a property built right into the array, not an external tool.</p>
+                </div>
+            </details>
+        </section>
+    </main>
+
+    <footer>
+        <p style="text-align: center; color: #64748b; padding: 2rem;">Happy Coding! Let me know if you need any more help.</p>
+    </footer>
+
+    <script>
+        // Interactive Logic
+        let currentArray = [];
+        
+        const visualArray = document.getElementById('visual-array');
+        const btnCreate = document.getElementById('btn-create');
+        const btnUpdate = document.getElementById('btn-update');
+        const inputSize = document.getElementById('array-size');
+        const inputIndex = document.getElementById('index-input');
+        const inputValue = document.getElementById('value-input');
+
+        function renderArray(highlightIndex = -1) {
+            visualArray.innerHTML = ''; // Clear current visual
+            
+            if (currentArray.length === 0) {
+                visualArray.innerHTML = '<p style="color: #94a3b8; font-style: italic;">Array is empty.</p>';
+                return;
+            }
+
+            currentArray.forEach((val, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'array-slot';
+
+                const box = document.createElement('div');
+                box.className = 'array-box';
+                if (index === highlightIndex) {
+                    box.classList.add('highlight');
+                    // Remove highlight after animation
+                    setTimeout(() => box.classList.remove('highlight'), 500);
+                }
+                box.textContent = val;
+
+                const label = document.createElement('span');
+                label.className = 'array-index';
+                label.textContent = `Index ${index}`;
+
+                slot.appendChild(box);
+                slot.appendChild(label);
+                visualArray.appendChild(slot);
+            });
+            
+            // Update max limit for index input
+            inputIndex.max = currentArray.length - 1;
+        }
+
+        btnCreate.addEventListener('click', () => {
+            const size = parseInt(inputSize.value);
+            if (size > 0 && size <= 20) {
+                // In Java, an int array initializes with 0s
+                currentArray = new Array(size).fill(0);
+                inputIndex.value = 0; // Reset index input
+                renderArray();
+            } else {
+                alert("Let's keep the size between 1 and 20 for this visualizer!");
+            }
+        });
+
+        btnUpdate.addEventListener('click', () => {
+            if (currentArray.length === 0) {
+                alert("Please create an array first!");
+                return;
+            }
+            const idx = parseInt(inputIndex.value);
+            const val = parseInt(inputValue.value);
+
+            if (idx >= 0 && idx < currentArray.length) {
+                currentArray[idx] = val; // Update the value
+                renderArray(idx); // Render and highlight
+            } else {
+                alert(`Index out of bounds! Valid indices are 0 to ${currentArray.length - 1}.`);
+            }
+        });
+        
+        // Initialize an empty state
+        renderArray();
+    </script>
+</body>
+</html>
