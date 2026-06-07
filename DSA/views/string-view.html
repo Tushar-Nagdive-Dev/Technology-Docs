@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>String Patterns: Interactive Guide</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 2rem;
+        }
+        main {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        header {
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        section {
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        figure {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: #fff;
+            border: 2px dashed #ccc;
+            text-align: center;
+        }
+        /* Using <kbd> to represent individual characters semantically */
+        kbd {
+            display: inline-block;
+            font-size: 1.5rem;
+            font-family: monospace;
+            padding: 0.5rem 1rem;
+            margin: 0.2rem;
+            background: #eee;
+            border: 2px solid #bbb;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        menu {
+            padding: 0;
+            margin: 1rem 0;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        button {
+            padding: 0.5rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        figcaption {
+            margin-top: 1rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        samp {
+            display: block;
+            margin-top: 1rem;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Semantic highlights via classes */
+        .pointer-left { border-bottom: 4px solid #ff4757; background: #ffeaa7; }
+        .pointer-right { border-bottom: 4px solid #2ed573; background: #ffeaa7; }
+        .match { background: #7bed9f; border-color: #2ed573; }
+        .mismatch { background: #ff6b81; border-color: #ff4757; }
+        .window-active { background: #74b9ff; border-color: #0984e3; color: white; }
+    </style>
+</head>
+<body>
+
+    <main>
+        <header>
+            <h1>Interactive String Algorithms</h1>
+            <p>Step through MAANG patterns visually to understand exactly how the pointers and memory behave during execution.</p>
+        </header>
+
+        <section id="two-pointers">
+            <article>
+                <h2>Pattern 1: Two Pointers (Valid Palindrome)</h2>
+                <p>Instead of creating a reversed copy of the string (which takes extra memory), we place one pointer at the start and one at the end. We move them toward the center, comparing characters.</p>
+                
+                <figure id="tp-container">
+                    </figure>
+                
+                <menu>
+                    <button id="tp-step" onclick="stepTwoPointers()">Step Forward</button>
+                    <button onclick="resetTwoPointers()">Reset</button>
+                </menu>
+                
+                <figcaption id="tp-status">Status: Ready to begin.</figcaption>
+                <samp id="tp-explanation">Click 'Step Forward' to initialize pointers.</samp>
+            </article>
+        </section>
+
+        <section id="sliding-window">
+            <article>
+                <h2>Pattern 2: Sliding Window (Longest Unique Substring)</h2>
+                <p>We use a dynamically resizing "window" to explore the string. The right pointer expands the window to add characters. If we hit a duplicate, the left pointer shrinks the window until the duplicate is gone.</p>
+                
+                <figure id="sw-container">
+                    </figure>
+                
+                <menu>
+                    <button id="sw-step" onclick="stepSlidingWindow()">Step Forward</button>
+                    <button onclick="resetSlidingWindow()">Reset</button>
+                </menu>
+                
+                <figcaption id="sw-status">Max Unique Length Found: 0</figcaption>
+                <samp id="sw-explanation">Click 'Step Forward' to start expanding the window.</samp>
+            </article>
+        </section>
+
+    </main>
+
+    <script>
+        /* --- TWO POINTERS LOGIC --- */
+        const tpWord = "racecar";
+        let tpLeft = 0;
+        let tpRight = tpWord.length - 1;
+        let tpState = 0; // 0: uninitialized, 1: comparing, 2: matched/moving, 3: done
+
+        function renderTwoPointers() {
+            const container = document.getElementById('tp-container');
+            container.innerHTML = '';
+            for (let i = 0; i < tpWord.length; i++) {
+                const kbd = document.createElement('kbd');
+                kbd.textContent = tpWord[i];
+                kbd.id = 'tp-char-' + i;
+                container.appendChild(kbd);
+            }
+        }
+
+        function resetTwoPointers() {
+            tpLeft = 0;
+            tpRight = tpWord.length - 1;
+            tpState = 0;
+            renderTwoPointers();
+            document.getElementById('tp-status').textContent = "Status: Ready to begin.";
+            document.getElementById('tp-explanation').textContent = "Click 'Step Forward' to initialize pointers.";
+            document.getElementById('tp-step').disabled = false;
+        }
+
+        function stepTwoPointers() {
+            const status = document.getElementById('tp-status');
+            const exp = document.getElementById('tp-explanation');
+            const btn = document.getElementById('tp-step');
+
+            if (tpLeft > tpRight) {
+                status.textContent = "Result: TRUE! It is a palindrome.";
+                exp.textContent = "Pointers crossed. Every character matched symmetrically.";
+                btn.disabled = true;
+                return;
+            }
+
+            // Clear previous highlights
+            renderTwoPointers();
+            const leftEl = document.getElementById('tp-char-' + tpLeft);
+            const rightEl = document.getElementById('tp-char-' + tpRight);
+
+            if (tpState === 0) {
+                leftEl.classList.add('pointer-left');
+                rightEl.classList.add('pointer-right');
+                status.textContent = `Comparing indices [${tpLeft}] and [${tpRight}]`;
+                exp.textContent = `Checking if '${tpWord[tpLeft]}' equals '${tpWord[tpRight]}'`;
+                tpState = 1;
+            } 
+            else if (tpState === 1) {
+                if (tpWord[tpLeft] === tpWord[tpRight]) {
+                    leftEl.classList.add('match');
+                    rightEl.classList.add('match');
+                    status.textContent = "Match found!";
+                    exp.textContent = "Characters match. Move pointers inward.";
+                    tpState = 2;
+                } else {
+                    leftEl.classList.add('mismatch');
+                    rightEl.classList.add('mismatch');
+                    status.textContent = "Result: FALSE! Not a palindrome.";
+                    exp.textContent = "Mismatch detected. We can immediately stop and return false.";
+                    btn.disabled = true;
+                }
+            } 
+            else if (tpState === 2) {
+                tpLeft++;
+                tpRight--;
+                tpState = 0;
+                stepTwoPointers(); // Automatically trigger next comparison render
+            }
+        }
+
+        /* --- SLIDING WINDOW LOGIC --- */
+        const swWord = "abcabcbb";
+        let swLeft = 0;
+        let swRight = 0;
+        let swMax = 0;
+        let seenSet = new Set();
+        let swState = 0; // 0: check right, 1: expand/shrink
+
+        function renderSlidingWindow() {
+            const container = document.getElementById('sw-container');
+            container.innerHTML = '';
+            for (let i = 0; i < swWord.length; i++) {
+                const kbd = document.createElement('kbd');
+                kbd.textContent = swWord[i];
+                kbd.id = 'sw-char-' + i;
+                
+                if (i >= swLeft && i <= swRight && swState > 0) {
+                    kbd.classList.add('window-active');
+                }
+                container.appendChild(kbd);
+            }
+        }
+
+        function resetSlidingWindow() {
+            swLeft = 0;
+            swRight = 0;
+            swMax = 0;
+            seenSet.clear();
+            swState = 0;
+            renderSlidingWindow();
+            document.getElementById('sw-status').textContent = "Max Unique Length Found: 0";
+            document.getElementById('sw-explanation').textContent = "Click 'Step Forward' to start expanding the window.";
+            document.getElementById('sw-step').disabled = false;
+        }
+
+        function stepSlidingWindow() {
+            const status = document.getElementById('sw-status');
+            const exp = document.getElementById('sw-explanation');
+            const btn = document.getElementById('sw-step');
+
+            if (swRight >= swWord.length && !seenSet.has(swWord[swRight])) {
+                exp.textContent = "Reached end of string. Algorithm complete.";
+                btn.disabled = true;
+                return;
+            }
+
+            const charRight = swWord[swRight];
+
+            if (seenSet.has(charRight)) {
+                // Shrink window
+                const charLeft = swWord[swLeft];
+                seenSet.delete(charLeft);
+                swLeft++;
+                exp.textContent = `Duplicate '${charRight}' found! Shrinking window from left (removing '${charLeft}').`;
+            } else {
+                // Expand window
+                seenSet.add(charRight);
+                const currentLen = swRight - swLeft + 1;
+                if (currentLen > swMax) swMax = currentLen;
+                
+                exp.textContent = `Added '${charRight}'. All characters in window are unique.`;
+                status.textContent = `Max Unique Length Found: ${swMax}`;
+                swRight++;
+            }
+            
+            swState = 1;
+            renderSlidingWindow();
+            
+            // Mark explicit left and right boundaries semantically
+            if (document.getElementById('sw-char-' + swLeft)) {
+                document.getElementById('sw-char-' + swLeft).style.borderLeft = "4px solid red";
+            }
+            // swRight is already incremented for next loop, so mark the current active right
+            let activeRight = swRight > swLeft ? swRight - 1 : swLeft;
+            if (seenSet.has(charRight) && !seenSet.has(swWord[swRight])) activeRight = swRight; // adjust for visual when shrinking
+            if (document.getElementById('sw-char-' + activeRight)) {
+                 document.getElementById('sw-char-' + activeRight).style.borderRight = "4px solid blue";
+            }
+        }
+
+        // Initialize on load
+        window.onload = () => {
+            resetTwoPointers();
+            resetSlidingWindow();
+        };
+    </script>
+</body>
+</html>
