@@ -266,3 +266,4 @@ int index = Collections.binarySearch(sortedNums, 30); // Returns 2
 int missingIndex = Collections.binarySearch(sortedNums, 25); // Returns -3
 
 ```
+[![VIEW Topic](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/DSA/views/arraylist-view.html)
