@@ -39,7 +39,6 @@
             border: 2px dashed #ccc;
             text-align: center;
         }
-        /* Using <kbd> to represent individual characters semantically */
         kbd {
             display: inline-block;
             font-size: 1.5rem;
@@ -51,6 +50,30 @@
             border-radius: 4px;
             transition: all 0.3s ease;
         }
+        /* Specialized layout for the bucket array */
+        menu[type="toolbar"] {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        menu[type="toolbar"] kbd {
+            font-size: 1rem;
+            padding: 0.3rem 0.6rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #fdfdfd;
+        }
+        menu[type="toolbar"] kbd sub {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 0.3rem;
+        }
+        
         menu {
             padding: 0;
             margin: 1rem 0;
@@ -82,12 +105,14 @@
             font-style: italic;
         }
 
-        /* Semantic highlights via classes */
+        /* Semantic highlights */
         .pointer-left { border-bottom: 4px solid #ff4757; background: #ffeaa7; }
         .pointer-right { border-bottom: 4px solid #2ed573; background: #ffeaa7; }
         .match { background: #7bed9f; border-color: #2ed573; }
         .mismatch { background: #ff6b81; border-color: #ff4757; }
         .window-active { background: #74b9ff; border-color: #0984e3; color: white; }
+        .bucket-active { background: #ffeaa7 !important; border-color: #fdcb6e !important; transform: scale(1.1); }
+        .success { background: #2ed573 !important; color: white; border-color: #2ed573 !important; }
     </style>
 </head>
 <body>
@@ -101,16 +126,12 @@
         <section id="two-pointers">
             <article>
                 <h2>Pattern 1: Two Pointers (Valid Palindrome)</h2>
-                <p>Instead of creating a reversed copy of the string (which takes extra memory), we place one pointer at the start and one at the end. We move them toward the center, comparing characters.</p>
-                
-                <figure id="tp-container">
-                    </figure>
-                
+                <p>Instead of creating a reversed copy of the string, we place one pointer at the start and one at the end. We move them toward the center, comparing characters.</p>
+                <figure id="tp-container"></figure>
                 <menu>
                     <button id="tp-step" onclick="stepTwoPointers()">Step Forward</button>
                     <button onclick="resetTwoPointers()">Reset</button>
                 </menu>
-                
                 <figcaption id="tp-status">Status: Ready to begin.</figcaption>
                 <samp id="tp-explanation">Click 'Step Forward' to initialize pointers.</samp>
             </article>
@@ -119,18 +140,34 @@
         <section id="sliding-window">
             <article>
                 <h2>Pattern 2: Sliding Window (Longest Unique Substring)</h2>
-                <p>We use a dynamically resizing "window" to explore the string. The right pointer expands the window to add characters. If we hit a duplicate, the left pointer shrinks the window until the duplicate is gone.</p>
-                
-                <figure id="sw-container">
-                    </figure>
-                
+                <p>We use a dynamically resizing "window" to explore the string. The right pointer expands the window. If we hit a duplicate, the left pointer shrinks the window until the duplicate is gone.</p>
+                <figure id="sw-container"></figure>
                 <menu>
                     <button id="sw-step" onclick="stepSlidingWindow()">Step Forward</button>
                     <button onclick="resetSlidingWindow()">Reset</button>
                 </menu>
-                
                 <figcaption id="sw-status">Max Unique Length Found: 0</figcaption>
                 <samp id="sw-explanation">Click 'Step Forward' to start expanding the window.</samp>
+            </article>
+        </section>
+
+        <section id="frequency-bucket">
+            <article>
+                <h2>Pattern 3: Frequency Bucket Arrays (First Unique Character)</h2>
+                <p>Because there are only 26 lowercase English letters, we bypass memory-heavy HashMaps. We use an array of size 26, mapping 'a' to index 0, 'b' to 1, etc.</p>
+                
+                <figure id="fb-string-container"></figure>
+                
+                <figcaption>Integer Array [Size 26]</figcaption>
+                <menu type="toolbar" id="fb-array-container"></menu>
+                
+                <menu>
+                    <button id="fb-step" onclick="stepFrequencyBucket()">Step Forward</button>
+                    <button onclick="resetFrequencyBucket()">Reset</button>
+                </menu>
+                
+                <figcaption id="fb-status">Phase 1: Counting Frequencies</figcaption>
+                <samp id="fb-explanation">Click 'Step Forward' to iterate the string and map characters to their bucket indices.</samp>
             </article>
         </section>
 
@@ -139,9 +176,7 @@
     <script>
         /* --- TWO POINTERS LOGIC --- */
         const tpWord = "racecar";
-        let tpLeft = 0;
-        let tpRight = tpWord.length - 1;
-        let tpState = 0; // 0: uninitialized, 1: comparing, 2: matched/moving, 3: done
+        let tpLeft, tpRight, tpState;
 
         function renderTwoPointers() {
             const container = document.getElementById('tp-container');
@@ -176,7 +211,6 @@
                 return;
             }
 
-            // Clear previous highlights
             renderTwoPointers();
             const leftEl = document.getElementById('tp-char-' + tpLeft);
             const rightEl = document.getElementById('tp-char-' + tpRight);
@@ -187,8 +221,7 @@
                 status.textContent = `Comparing indices [${tpLeft}] and [${tpRight}]`;
                 exp.textContent = `Checking if '${tpWord[tpLeft]}' equals '${tpWord[tpRight]}'`;
                 tpState = 1;
-            } 
-            else if (tpState === 1) {
+            } else if (tpState === 1) {
                 if (tpWord[tpLeft] === tpWord[tpRight]) {
                     leftEl.classList.add('match');
                     rightEl.classList.add('match');
@@ -199,25 +232,20 @@
                     leftEl.classList.add('mismatch');
                     rightEl.classList.add('mismatch');
                     status.textContent = "Result: FALSE! Not a palindrome.";
-                    exp.textContent = "Mismatch detected. We can immediately stop and return false.";
+                    exp.textContent = "Mismatch detected. We stop immediately.";
                     btn.disabled = true;
                 }
-            } 
-            else if (tpState === 2) {
+            } else if (tpState === 2) {
                 tpLeft++;
                 tpRight--;
                 tpState = 0;
-                stepTwoPointers(); // Automatically trigger next comparison render
+                stepTwoPointers();
             }
         }
 
         /* --- SLIDING WINDOW LOGIC --- */
         const swWord = "abcabcbb";
-        let swLeft = 0;
-        let swRight = 0;
-        let swMax = 0;
-        let seenSet = new Set();
-        let swState = 0; // 0: check right, 1: expand/shrink
+        let swLeft, swRight, swMax, seenSet, swState;
 
         function renderSlidingWindow() {
             const container = document.getElementById('sw-container');
@@ -226,20 +254,14 @@
                 const kbd = document.createElement('kbd');
                 kbd.textContent = swWord[i];
                 kbd.id = 'sw-char-' + i;
-                
-                if (i >= swLeft && i <= swRight && swState > 0) {
-                    kbd.classList.add('window-active');
-                }
+                if (i >= swLeft && i <= swRight && swState > 0) kbd.classList.add('window-active');
                 container.appendChild(kbd);
             }
         }
 
         function resetSlidingWindow() {
-            swLeft = 0;
-            swRight = 0;
-            swMax = 0;
-            seenSet.clear();
-            swState = 0;
+            swLeft = 0; swRight = 0; swMax = 0;
+            seenSet = new Set(); swState = 0;
             renderSlidingWindow();
             document.getElementById('sw-status').textContent = "Max Unique Length Found: 0";
             document.getElementById('sw-explanation').textContent = "Click 'Step Forward' to start expanding the window.";
@@ -260,17 +282,14 @@
             const charRight = swWord[swRight];
 
             if (seenSet.has(charRight)) {
-                // Shrink window
                 const charLeft = swWord[swLeft];
                 seenSet.delete(charLeft);
                 swLeft++;
                 exp.textContent = `Duplicate '${charRight}' found! Shrinking window from left (removing '${charLeft}').`;
             } else {
-                // Expand window
                 seenSet.add(charRight);
                 const currentLen = swRight - swLeft + 1;
                 if (currentLen > swMax) swMax = currentLen;
-                
                 exp.textContent = `Added '${charRight}'. All characters in window are unique.`;
                 status.textContent = `Max Unique Length Found: ${swMax}`;
                 swRight++;
@@ -279,22 +298,128 @@
             swState = 1;
             renderSlidingWindow();
             
-            // Mark explicit left and right boundaries semantically
             if (document.getElementById('sw-char-' + swLeft)) {
                 document.getElementById('sw-char-' + swLeft).style.borderLeft = "4px solid red";
             }
-            // swRight is already incremented for next loop, so mark the current active right
             let activeRight = swRight > swLeft ? swRight - 1 : swLeft;
-            if (seenSet.has(charRight) && !seenSet.has(swWord[swRight])) activeRight = swRight; // adjust for visual when shrinking
+            if (seenSet.has(charRight) && !seenSet.has(swWord[swRight])) activeRight = swRight;
             if (document.getElementById('sw-char-' + activeRight)) {
                  document.getElementById('sw-char-' + activeRight).style.borderRight = "4px solid blue";
             }
         }
 
-        // Initialize on load
+        /* --- FREQUENCY BUCKET LOGIC --- */
+        const fbWord = "stats";
+        let fbIndex = 0;
+        let fbPhase = 1; // 1: Counting, 2: Checking
+        let bucketArray = new Array(26).fill(0);
+
+        function renderFrequencyString() {
+            const container = document.getElementById('fb-string-container');
+            container.innerHTML = '';
+            for (let i = 0; i < fbWord.length; i++) {
+                const kbd = document.createElement('kbd');
+                kbd.textContent = fbWord[i];
+                kbd.id = 'fb-char-' + i;
+                if (i === fbIndex && fbPhase <= 2) {
+                    kbd.classList.add('pointer-left'); // Reusing the visual highlight class
+                }
+                container.appendChild(kbd);
+            }
+        }
+
+        function renderFrequencyArray(activeChar = null) {
+            const container = document.getElementById('fb-array-container');
+            container.innerHTML = '';
+            // Render all 26 letters using character codes (97 = 'a')
+            for (let i = 0; i < 26; i++) {
+                const char = String.fromCharCode(97 + i);
+                const count = bucketArray[i];
+                
+                const kbd = document.createElement('kbd');
+                kbd.id = 'fb-bucket-' + char;
+                kbd.innerHTML = `${char} <br> <sub>${count}</sub>`;
+                
+                if (activeChar === char) {
+                    kbd.classList.add('bucket-active');
+                }
+                container.appendChild(kbd);
+            }
+        }
+
+        function resetFrequencyBucket() {
+            fbIndex = 0;
+            fbPhase = 1;
+            bucketArray = new Array(26).fill(0);
+            renderFrequencyString();
+            renderFrequencyArray();
+            document.getElementById('fb-status').textContent = "Phase 1: Counting Frequencies";
+            document.getElementById('fb-explanation').textContent = "Click 'Step Forward' to map characters to their index ('char - a').";
+            document.getElementById('fb-step').disabled = false;
+        }
+
+        function stepFrequencyBucket() {
+            const status = document.getElementById('fb-status');
+            const exp = document.getElementById('fb-explanation');
+            const btn = document.getElementById('fb-step');
+
+            if (fbPhase === 1) {
+                // Counting Phase
+                if (fbIndex < fbWord.length) {
+                    const char = fbWord[fbIndex];
+                    const charCode = char.charCodeAt(0) - 97; // Map 'a' to 0
+                    
+                    bucketArray[charCode]++;
+                    
+                    renderFrequencyString();
+                    renderFrequencyArray(char);
+                    
+                    exp.innerHTML = `Read <b>'${char}'</b>. Mapped to index ${charCode}. Incremented count to ${bucketArray[charCode]}.`;
+                    fbIndex++;
+                } else {
+                    // Transition to Phase 2
+                    fbPhase = 2;
+                    fbIndex = 0;
+                    status.textContent = "Phase 2: Finding First Unique";
+                    exp.textContent = "Array fully populated! Now re-iterating the string to check bucket values. Step forward to begin.";
+                    renderFrequencyString();
+                    renderFrequencyArray(); // clear active bucket
+                }
+            } 
+            else if (fbPhase === 2) {
+                // Checking Phase
+                if (fbIndex < fbWord.length) {
+                    const char = fbWord[fbIndex];
+                    const charCode = char.charCodeAt(0) - 97;
+                    const count = bucketArray[charCode];
+                    
+                    renderFrequencyString();
+                    renderFrequencyArray(char);
+                    
+                    if (count === 1) {
+                        status.textContent = `Result found at index ${fbIndex}: '${char}'`;
+                        exp.innerHTML = `Bucket for <b>'${char}'</b> is exactly 1. This is the first unique character!`;
+                        document.getElementById('fb-char-' + fbIndex).classList.replace('pointer-left', 'success');
+                        document.getElementById('fb-bucket-' + char).classList.add('success');
+                        btn.disabled = true;
+                        fbPhase = 3; // Done
+                    } else {
+                        exp.innerHTML = `Bucket for <b>'${char}'</b> is ${count}. It's a duplicate. Moving to next.`;
+                        fbIndex++;
+                    }
+                } else {
+                    status.textContent = "Result: -1 (No unique characters)";
+                    exp.textContent = "Iterated entirely through the string, no buckets had a value of exactly 1.";
+                    btn.disabled = true;
+                }
+            }
+        }
+
+        // Initialize all on load
         window.onload = () => {
             resetTwoPointers();
             resetSlidingWindow();
+            resetFrequencyBucket();
         };
     </script>
 </body>
