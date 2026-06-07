@@ -142,3 +142,5 @@ System.out.println(Arrays.toString(expanded));
 * **Speed:** Accessing an array element using its index is extremely fast ($O(1)$ time complexity).
 * **Memory limits:** Because arrays require one large, continuous block of memory, they are very efficient but lack flexibility.
 * **The `.length` property:** Remember, to find out how big an array is, use `arrayName.length`. Notice there are **no parentheses** after `length`. It is a property, not a method!
+
+[![VIEW Topic](https://img.shields.io/badge/🚀-Preview-blue?style=for-the-badge)](https://htmlpreview.github.io/?https://github.com/Tushar-Nagdive/StackBlueprint/blob/StackTech/DSA/views/arrays-view.html)
